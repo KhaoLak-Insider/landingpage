@@ -420,6 +420,10 @@ export default function Home() {
     {message}
   </div>
 )}
+            >
+              {message}
+            </p>
+          )}
 
           <p className="mt-4 text-sm text-white/75">
             Kein Spam. Nur Informationen zum App-Start.

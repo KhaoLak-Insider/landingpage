@@ -1,8 +1,4 @@
-"use client";
-
 import Image from "next/image";
-import { FormEvent, useState } from "react";
-import { supabase } from "@/src/lib/supabase";
 
 const features = [
   ["📍", "Interaktive Karte", "Alle Orte auf einen Blick – später auch offline verfügbar."],
@@ -21,46 +17,6 @@ const categories = [
 ];
 
 export default function Home() {
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState<"success" | "error">("success");
-
-  const joinWaitlist = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const normalizedEmail = email.trim().toLowerCase();
-
-    if (!normalizedEmail) {
-      setMessageType("error");
-      setMessage("Bitte gib eine E-Mail-Adresse ein.");
-      return;
-    }
-
-    setLoading(true);
-    setMessage("");
-
-    const { error } = await supabase
-      .from("waitlist")
-      .insert([{ email: normalizedEmail }]);
-
-    if (error) {
-      setMessageType("error");
-
-      if (error.code === "23505") {
-        setMessage("✅ Diese E-Mail-Adresse steht bereits auf unserer Warteliste.");
-      } else {
-        setMessage("Leider gab es ein Problem. Bitte versuche es später erneut.");
-      }
-    } else {
-      setMessageType("success");
-      setMessage("🎉 Perfekt! Dein Platz auf der Warteliste ist reserviert. Wir informieren dich zum App-Start.");
-      setEmail("");
-    }
-
-    setLoading(false);
-  };
-
   return (
     <main className="min-h-screen bg-white text-slate-900">
       <section className="relative min-h-[820px] overflow-hidden bg-[url('/images/hero.png')] bg-cover bg-center">
@@ -84,12 +40,9 @@ export default function Home() {
             <a href="#">Community</a>
           </div>
 
-          <a
-            href="#waitlist"
-            className="rounded-full bg-teal-500 px-7 py-3.5 text-sm font-bold shadow-xl shadow-teal-950/30 transition hover:bg-teal-400"
-          >
+          <button className="rounded-full bg-teal-500 px-7 py-3.5 text-sm font-bold shadow-xl shadow-teal-950/30 transition hover:bg-teal-400">
             Zur Warteliste
-          </a>
+          </button>
         </nav>
 
         <div className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 items-center gap-16 px-8 pt-0 md:grid-cols-[1.05fr_0.95fr]">
@@ -117,12 +70,9 @@ export default function Home() {
             </div>
 
             <div className="mt-10 flex flex-wrap gap-5">
-              <a
-                href="#waitlist"
-                className="rounded-full bg-teal-500 px-9 py-4 font-bold text-white shadow-xl shadow-teal-950/30 transition hover:bg-teal-400"
-              >
+              <button className="rounded-full bg-teal-500 px-9 py-4 font-bold text-white shadow-xl shadow-teal-950/30 transition hover:bg-teal-400">
                 Start nicht verpassen
-              </a>
+              </button>
               <button className="rounded-full border border-white/70 bg-white/10 px-9 py-4 font-bold text-white backdrop-blur transition hover:bg-white/20">
                 App ansehen
               </button>
@@ -252,12 +202,9 @@ export default function Home() {
             </div>
 
             <div className="mt-10 flex flex-wrap items-center gap-4">
-              <a
-                href="#waitlist"
-                className="rounded-full bg-teal-500 px-8 py-4 font-bold text-white shadow-xl shadow-teal-200 transition hover:bg-teal-400"
-              >
+              <button className="rounded-full bg-teal-500 px-8 py-4 font-bold text-white shadow-xl shadow-teal-200 transition hover:bg-teal-400">
                 Zur Warteliste
-              </a>
+              </button>
 
               <div className="rounded-full border border-slate-200 bg-white px-6 py-4 text-sm font-bold text-slate-600 shadow-sm">
                 App startet 2026
@@ -271,7 +218,7 @@ export default function Home() {
             <Image
               src="/images/home-screen.png"
               alt="Home Screen"
-              width={280}
+              width={260}
               height={560}
               className="absolute left-[4%] top-24 z-10 hidden rotate-[-8deg] md:block"
             />
@@ -279,7 +226,7 @@ export default function Home() {
             <Image
               src="/images/map-screen.png"
               alt="Kartenansicht"
-              width={330}
+              width={300}
               height={620}
               className="relative z-20"
             />
@@ -287,74 +234,13 @@ export default function Home() {
             <Image
               src="/images/planer-screen.png"
               alt="Reiseplaner"
-              width={280}
+              width={260}
               height={560}
               className="absolute right-[4%] top-24 z-10 hidden rotate-[8deg] md:block"
             />
           </div>
         </div>
       </section>
-
-<section className="mx-auto grid max-w-7xl items-center gap-16 px-8 py-24 md:grid-cols-[1fr_1fr]">
-  <div className="relative flex justify-center">
-    <div className="absolute top-16 h-72 w-72 rounded-full bg-teal-100 blur-3xl" />
-
-    <Image
-      src="/images/map-screen.png"
-      alt="Interaktive Karte"
-      width={430}
-      height={860}
-      className="relative z-10"
-    />
-  </div>
-
-  <div>
-    <div className="mb-5 inline-flex rounded-full bg-teal-100 px-4 py-2 text-sm font-bold text-teal-700">
-      Interaktive Karte
-    </div>
-
-    <h2 className="text-4xl font-black leading-tight tracking-tight md:text-5xl">
-      Finde die schönsten Orte
-      <br />
-      auf einen <span className="text-teal-500">Blick.</span>
-    </h2>
-
-    <p className="mt-6 max-w-md text-lg leading-relaxed text-slate-600">
-      Strände, Märkte, Restaurants, Tempel und Geheimtipps – alles übersichtlich
-      auf der Karte und perfekt für deinen Urlaub sortiert.
-    </p>
-
-    <div className="mt-8 space-y-4 text-base font-semibold text-slate-700">
-      <div className="flex items-center gap-3">
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-teal-500 text-sm text-white">
-          ✓
-        </span>
-        Alle Orte auf einen Blick
-      </div>
-
-      <div className="flex items-center gap-3">
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-teal-500 text-sm text-white">
-          ✓
-        </span>
-        Nach Stränden, Märkten & Restaurants filtern
-      </div>
-
-      <div className="flex items-center gap-3">
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-teal-500 text-sm text-white">
-          ✓
-        </span>
-        Entfernungen und Details direkt sehen
-      </div>
-
-      <div className="flex items-center gap-3">
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-teal-500 text-sm text-white">
-          ✓
-        </span>
-        Offline-Nutzung später geplant
-      </div>
-    </div>
-  </div>
-</section>
 
       <section className="mx-auto max-w-7xl px-8 py-16">
         <div className="grid gap-8 text-center md:grid-cols-3">
@@ -372,143 +258,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-<section id="waitlist" className="px-8 py-20">
-        <div className="mx-auto max-w-5xl rounded-[2.5rem] bg-gradient-to-br from-teal-500 to-teal-600 px-8 py-16 text-center text-white shadow-2xl shadow-teal-100">
-          <div className="mb-4 inline-flex rounded-full bg-white/20 px-4 py-2 text-sm font-semibold backdrop-blur">
-            Khao Lak Insider App
-          </div>
-
-          <h2 className="text-4xl font-black leading-tight md:text-5xl">
-            Verpasse den Start nicht.
-          </h2>
-
-          <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-white/90">
-            Trage dich unverbindlich in die Warteliste ein und erfahre als Erster,
-            wenn die Khao Lak Insider App startet.
-          </p>
-
-          <form
-            onSubmit={joinWaitlist}
-            className="mx-auto mt-9 flex max-w-xl flex-col gap-4 rounded-3xl bg-white p-2 shadow-xl sm:flex-row sm:rounded-full"
-          >
-            <input
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="Deine E-Mail-Adresse"
-              className="h-12 flex-1 rounded-full px-5 text-slate-900 outline-none"
-            />
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="h-12 rounded-full bg-slate-950 px-7 font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {loading ? "Speichern..." : "Zur Warteliste"}
-            </button>
-          </form>
-
-          {message && (
-  <div
-    className={`mt-4 inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold ${
-      messageType === "success"
-        ? "bg-emerald-100 text-emerald-700"
-        : "bg-red-100 text-red-700"
-    }`}
-  >
-    {message}
-  </div>
-)}
-
-          <p className="mt-4 text-sm text-white/75">
-            Kein Spam. Nur Informationen zum App-Start.
-          </p>
-        </div>
-      </section>
-
-      <footer className="border-t border-slate-200 bg-white">
-  <div className="mx-auto max-w-7xl px-8 py-16">
-    <div className="grid gap-12 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
-
-     <div>
-  <Image
-  src="/images/logo-footer.svg"
-  alt="Khao Lak Insider"
-  width={260}
-  height={260}
-  className="h-auto w-[220px]"
-/>
-
-        <p className="mt-6 max-w-sm text-sm leading-relaxed text-slate-600">
-          Der smarte Reiseführer für Khao Lak. Entdecke Strände,
-          Restaurants, Märkte, Tempel und echte Geheimtipps in einer App.
-        </p>
-
-        <p className="mt-6 text-sm font-semibold text-teal-600">
-          App-Start 2026
-        </p>
-      </div>
-
-      <div>
-        <h4 className="mb-4 font-bold text-slate-900">
-          App
-        </h4>
-
-        <ul className="space-y-3 text-sm text-slate-600">
-          <li><a href="#">Features</a></li>
-          <li><a href="#">Interaktive Karte</a></li>
-          <li><a href="#">Reiseplaner</a></li>
-          <li><a href="#">Favoriten</a></li>
-        </ul>
-      </div>
-
-      <div>
-        <h4 className="mb-4 font-bold text-slate-900">
-          Unternehmen
-        </h4>
-
-        <ul className="space-y-3 text-sm text-slate-600">
-          <li><a href="#">Über uns</a></li>
-          <li><a href="#">Warteliste</a></li>
-          <li><a href="#">Kontakt</a></li>
-        </ul>
-      </div>
-
-      <div>
-        <h4 className="mb-4 font-bold text-slate-900">
-          Rechtliches
-        </h4>
-
-        <ul className="space-y-3 text-sm text-slate-600">
-          <li><a href="/impressum">Impressum</a></li>
-          <li><a href="/datenschutz">Datenschutz</a></li>
-        </ul>
-      </div>
-
-    </div>
-
-    <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-slate-200 pt-8 text-sm text-slate-500 md:flex-row">
-      <p>
-        © 2026 Khao Lak Insider. Alle Rechte vorbehalten.
-      </p>
-
-      <div className="flex gap-6">
-        <a href="#" className="hover:text-teal-500 transition">
-          Instagram
-        </a>
-
-        <a href="#" className="hover:text-teal-500 transition">
-          YouTube
-        </a>
-
-        <a href="#" className="hover:text-teal-500 transition">
-          Facebook
-        </a>
-      </div>
-    </div>
-  </div>
-</footer>
     </main>
   );
 }

@@ -410,16 +410,14 @@ export default function Home() {
           </form>
 
           {message && (
-  <div
-    className={`mt-4 inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold ${
-      messageType === "success"
-        ? "bg-emerald-100 text-emerald-700"
-        : "bg-red-100 text-red-700"
-    }`}
-  >
-    {message}
-  </div>
-)}
+            <p
+              className={`mt-4 text-sm font-semibold ${
+                messageType === "success" ? "text-white" : "text-red-100"
+              }`}
+            >
+              {message}
+            </p>
+          )}
 
           <p className="mt-4 text-sm text-white/75">
             Kein Spam. Nur Informationen zum App-Start.

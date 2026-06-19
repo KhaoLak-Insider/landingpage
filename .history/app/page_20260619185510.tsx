@@ -48,13 +48,13 @@ export default function Home() {
       setMessageType("error");
 
       if (error.code === "23505") {
-        setMessage("✅ Diese E-Mail-Adresse steht bereits auf unserer Warteliste.");
+        setMessage("Diese E-Mail-Adresse ist bereits eingetragen.");
       } else {
         setMessage("Leider gab es ein Problem. Bitte versuche es später erneut.");
       }
     } else {
       setMessageType("success");
-      setMessage("🎉 Perfekt! Dein Platz auf der Warteliste ist reserviert. Wir informieren dich zum App-Start.");
+      setMessage("Danke! Du stehst jetzt auf der Warteliste.");
       setEmail("");
     }
 
@@ -410,16 +410,14 @@ export default function Home() {
           </form>
 
           {message && (
-  <div
-    className={`mt-4 inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold ${
-      messageType === "success"
-        ? "bg-emerald-100 text-emerald-700"
-        : "bg-red-100 text-red-700"
-    }`}
-  >
-    {message}
-  </div>
-)}
+            <p
+              className={`mt-4 text-sm font-semibold ${
+                messageType === "success" ? "text-white" : "text-red-100"
+              }`}
+            >
+              {message}
+            </p>
+          )}
 
           <p className="mt-4 text-sm text-white/75">
             Kein Spam. Nur Informationen zum App-Start.

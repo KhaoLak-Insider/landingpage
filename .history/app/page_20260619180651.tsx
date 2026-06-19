@@ -1,8 +1,4 @@
-"use client";
-
 import Image from "next/image";
-import { FormEvent, useState } from "react";
-import { supabase } from "@/src/lib/supabase";
 
 const features = [
   ["📍", "Interaktive Karte", "Alle Orte auf einen Blick – später auch offline verfügbar."],
@@ -21,46 +17,6 @@ const categories = [
 ];
 
 export default function Home() {
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState<"success" | "error">("success");
-
-  const joinWaitlist = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const normalizedEmail = email.trim().toLowerCase();
-
-    if (!normalizedEmail) {
-      setMessageType("error");
-      setMessage("Bitte gib eine E-Mail-Adresse ein.");
-      return;
-    }
-
-    setLoading(true);
-    setMessage("");
-
-    const { error } = await supabase
-      .from("waitlist")
-      .insert([{ email: normalizedEmail }]);
-
-    if (error) {
-      setMessageType("error");
-
-      if (error.code === "23505") {
-        setMessage("✅ Diese E-Mail-Adresse steht bereits auf unserer Warteliste.");
-      } else {
-        setMessage("Leider gab es ein Problem. Bitte versuche es später erneut.");
-      }
-    } else {
-      setMessageType("success");
-      setMessage("🎉 Perfekt! Dein Platz auf der Warteliste ist reserviert. Wir informieren dich zum App-Start.");
-      setEmail("");
-    }
-
-    setLoading(false);
-  };
-
   return (
     <main className="min-h-screen bg-white text-slate-900">
       <section className="relative min-h-[820px] overflow-hidden bg-[url('/images/hero.png')] bg-cover bg-center">
@@ -84,12 +40,9 @@ export default function Home() {
             <a href="#">Community</a>
           </div>
 
-          <a
-            href="#waitlist"
-            className="rounded-full bg-teal-500 px-7 py-3.5 text-sm font-bold shadow-xl shadow-teal-950/30 transition hover:bg-teal-400"
-          >
+          <button className="rounded-full bg-teal-500 px-7 py-3.5 text-sm font-bold shadow-xl shadow-teal-950/30 transition hover:bg-teal-400">
             Zur Warteliste
-          </a>
+          </button>
         </nav>
 
         <div className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 items-center gap-16 px-8 pt-0 md:grid-cols-[1.05fr_0.95fr]">
@@ -117,12 +70,9 @@ export default function Home() {
             </div>
 
             <div className="mt-10 flex flex-wrap gap-5">
-              <a
-                href="#waitlist"
-                className="rounded-full bg-teal-500 px-9 py-4 font-bold text-white shadow-xl shadow-teal-950/30 transition hover:bg-teal-400"
-              >
+              <button className="rounded-full bg-teal-500 px-9 py-4 font-bold text-white shadow-xl shadow-teal-950/30 transition hover:bg-teal-400">
                 Start nicht verpassen
-              </a>
+              </button>
               <button className="rounded-full border border-white/70 bg-white/10 px-9 py-4 font-bold text-white backdrop-blur transition hover:bg-white/20">
                 App ansehen
               </button>
@@ -252,12 +202,9 @@ export default function Home() {
             </div>
 
             <div className="mt-10 flex flex-wrap items-center gap-4">
-              <a
-                href="#waitlist"
-                className="rounded-full bg-teal-500 px-8 py-4 font-bold text-white shadow-xl shadow-teal-200 transition hover:bg-teal-400"
-              >
+              <button className="rounded-full bg-teal-500 px-8 py-4 font-bold text-white shadow-xl shadow-teal-200 transition hover:bg-teal-400">
                 Zur Warteliste
-              </a>
+              </button>
 
               <div className="rounded-full border border-slate-200 bg-white px-6 py-4 text-sm font-bold text-slate-600 shadow-sm">
                 App startet 2026
@@ -373,72 +320,53 @@ export default function Home() {
         </div>
       </section>
 
-<section id="waitlist" className="px-8 py-20">
-        <div className="mx-auto max-w-5xl rounded-[2.5rem] bg-gradient-to-br from-teal-500 to-teal-600 px-8 py-16 text-center text-white shadow-2xl shadow-teal-100">
-          <div className="mb-4 inline-flex rounded-full bg-white/20 px-4 py-2 text-sm font-semibold backdrop-blur">
-            Khao Lak Insider App
-          </div>
+<section className="px-8 py-20">
+  <div className="mx-auto max-w-5xl rounded-[2.5rem] bg-gradient-to-br from-teal-500 to-teal-600 px-8 py-16 text-center text-white shadow-2xl shadow-teal-100">
+    <div className="mb-4 inline-flex rounded-full bg-white/20 px-4 py-2 text-sm font-semibold backdrop-blur">
+      Khao Lak Insider App
+    </div>
 
-          <h2 className="text-4xl font-black leading-tight md:text-5xl">
-            Verpasse den Start nicht.
-          </h2>
+    <h2 className="text-4xl font-black leading-tight md:text-5xl">
+      Verpasse den Start nicht.
+    </h2>
 
-          <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-white/90">
-            Trage dich unverbindlich in die Warteliste ein und erfahre als Erster,
-            wenn die Khao Lak Insider App startet.
-          </p>
+    <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-white/90">
+      Trage dich unverbindlich in die Warteliste ein und erfahre als Erster,
+      wenn die Khao Lak Insider App startet.
+    </p>
 
-          <form
-            onSubmit={joinWaitlist}
-            className="mx-auto mt-9 flex max-w-xl flex-col gap-4 rounded-3xl bg-white p-2 shadow-xl sm:flex-row sm:rounded-full"
-          >
-            <input
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="Deine E-Mail-Adresse"
-              className="h-12 flex-1 rounded-full px-5 text-slate-900 outline-none"
-            />
+    <div className="mx-auto mt-9 flex max-w-xl flex-col gap-4 rounded-full bg-white p-2 shadow-xl sm:flex-row">
+      <input
+        type="email"
+        placeholder="Deine E-Mail-Adresse"
+        className="h-12 flex-1 rounded-full px-5 text-slate-900 outline-none"
+      />
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="h-12 rounded-full bg-slate-950 px-7 font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {loading ? "Speichern..." : "Zur Warteliste"}
-            </button>
-          </form>
+      <button className="h-12 rounded-full bg-slate-950 px-7 font-bold text-white transition hover:bg-slate-800">
+        Zur Warteliste
+      </button>
+    </div>
 
-          {message && (
-  <div
-    className={`mt-4 inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold ${
-      messageType === "success"
-        ? "bg-emerald-100 text-emerald-700"
-        : "bg-red-100 text-red-700"
-    }`}
-  >
-    {message}
+    <p className="mt-4 text-sm text-white/75">
+      Kein Spam. Nur Informationen zum App-Start.
+    </p>
   </div>
-)}
-
-          <p className="mt-4 text-sm text-white/75">
-            Kein Spam. Nur Informationen zum App-Start.
-          </p>
-        </div>
-      </section>
+</section>
 
       <footer className="border-t border-slate-200 bg-white">
   <div className="mx-auto max-w-7xl px-8 py-16">
     <div className="grid gap-12 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
 
      <div>
-  <Image
-  src="/images/logo-footer.svg"
-  alt="Khao Lak Insider"
-  width={260}
-  height={260}
-  className="h-auto w-[220px]"
-/>
+  <div className="inline-flex rounded-full border border-teal-100 bg-gradient-to-b from-teal-50 to-white p-6 shadow-lg shadow-teal-100">
+    <Image
+      src="/images/logo.svg"
+      alt="Khao Lak Insider"
+      width={260}
+      height={260}
+      className="h-auto w-[220px]"
+    />
+  </div>
 
         <p className="mt-6 max-w-sm text-sm leading-relaxed text-slate-600">
           Der smarte Reiseführer für Khao Lak. Entdecke Strände,
