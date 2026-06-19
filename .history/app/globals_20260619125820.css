@@ -1,0 +1,110 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+}
+
+.hero {
+  min-height: 100vh;
+  background-image: url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e");
+  background-size: cover;
+  background-position: center;
+}
+
+.overlay {
+  min-height: 100vh;
+  background: rgba(0,0,0,0.35);
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30px 80px;
+  color: white;
+}
+
+.logo {
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.navlinks {
+  display: flex;
+  gap: 30px;
+}
+
+.navlinks a {
+  color: white;
+  text-decoration: none;
+}
+
+.download-btn {
+  background: #17b8b0;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 999px;
+  color: white;
+  cursor: pointer;
+}
+
+.hero-content {
+  max-width: 1400px;
+  margin: auto;
+  padding: 100px 80px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hero-text {
+  max-width: 700px;
+  color: white;
+}
+
+.hero-text h1 {
+  font-size: 72px;
+  line-height: 1.1;
+}
+
+.hero-text span {
+  color: #36d1c4;
+}
+
+.hero-text p {
+  margin-top: 30px;
+  font-size: 24px;
+}
+
+.buttons {
+  display: flex;
+  gap: 20px;
+  margin-top: 40px;
+}
+
+.primary,
+.secondary {
+  padding: 16px 30px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.primary {
+  background: #17b8b0;
+  color: white;
+  border: none;
+}
+
+.secondary {
+  background: transparent;
+  border: 2px solid white;
+  color: white;
+}
+
+.phone-mockup {
+  font-size: 220px;
+}
