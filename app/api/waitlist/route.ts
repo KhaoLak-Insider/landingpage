@@ -70,43 +70,73 @@ export async function POST(req: Request) {
   subject: "🌴 Willkommen auf der Warteliste",
 
   html: `
-    <div style="background:#f6f7fb;padding:40px 0;font-family:Arial,sans-serif;">
-      <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.08);">
+  <div style="margin:0;padding:40px 20px;background:#f4f7fb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;">
 
-        <!-- Header -->
-        <div style="background:linear-gradient(135deg,#00b3a6,#0ea5a4);padding:30px;text-align:center;color:white;">
-          <h1 style="margin:0;font-size:24px;">🌴 Khao Lak Insider</h1>
-          <p style="margin:8px 0 0;opacity:0.9;">Warteliste bestätigt</p>
-        </div>
+    <div style="max-width:620px;margin:0 auto;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,0.08);">
 
-        <!-- Body -->
-        <div style="padding:30px;color:#1f2937;">
+      <div style="background:linear-gradient(135deg,#14b8a6,#0f766e);padding:40px 30px;text-align:center;color:white;">
+        <div style="font-size:42px;line-height:1;">🌴</div>
 
-          <h2 style="margin-top:0;">Danke für deine Anmeldung 🙌</h2>
+        <h1 style="margin:15px 0 8px;font-size:28px;font-weight:700;">
+          Willkommen bei Khao Lak Insider
+        </h1>
 
-          <p style="font-size:15px;line-height:1.6;">
-            Du bist jetzt auf der Warteliste für die <b>Khao Lak Insider App</b>.
-          </p>
+        <p style="margin:0;font-size:15px;opacity:0.9;">
+          Dein Platz auf der Warteliste ist reserviert.
+        </p>
+      </div>
 
-          <div style="background:#f3f4f6;padding:15px;border-radius:10px;margin:20px 0;">
-            <p style="margin:0;font-size:14px;">
-              👉 Du bekommst als Erstes Zugang, sobald wir starten.<br/>
-              👉 Exklusive Updates und Early Access Infos folgen bald.
-            </p>
+      <div style="padding:35px 30px;color:#1f2937;">
+
+        <h2 style="margin-top:0;font-size:24px;">
+          Danke für deine Anmeldung 🙌
+        </h2>
+
+        <p style="font-size:16px;line-height:1.7;color:#4b5563;">
+          Du bist jetzt offiziell auf der Warteliste für die
+          <strong>Khao Lak Insider App</strong>.
+        </p>
+
+        <p style="font-size:16px;line-height:1.7;color:#4b5563;">
+          Wir informieren dich als Ersten, sobald die App verfügbar ist.
+        </p>
+
+        <div style="background:#f0fdfa;border:1px solid #ccfbf1;border-radius:14px;padding:18px;margin:25px 0;">
+          <div style="font-size:15px;line-height:1.8;color:#115e59;">
+            ✅ Early Access zum App-Start<br>
+            ✅ Exklusive Updates zur Entwicklung<br>
+            ✅ Kein Spam – nur relevante Informationen
           </div>
-
-          <a href="https://khaolak.app"
-             style="display:inline-block;background:#0ea5a4;color:white;text-decoration:none;padding:12px 20px;border-radius:10px;font-weight:bold;">
-            Zur Website
-          </a>
-
-          <p style="margin-top:25px;font-size:12px;color:#6b7280;">
-            Khao Lak Insider – dein smarter Reiseführer für Thailand 🌴
-          </p>
-
         </div>
+
+        <div style="text-align:center;margin:35px 0;">
+          <a
+            href="https://khaolak.app"
+            style="
+              background:#14b8a6;
+              color:#ffffff;
+              text-decoration:none;
+              padding:14px 28px;
+              border-radius:12px;
+              display:inline-block;
+              font-weight:600;
+              font-size:15px;
+            "
+          >
+            🌴 Zur Website
+          </a>
+        </div>
+
+        <hr style="border:none;border-top:1px solid #e5e7eb;margin:30px 0;">
+
+        <p style="margin:0;font-size:13px;color:#9ca3af;text-align:center;">
+          Khao Lak Insider – dein smarter Reiseführer für Thailand
+        </p>
+
       </div>
     </div>
+
+  </div>
   `,
 });
 
