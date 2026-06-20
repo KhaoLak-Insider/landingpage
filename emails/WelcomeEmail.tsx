@@ -21,11 +21,10 @@ export default function WelcomeEmail() {
           {/* ================= HERO ================= */}
           <Img
             src="https://pub-e91d905941ab460b95ac5248c28e16f3.r2.dev/emails/welcome/welcome_hero.jpg"
-            alt="Khao Lak Hero"
             style={hero}
           />
 
-          {/* ================= TOP INTRO BOX ================= */}
+          {/* ================= INTRO ================= */}
           <Section style={introCard}>
             <Text style={introBadge}>
               🌴 Khao Lak Insider · Travel smarter
@@ -40,27 +39,33 @@ export default function WelcomeEmail() {
             </Text>
           </Section>
 
-          {/* ================= STORY + SUNSET IMAGE ================= */}
-          <Section style={twoCol}>
-            <Section style={textCol}>
-              <Text style={storyTitle}>06:47 Uhr · Coconut Beach</Text>
+          {/* ================= STORY (TABLE SAFE) ================= */}
+          <Section style={card}>
+            <table width="100%" cellPadding="0" cellSpacing="0">
+              <tr>
 
-              <Text style={storyText}>
-                Kein Lärm. Kein Touribus. Nur Licht, Wellen und ein kleiner Fischer,
-                der sein Boot ins Wasser schiebt.
-              </Text>
+                <td style={storyLeft}>
+                  <Text style={storyTitle}>06:47 Uhr · Coconut Beach</Text>
 
-              <Text style={storyTextBold}>
-                Genau solche Momente wirst du hier entdecken.
-              </Text>
-            </Section>
+                  <Text style={storyText}>
+                    Kein Lärm. Kein Touribus. Nur Licht, Wellen und ein kleiner Fischer,
+                    der sein Boot ins Wasser schiebt.
+                  </Text>
 
-            {/* SUNSET PLACEHOLDER IMAGE */}
-            <Img
-              src="https://pub-e91d905941ab460b95ac5248c28e16f3.r2.dev/emails/welcome/sunset.jpg"
-              alt="Sunset Khao Lak"
-              style={sideImage}
-            />
+                  <Text style={storyHighlight}>
+                    Genau solche Momente wirst du hier entdecken.
+                  </Text>
+                </td>
+
+                <td width="170" style={storyRight}>
+                  <Img
+                    src="https://pub-e91d905941ab460b95ac5248c28e16f3.r2.dev/emails/welcome/sunset.jpg"
+                    style={sideImage}
+                  />
+                </td>
+
+              </tr>
+            </table>
           </Section>
 
           <Hr style={hr} />
@@ -75,52 +80,51 @@ export default function WelcomeEmail() {
 
           <Hr style={hr} />
 
-          {/* ================= MARC & MELO SECTION ================= */}
-          <Section style={twoCol}>
-            <Img
-              src="https://YOUR-R2-BUCKET/marc-melo.jpg"
-              alt="Marc & Melo"
-              style={circleImage}
-            />
+          {/* ================= MARC & MELO ================= */}
+          <Section style={card}>
+            <table width="100%">
+              <tr>
 
-            <Section style={textCol}>
-              <Text style={teamTitle}>Marc & Melo vor Ort</Text>
+                <td width="90" style={{ verticalAlign: "top" }}>
+                  <Img
+                    src="https://via.placeholder.com/120x120?text=Marc+%26+Melo"
+                    style={circleImage}
+                  />
+                </td>
 
-              <Text style={teamText}>
-                Seit über 13 Jahren verbringen sie regelmäßig mehrere Monate in Khao Lak.
-                Sie kennen Orte, die kein Reiseführer zeigt.
-              </Text>
-            </Section>
+                <td style={{ paddingLeft: "12px", verticalAlign: "top" }}>
+                  <Text style={teamTitle}>Marc & Melo vor Ort</Text>
+
+                  <Text style={teamText}>
+                    Seit über 13 Jahren verbringen sie regelmäßig mehrere Monate in Khao Lak.
+                    Sie kennen Orte, die kein Reiseführer zeigt.
+                  </Text>
+                </td>
+
+              </tr>
+            </table>
           </Section>
 
           <Hr style={hr} />
 
-          {/* ================= APP PREVIEW SECTION ================= */}
-          <Section style={twoCol}>
-            <Section style={textCol}>
-              <Text style={featureTitle}>
-                📱 So wird die Khao Lak App aussehen
-              </Text>
+          {/* ================= APP SECTION ================= */}
+          <Section style={card}>
+            <Text style={featureTitle}>
+              📱 So wird die Khao Lak App aussehen
+            </Text>
 
-              <Text style={featureText}>
-                Aus diesem Newsletter entsteht eine echte App, die Khao Lak vor Ort verständlich macht.
-              </Text>
+            <Text style={featureText}>
+              Aus diesem Newsletter entsteht eine echte App, die Khao Lak vor Ort verständlich macht.
+            </Text>
 
-              <Text style={featureText}>
-                Jede Woche zeigen wir dir ein neues Feature.
-              </Text>
+            <Text style={featureItem}>🏝️ Interaktive Karte mit echten Spots</Text>
+            <Text style={featureItem}>🗺️ Tagesplanung für deinen Urlaub</Text>
+            <Text style={featureItem}>⭐ Geheimtipps von Marc & Melo</Text>
+            <Text style={featureItem}>🎧 Audio Guides vor Ort</Text>
 
-              <Text style={featureItem}>🏝️ Interaktive Karte mit echten Spots</Text>
-              <Text style={featureItem}>🗺️ Tagesplanung für deinen Urlaub</Text>
-              <Text style={featureItem}>⭐ Geheimtipps von Marc & Melo</Text>
-              <Text style={featureItem}>🎧 Audio Guides vor Ort</Text>
-            </Section>
-
-            {/* APP MOCKUP PLACEHOLDER */}
             <Img
-              src="https://YOUR-R2-BUCKET/app-mockup.jpg"
-              alt="App Mockup"
-              style={sideImage}
+              src="https://via.placeholder.com/300x600?text=App+Mockup"
+              style={appMockup}
             />
           </Section>
 
@@ -162,9 +166,8 @@ const hero = {
 
 /* INTRO */
 const introCard = {
-  backgroundColor: "#ffffff",
-  margin: "18px",
   padding: "18px",
+  margin: "18px",
   borderRadius: "14px",
   border: "1px solid #e5e7eb",
 };
@@ -173,14 +176,11 @@ const introBadge = {
   fontSize: "12px",
   color: "#0f766e",
   fontWeight: "bold",
-  marginBottom: "8px",
 };
 
 const introTitle = {
   fontSize: "20px",
   fontWeight: "bold",
-  color: "#0f172a",
-  marginBottom: "8px",
 };
 
 const introText = {
@@ -189,68 +189,59 @@ const introText = {
   lineHeight: "1.6",
 };
 
-/* 2 COLUMN LAYOUT */
-const twoCol = {
-  display: "flex",
-  flexDirection: "row" as const,
-  gap: "12px",
+/* CARD */
+const card = {
   margin: "18px",
-  alignItems: "center",
-};
-
-const textCol = {
-  flex: 1,
-};
-
-const sideImage = {
-  width: "200px",
-  height: "auto",
+  padding: "16px",
   borderRadius: "12px",
-  objectFit: "cover" as const,
-};
-
-const circleImage = {
-  width: "120px",
-  height: "120px",
-  borderRadius: "50%",
-  objectFit: "cover" as const,
+  border: "1px solid #eee",
 };
 
 /* STORY */
+const storyLeft = {
+  verticalAlign: "top",
+  paddingRight: "12px",
+};
+
+const storyRight = {
+  verticalAlign: "top",
+};
+
 const storyTitle = {
   fontSize: "14px",
   fontWeight: "bold",
-  marginBottom: "8px",
 };
 
 const storyText = {
   fontSize: "14px",
   color: "#0f172a",
   lineHeight: "1.6",
-  marginBottom: "10px",
 };
 
-const storyTextBold = {
+const storyHighlight = {
   fontSize: "14px",
   color: "#0f766e",
   fontWeight: "bold",
 };
 
+const sideImage = {
+  width: "160px",
+  borderRadius: "10px",
+};
+
 /* GRID */
 const grid = {
-  padding: "0 18px",
+  margin: "0 18px",
 };
 
 const gridItem = {
   fontSize: "14px",
   marginBottom: "6px",
-  color: "#0f172a",
 };
 
 /* TEAM */
 const teamTitle = {
   fontWeight: "bold",
-  marginBottom: "6px",
 };
 
 const teamText = {
@@ -259,9 +250,14 @@ const teamText = {
   lineHeight: "1.6",
 };
 
+const circleImage = {
+  width: "80px",
+  height: "80px",
+  borderRadius: "50%",
+};
+
 /* FEATURE */
 const featureTitle = {
-  fontSize: "15px",
   fontWeight: "bold",
   marginBottom: "10px",
 };
@@ -269,43 +265,42 @@ const featureTitle = {
 const featureText = {
   fontSize: "14px",
   color: "#475569",
-  lineHeight: "1.6",
-  marginBottom: "10px",
 };
 
 const featureItem = {
   fontSize: "14px",
   marginBottom: "6px",
-  color: "#0f172a",
+};
+
+const appMockup = {
+  width: "160px",
+  marginTop: "12px",
+  borderRadius: "12px",
 };
 
 /* CTA */
 const center = {
   textAlign: "center" as const,
-  margin: "26px 0",
+  margin: "24px 0",
 };
 
 const cta = {
-  display: "inline-block",
   backgroundColor: "#0f766e",
-  color: "#ffffff",
+  color: "#fff",
   padding: "14px 22px",
   borderRadius: "10px",
-  fontSize: "16px",
-  fontWeight: "bold",
   textDecoration: "none",
+  fontWeight: "bold",
 };
 
-/* HR */
 const hr = {
-  margin: "20px 18px",
+  margin: "18px",
   borderColor: "#e5e7eb",
 };
 
-/* FOOTER */
 const footer = {
+  textAlign: "center" as const,
   fontSize: "12px",
   color: "#94a3b8",
-  textAlign: "center" as const,
   margin: "20px 0",
 };
