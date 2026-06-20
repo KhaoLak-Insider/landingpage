@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
+import { render } from "@react-email/render";
+import WelcomeEmail from "@/emails/WelcomeEmail";
 
 export async function GET(req: Request) {
   try {
@@ -9,8 +11,6 @@ export async function GET(req: Request) {
     // 🔑 TOKEN
     const rawToken = searchParams.get("token");
     const token = rawToken?.trim();
-
-    console.log("🔥 TOKEN:", token);
 
     if (!token) {
       return NextResponse.json(
@@ -33,9 +33,6 @@ export async function GET(req: Request) {
       .from("waitlist")
       .select("id, email, newsletter_token")
       .eq("newsletter_token", token);
-
-    console.log("📦 DATA:", data);
-    console.log("❌ ERROR:", error);
 
     if (error) {
       return NextResponse.json(
@@ -68,63 +65,18 @@ export async function GET(req: Request) {
       );
     }
 
-    // ✉️ WELCOME EMAIL (deine schöne Version)
+    // ✉️ RENDER REACT EMAIL (NEU)
+    const html = render(<WelcomeEmail />);
+
+    // ✉️ SEND EMAIL (NEU DESIGN)
     await resend.emails.send({
       from: "Khao Lak Insider <onboarding@khaolak.app>",
       to: user.email,
       subject: "Willkommen im Khao Lak Insider 🌴",
-      html: `
-<div style="font-family: Arial, sans-serif; background:#f6f7fb; padding:40px 0;">
-  <div style="max-width:600px; margin:0 auto; background:#ffffff; padding:32px; border-radius:12px;">
-
-    <p style="font-size:14px; color:#666;">
-      Khao Lak Insider
-    </p>
-
-    <h1 style="font-size:22px; margin-top:10px;">
-      Willkommen 👋
-    </h1>
-
-    <p style="font-size:16px; line-height:1.6; color:#333;">
-      Schön, dass du dabei bist.
-    </p>
-
-    <p style="font-size:16px; line-height:1.6; color:#333;">
-      Du bekommst ab jetzt hin und wieder kurze Updates aus Khao Lak —
-      neue Orte, kleine Tipps und Dinge, die man nicht sofort im Reiseführer findet.
-    </p>
-
-    <p style="font-size:16px; line-height:1.6; color:#333;">
-      Kein Spam. Keine täglichen Mails. Nur wenn es wirklich etwas Neues gibt.
-    </p>
-
-    <hr style="margin:24px 0; border:none; border-top:1px solid #eee;" />
-
-    <h2 style="font-size:18px;">
-      🏝️ Kleine Empfehlung zum Start
-    </h2>
-
-    <p style="font-size:15px; line-height:1.6; color:#333;">
-      Wenn du bald in Khao Lak bist, schau dir unbedingt die kleineren Strände nördlich von Bang Niang an.
-      Dort ist es oft deutlich ruhiger als im Zentrum.
-    </p>
-
-    <p style="font-size:15px; color:#666;">
-      Mehr davon kommt bald.
-    </p>
-
-    <hr style="margin:24px 0; border:none; border-top:1px solid #eee;" />
-
-    <p style="font-size:12px; color:#999;">
-      Du erhältst diese Mail, weil du dich auf khaolak.app für den Newsletter angemeldet hast.
-    </p>
-
-  </div>
-</div>
-      `,
+      html,
     });
 
-    // 🎯 REDIRECT TO SUCCESS PAGE
+    // 🎯 SUCCESS REDIRECT
     return NextResponse.redirect(
       "https://khaolak.app/confirm-newsletter?status=success"
     );
