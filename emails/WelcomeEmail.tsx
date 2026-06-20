@@ -57,7 +57,7 @@ export default function WelcomeEmail() {
 
             {/* SUNSET PLACEHOLDER IMAGE */}
             <Img
-              src="https://YOUR-R2-BUCKET/sunset-placeholder.jpg"
+              src="https://pub-e91d905941ab460b95ac5248c28e16f3.r2.dev/emails/welcome/sunset.jpg"
               alt="Sunset Khao Lak"
               style={sideImage}
             />
