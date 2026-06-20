@@ -79,32 +79,39 @@ export default function DatenschutzPage() {
           </section>
 
           <section>
-  <h2 className="mb-3 text-xl font-bold">6. Plausible Analytics</h2>
+  <h2 className="mb-3 text-xl font-bold">6. Webanalyse mit Vercel Analytics</h2>
 
   <p>
-    Diese Website verwendet Plausible Analytics zur statistischen Auswertung
-    der Nutzung unserer Website.
+    Diese Website nutzt den Webanalyse-Dienst Vercel Analytics der Vercel Inc.,
+    440 N Barranca Ave #4133, Covina, CA 91723, USA.
   </p>
 
   <p className="mt-3">
-    Plausible Analytics ist ein datenschutzfreundlicher Webanalyse-Dienst.
-    Es werden keine Cookies eingesetzt und keine personenbezogenen Profile
-    erstellt.
+    Vercel Analytics ermöglicht eine anonyme Analyse der Nutzung dieser Website.
+    Es werden keine Cookies gesetzt und keine personenbezogenen Profile erstellt.
   </p>
 
   <p className="mt-3">
-    Die erfassten Informationen werden ausschließlich in aggregierter Form
-    verarbeitet. Ein Rückschluss auf einzelne Personen ist nicht möglich.
+    Erfasst werden unter anderem Seitenaufrufe, Gerätetyp, Browsertyp,
+    ungefährer Standort (Land) sowie Referrer-Informationen.
   </p>
 
   <p className="mt-3">
-    Die Verarbeitung erfolgt auf Grundlage unseres berechtigten Interesses
-    an der Analyse und Optimierung unseres Online-Angebots gemäß
-    Art. 6 Abs. 1 lit. f DSGVO.
+    Die Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO
+    (berechtigtes Interesse an der Optimierung und Analyse unseres Webangebots).
   </p>
+
   <p className="mt-3">
-  Weitere Informationen zum Datenschutz bei Plausible Analytics findest du auf der offiziellen Website von Plausible Analytics.
-</p>
+    Weitere Informationen findest du hier:{" "}
+    <a
+      href="https://vercel.com/legal/privacy-policy"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-teal-600 underline hover:text-teal-700"
+    >
+      Vercel Datenschutzerklärung
+    </a>
+  </p>
 </section>
 
           <section>
