@@ -65,21 +65,50 @@ export async function POST(req: Request) {
     console.log("📤 SENDING EMAIL VIA RESEND...");
 
     const result = await resend.emails.send({
-      from: "Khao Lak Insider <no-reply@khaolak.app>",
-      to: email,
-      subject: "Du bist auf der Warteliste 🌴",
-      html: `
-        <div style="font-family: Arial, sans-serif;">
-          <h1>Danke für deine Anmeldung 🌴</h1>
-          <p>Du bist jetzt auf der Warteliste für die <b>Khao Lak Insider App</b>.</p>
-          <p>Wir melden uns, sobald es losgeht.</p>
-          <hr />
-          <p style="color: #666;">
-            Khao Lak Insider – dein smarter Reiseführer für Thailand
-          </p>
+  from: "Khao Lak Insider <no-reply@khaolak.app>",
+  to: email,
+  subject: "🌴 Willkommen auf der Warteliste",
+
+  html: `
+    <div style="background:#f6f7fb;padding:40px 0;font-family:Arial,sans-serif;">
+      <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.08);">
+
+        <!-- Header -->
+        <div style="background:linear-gradient(135deg,#00b3a6,#0ea5a4);padding:30px;text-align:center;color:white;">
+          <h1 style="margin:0;font-size:24px;">🌴 Khao Lak Insider</h1>
+          <p style="margin:8px 0 0;opacity:0.9;">Warteliste bestätigt</p>
         </div>
-      `,
-    });
+
+        <!-- Body -->
+        <div style="padding:30px;color:#1f2937;">
+
+          <h2 style="margin-top:0;">Danke für deine Anmeldung 🙌</h2>
+
+          <p style="font-size:15px;line-height:1.6;">
+            Du bist jetzt auf der Warteliste für die <b>Khao Lak Insider App</b>.
+          </p>
+
+          <div style="background:#f3f4f6;padding:15px;border-radius:10px;margin:20px 0;">
+            <p style="margin:0;font-size:14px;">
+              👉 Du bekommst als Erstes Zugang, sobald wir starten.<br/>
+              👉 Exklusive Updates und Early Access Infos folgen bald.
+            </p>
+          </div>
+
+          <a href="https://khaolak.app"
+             style="display:inline-block;background:#0ea5a4;color:white;text-decoration:none;padding:12px 20px;border-radius:10px;font-weight:bold;">
+            Zur Website
+          </a>
+
+          <p style="margin-top:25px;font-size:12px;color:#6b7280;">
+            Khao Lak Insider – dein smarter Reiseführer für Thailand 🌴
+          </p>
+
+        </div>
+      </div>
+    </div>
+  `,
+});
 
     console.log("📧 RESEND RESPONSE:", result);
 
