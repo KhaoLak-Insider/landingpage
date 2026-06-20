@@ -53,7 +53,7 @@ export default function Home() {
       body: JSON.stringify({
         email: normalizedEmail,
         waitlist_opt_in: waitlistConsent,
-        newsletter_opt_in: newsletterConsent,
+        newsletter_opt_in: true,
       }),
     });
 
