@@ -24,10 +24,10 @@ export default function ConfirmPage() {
         {/* Divider */}
         <div className="my-6 border-t border-gray-100" />
 
-        {/* Info box */}
-        <div className="text-sm text-gray-500">
-          Du kannst dich jederzeit mit einem Klick wieder abmelden.
-        </div>
+        {/* Info small */}
+        <p className="text-sm text-gray-500">
+          Wir halten dich nur mit wirklich relevanten Reise-Updates auf dem Laufenden.
+        </p>
 
         {/* Button */}
         <a
@@ -37,7 +37,7 @@ export default function ConfirmPage() {
           Zur App
         </a>
 
-        {/* Footer hint */}
+        {/* Footer */}
         <p className="mt-4 text-xs text-gray-400">
           Khao Lak Insider · Travel smarter
         </p>
