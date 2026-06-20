@@ -26,10 +26,6 @@ export default function Home() {
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error">("success");
 
-  // CONSENT STATES
-  const [waitlistConsent, setWaitlistConsent] = useState(true);
-  const [newsletterConsent, setNewsletterConsent] = useState(false);
-
   const joinWaitlist = async (event: FormEvent<HTMLFormElement>) => {
   event.preventDefault();
 
@@ -50,11 +46,7 @@ export default function Home() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        email: normalizedEmail,
-        waitlist_opt_in: waitlistConsent,
-        newsletter_opt_in: newsletterConsent,
-      }),
+      body: JSON.stringify({ email: normalizedEmail }),
     });
 
     const data = await response.json();
@@ -74,15 +66,6 @@ export default function Home() {
 
   setLoading(false);
 };
-
-  
-  // exit intent (simple)
-  if (typeof window !== "undefined") {
-    window.onbeforeunload = () => {
-      // soft signal only
-      return null;
-    };
-  }
 
   return (
     <main className="min-h-screen bg-white text-slate-900">
@@ -403,7 +386,7 @@ export default function Home() {
       </section>
 
 <section id="waitlist" className="px-8 py-20">
-        <div className="mx-auto max-w-5xl rounded-[2.5rem] bg-gradient-to-br from-teal-500 via-teal-500 to-emerald-600 px-8 py-16 text-center text-white shadow-2xl shadow-teal-200/60 ring-1 ring-white/20">
+        <div className="mx-auto max-w-5xl rounded-[2.5rem] bg-gradient-to-br from-teal-500 to-teal-600 px-8 py-16 text-center text-white shadow-2xl shadow-teal-100">
           <div className="mb-4 inline-flex rounded-full bg-white/20 px-4 py-2 text-sm font-semibold backdrop-blur">
             Khao Lak Insider App
           </div>
@@ -418,72 +401,25 @@ export default function Home() {
           </p>
 
           <form
-  onSubmit={joinWaitlist}
-  className="mx-auto mt-9 max-w-xl rounded-3xl bg-white/95 p-6 shadow-2xl ring-1 ring-black/5 backdrop-blur"
->
-  <input
-    type="email"
-    value={email}
-    onChange={(event) => setEmail(event.target.value)}
-    placeholder="Deine E-Mail-Adresse"
-    className="h-12 w-full rounded-full px-5 text-slate-900 outline-none shadow-inner bg-white ring-1 ring-slate-200 focus:ring-2 focus:ring-teal-400 transition"
-  />
+            onSubmit={joinWaitlist}
+            className="mx-auto mt-9 flex max-w-xl flex-col gap-4 rounded-3xl bg-white p-2 shadow-xl sm:flex-row sm:rounded-full"
+          >
+            <input
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="Deine E-Mail-Adresse"
+              className="h-12 flex-1 rounded-full px-5 text-slate-900 outline-none"
+            />
 
-  <div className="mt-4 text-center text-xs text-slate-500">
-    ⭐ Werde einer der ersten Nutzer der Khao Lak Insider App
-  </div>
-
-  <div className="mt-5 flex flex-col gap-4 text-left">
-
-    <label className={`flex items-start gap-3 rounded-2xl border p-4 cursor-pointer transition ${
-      waitlistConsent ? "border-teal-400 bg-teal-50 shadow-sm" : "border-slate-200 bg-white"
-    }`}>
-      <input
-        type="checkbox"
-        checked={waitlistConsent}
-        onChange={(e) => setWaitlistConsent(e.target.checked)}
-        className="mt-1 h-4 w-4 accent-teal-600"
-      />
-      <div>
-        <p className="font-semibold text-slate-900">🚀 Early Access zur App</p>
-        <p className="text-xs text-slate-600">
-          Ich werde sofort benachrichtigt, wenn die App startet.
-        </p>
-      </div>
-    </label>
-
-    <label className={`flex items-start gap-3 rounded-2xl border p-4 cursor-pointer transition ${
-      newsletterConsent ? "border-teal-400 bg-teal-50 shadow-sm" : "border-slate-200 bg-white"
-    }`}>
-      <input
-        type="checkbox"
-        checked={newsletterConsent}
-        onChange={(e) => setNewsletterConsent(e.target.checked)}
-        className="mt-1 h-4 w-4 accent-teal-600"
-      />
-      <div>
-        <p className="font-semibold text-slate-900">✨ Reise-Updates & Insider Tipps</p>
-        <p className="text-xs text-slate-500">
-          1–2× pro Woche neue Spots, Geheimtipps und Reiseideen.
-        </p>
-      </div>
-    </label>
-
-  </div>
-
-  <button
-    type="submit"
-    disabled={loading}
-    className="mt-5 h-12 w-full rounded-full bg-gradient-to-r from-slate-900 to-slate-950 font-bold text-white shadow-lg transition hover:scale-[1.03] active:scale-[0.98] disabled:opacity-60"
-  >
-    {loading ? "Speichern..." : "🚀 Early Access sichern"}
-  </button>
-
-  <p className="mt-4 text-center text-xs text-slate-400">
-    Kein Spam. Nur App-Updates.
-  </p>
-</form>
-
+            <button
+              type="submit"
+              disabled={loading}
+              className="h-12 rounded-full bg-slate-950 px-7 font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {loading ? "Speichern..." : "Zur Warteliste"}
+            </button>
+          </form>
 
           {message && (
   <div
