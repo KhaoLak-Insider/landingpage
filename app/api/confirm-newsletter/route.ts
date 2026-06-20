@@ -66,7 +66,7 @@ export async function GET(req: Request) {
     }
 
     // ✉️ RENDER REACT EMAIL (NEU)
-    const html = render(<WelcomeEmail />);
+    const html = render(WelcomeEmail());
 
     // ✉️ SEND EMAIL (NEU DESIGN)
     await resend.emails.send({
