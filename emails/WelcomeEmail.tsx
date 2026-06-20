@@ -15,80 +15,91 @@ export default function WelcomeEmail() {
   return (
     <Html>
       <Head />
-      <Body style={{ ...main, textAlign: "left", margin: 0, padding: 0 }}>
+      <Body style={{ ...main, margin: 0, padding: 0 }}>
         <Container style={container}>
 
-          {/* HERO IMAGE */}
+          {/* HERO */}
           <Img
             src="https://pub-e91d905941ab460b95ac5248c28e16f3.r2.dev/emails/welcome/welcome_hero.jpg"
             alt="Khao Lak Insider"
             style={hero}
           />
 
-          {/* HEADER STRIP */}
+          {/* BRAND BAR */}
           <Section style={topBar}>
             <Text style={topBarText}>
               🌴 Khao Lak Insider · Travel smarter
             </Text>
           </Section>
 
-          {/* TITLE */}
+          {/* HOOK */}
           <Heading style={h1}>
-            Willkommen im Khao Lak Insider
+            Du hast gerade den touristischen Blick verlassen.
           </Heading>
 
           <Text style={lead}>
-            Du bist jetzt nicht mehr nur Besucher.
-            Du bist jemand, der Khao Lak wirklich entdeckt.
+            Ab jetzt siehst Du Khao Lak anders.
+            Nicht als Reiseziel — sondern als Sammlung echter Momente.
           </Text>
 
-          {/* STORY BLOCK */}
+          {/* CINEMATIC STORY */}
           <Section style={storyBox}>
             <Text style={storyText}>
-              Stell Dir vor: 06:47 Uhr, Coconut Beach.
+              06:47 Uhr · Coconut Beach
             </Text>
 
             <Text style={storyText}>
-              Kein Lärm. Kein Touribus. Nur Licht, Wellen und ein kleiner Holzfischer,
-              der gerade sein Boot ins Wasser schiebt.
+              Der Strand ist leer.
+              Kein Verkehr. Kein Stimmengewirr.
+              Nur das leise Rollen der Wellen.
+            </Text>
+
+            <Text style={storyText}>
+              Ein kleiner Fischer schiebt sein Boot ins Wasser.
+              Du merkst, dass dieser Moment nicht im Reiseführer steht.
             </Text>
 
             <Text style={storyTextBold}>
-              Genau solche Momente zeigen wir Dir.
+              Genau diese Momente bekommst Du hier.
             </Text>
           </Section>
 
           <Hr style={hr} />
 
-          {/* VALUE GRID */}
+          {/* VALUE SHIFT (no features, only promises) */}
           <Section style={grid}>
-            <Text style={gridItem}>🏝️ Versteckte Orte</Text>
-            <Text style={gridItem}>🍜 Food Spots</Text>
-            <Text style={gridItem}>🧭 Insider Wissen</Text>
-            <Text style={gridItem}>📍 Updates aus Khao Lak</Text>
+            <Text style={gridItem}>Orte, die niemand fotografiert</Text>
+            <Text style={gridItem}>Essen, das nur Locals kennen</Text>
+            <Text style={gridItem}>Infos direkt von vor Ort</Text>
+            <Text style={gridItem}>Updates, bevor sie im Reiseführer stehen</Text>
           </Section>
 
           <Hr style={hr} />
 
-          {/* MARC & MELO */}
+          {/* MARC & MELO (PERSONAL STORY) */}
           <Section style={teamBox}>
-            <Text style={teamTitle}>Marc & Melo vor Ort</Text>
+            <Text style={teamTitle}>
+              Marc & Melo sind vor Ort
+            </Text>
+
             <Text style={teamText}>
-              Wir zeigen Dir Khao Lak so, wie es wirklich ist —
-              nicht wie im Reiseführer, sondern wie es sich anfühlt.
+              Sie verbringen seit über 13 Jahren regelmäßig mehrere Monate im Jahr in Khao Lak.
+
+            Und genau deshalb zeigen sie dir den Ort so, wie ihn kaum ein Tourist je erlebt —
+            ehrlich, direkt und abseits der klassischen Touri-Routen.
             </Text>
           </Section>
 
           {/* CTA */}
           <Section style={center}>
             <Link href="https://khaolak.app" style={cta}>
-              🌴 Jetzt erste Spots entdecken
+              👉 Deinen ersten echten Spot öffnen
             </Link>
           </Section>
 
-          {/* FOOTER */}
+          {/* MICRO FOOTER */}
           <Text style={footer}>
-            Khao Lak Insider · No fluff. Just real places.
+            Khao Lak Insider · No filters. Just places.
           </Text>
 
         </Container>
@@ -97,9 +108,7 @@ export default function WelcomeEmail() {
   );
 }
 
-/* =========================
-   STYLES
-========================= */
+/* ===================== STYLES ===================== */
 
 const main = {
   backgroundColor: "#f6f7fb",
@@ -110,9 +119,6 @@ const container = {
   width: "600px",
   margin: "0 auto",
   backgroundColor: "#ffffff",
-  borderRadius: "14px",
-  overflow: "hidden",
-  textAlign: "left" as const,
 };
 
 const hero = {
@@ -132,9 +138,10 @@ const topBarText = {
 };
 
 const h1 = {
-  fontSize: "30px",
+  fontSize: "32px",
   color: "#0f172a",
-  margin: "18px 18px 8px",
+  margin: "18px 18px 10px",
+  lineHeight: "1.2",
 };
 
 const lead = {
@@ -149,7 +156,6 @@ const storyBox = {
   margin: "0 18px",
   padding: "16px",
   borderRadius: "12px",
-  textAlign: "left" as const,
 };
 
 const storyText = {
@@ -167,7 +173,6 @@ const storyTextBold = {
 
 const grid = {
   padding: "0 18px",
-  textAlign: "left" as const,
 };
 
 const gridItem = {
@@ -181,7 +186,6 @@ const teamBox = {
   margin: "18px",
   padding: "14px",
   borderRadius: "12px",
-  textAlign: "left" as const,
 };
 
 const teamTitle = {
@@ -197,7 +201,7 @@ const teamText = {
 
 const center = {
   textAlign: "center" as const,
-  margin: "24px 0",
+  margin: "26px 0",
 };
 
 const cta = {
