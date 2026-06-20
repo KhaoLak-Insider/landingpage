@@ -410,9 +410,8 @@ export default function Home() {
 
           <form
   onSubmit={joinWaitlist}
-  className="mx-auto mt-9 max-w-xl rounded-3xl bg-white p-4 shadow-xl"
+  className="mx-auto mt-9 max-w-xl rounded-3xl bg-white p-5 shadow-xl"
 >
-  {/* INPUT */}
   <input
     type="email"
     value={email}
@@ -421,30 +420,36 @@ export default function Home() {
     className="h-12 w-full rounded-full px-5 text-slate-900 outline-none"
   />
 
-  {/* CHECKBOXES */}
-  <div className="mt-4 flex flex-col gap-3 text-left text-sm text-slate-700">
-    <label className="flex items-start gap-2">
+  <div className="mt-5 flex flex-col gap-3 text-left text-sm text-slate-700">
+
+    <label className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
       <input
         type="checkbox"
         checked={waitlistConsent}
         onChange={(e) => setWaitlistConsent(e.target.checked)}
         className="mt-1 h-4 w-4 accent-teal-600"
       />
-      <span>Ich möchte Updates zum App-Start erhalten</span>
+      <div>
+        <p className="font-semibold text-slate-800">App-Start Updates</p>
+        <p className="text-xs text-slate-500">Ich erfahre als Erstes, wenn die App startet.</p>
+      </div>
     </label>
 
-    <label className="flex items-start gap-2">
+    <label className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-3">
       <input
         type="checkbox"
         checked={newsletterConsent}
         onChange={(e) => setNewsletterConsent(e.target.checked)}
         className="mt-1 h-4 w-4 accent-teal-600"
       />
-      <span>Ich möchte regelmäßige Newsletter erhalten</span>
+      <div>
+        <p className="font-semibold text-slate-800">Newsletter (optional)</p>
+        <p className="text-xs text-slate-500">1–2× pro Woche Reiseideen & neue Spots</p>
+      </div>
     </label>
+
   </div>
 
-  {/* BUTTON */}
   <button
     type="submit"
     disabled={loading || !waitlistConsent}
@@ -454,7 +459,7 @@ export default function Home() {
   </button>
 
   <p className="mt-4 text-center text-xs text-slate-400">
-    Kein Spam. Nur Informationen zum App-Start.
+    Kein Spam. Nur App-Updates.
   </p>
 </form>
 
