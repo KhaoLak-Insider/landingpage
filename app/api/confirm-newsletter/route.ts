@@ -2,81 +2,51 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 export async function GET(req: Request) {
-  try {
-    const { searchParams } = new URL(req.url);
+  const { searchParams } = new URL(req.url);
+  const token = searchParams.get("token")?.trim();
 
-    // 🧠 CLEAN TOKEN (wichtig!)
-    const rawToken = searchParams.get("token");
-    const token = rawToken?.trim().replace(/\s/g, "");
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
-    console.log("🔥 RAW TOKEN:", rawToken);
-    console.log("🔥 CLEAN TOKEN:", token);
-    console.log("🔥 TOKEN LENGTH:", token?.length);
+  // 🔍 GET ALL ROWS FIRST (ABSOLUTE TRUTH SOURCE)
+  const { data, error } = await supabase
+    .from("waitlist")
+    .select("id, newsletter_token");
 
-    // 🔌 Supabase Client
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
+  console.log("📦 ALL ROWS:", data);
+  console.log("❌ ERROR:", error);
 
-    // 🔍 STEP 1: FIND ROW
-    const { data: rows, error: findError } = await supabase
-      .from("waitlist")
-      .select("id, newsletter_token")
-      .eq("newsletter_token", token);
+  // 🧠 MANUAL MATCH (NO SUPABASE FILTER)
+  const match = data?.find(
+    (row) => row.newsletter_token?.trim() === token
+  );
 
-    console.log("📦 MATCH RESULT:", rows);
-    console.log("❌ FIND ERROR:", findError);
+  console.log("🎯 MATCH:", match);
 
-    if (findError) {
-      return NextResponse.json({
-        error: "Supabase find error",
-        details: findError,
-      });
-    }
-
-    if (!rows || rows.length === 0) {
-      return NextResponse.json({
-        error: "NO MATCH FOUND",
-        token,
-      });
-    }
-
-    const id = rows[0].id;
-
-    // 🔥 STEP 2: UPDATE
-    const { data: updateData, error: updateError } = await supabase
-      .from("waitlist")
-      .update({
-        newsletter_confirmed: true,
-      })
-      .eq("id", id)
-      .select();
-
-    console.log("✅ UPDATE RESULT:", updateData);
-    console.log("❌ UPDATE ERROR:", updateError);
-
-    if (updateError) {
-      return NextResponse.json({
-        error: "Update failed",
-        details: updateError,
-      });
-    }
-
+  if (!match) {
     return NextResponse.json({
-      success: true,
-      updated: updateData,
+      error: "NO MATCH FOUND",
+      token,
+      dbTokens: data?.map(r => r.newsletter_token),
     });
-
-  } catch (err) {
-    console.log("💥 FATAL ERROR:", err);
-
-    return NextResponse.json(
-      {
-        error: "Server error",
-        details: String(err),
-      },
-      { status: 500 }
-    );
   }
+
+  // 🔥 UPDATE BY ID
+  const { data: updated, error: updateError } = await supabase
+    .from("waitlist")
+    .update({
+      newsletter_confirmed: true,
+    })
+    .eq("id", match.id)
+    .select();
+
+  console.log("✅ UPDATED:", updated);
+  console.log("❌ UPDATE ERROR:", updateError);
+
+  return NextResponse.json({
+    success: true,
+    updated,
+  });
 }
