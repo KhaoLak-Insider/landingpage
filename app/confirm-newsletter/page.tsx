@@ -1,36 +1,32 @@
-import { CheckCircle } from "lucide-react";
-
 export default function ConfirmPage({
   searchParams,
 }: {
   searchParams: { status?: string };
 }) {
-  const isSuccess = searchParams?.status === "success";
+  const success = searchParams?.status === "success";
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-teal-50 via-white to-white px-6">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-teal-50 to-white px-6">
 
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-gray-100 p-8 text-center">
+      <div className="max-w-md w-full bg-white shadow-xl rounded-2xl p-8 text-center">
 
-        <div className="flex justify-center mb-4">
-          <div className="h-14 w-14 rounded-full bg-teal-100 flex items-center justify-center">
-            <CheckCircle className="text-teal-600 w-7 h-7" />
-          </div>
+        <div className="text-4xl mb-4">
+          {success ? "🎉" : "❌"}
         </div>
 
-        <h1 className="text-2xl font-bold text-gray-900">
-          {isSuccess ? "Newsletter bestätigt" : "Bestätigung fehlgeschlagen"}
+        <h1 className="text-2xl font-bold">
+          {success ? "Newsletter bestätigt" : "Bestätigung fehlgeschlagen"}
         </h1>
 
-        <p className="mt-3 text-gray-600">
-          {isSuccess
-            ? "Perfekt! Du bist jetzt offiziell auf unserer Liste."
+        <p className="mt-2 text-gray-600">
+          {success
+            ? "Du bist jetzt erfolgreich auf der Liste."
             : "Der Link ist ungültig oder abgelaufen."}
         </p>
 
         <a
           href="/"
-          className="mt-6 inline-block w-full bg-teal-600 hover:bg-teal-700 text-white font-medium py-3 rounded-xl transition"
+          className="mt-6 inline-block bg-teal-600 text-white px-6 py-3 rounded-xl"
         >
           Zur App
         </a>
