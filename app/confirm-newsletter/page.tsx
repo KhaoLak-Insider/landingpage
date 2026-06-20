@@ -1,13 +1,11 @@
-"use client";
-
 import { CheckCircle } from "lucide-react";
-import { useSearchParams } from "next/navigation";
 
-export default function ConfirmPage() {
-  const searchParams = useSearchParams();
-  const status = searchParams.get("status");
-
-  const isSuccess = status === "success";
+export default function ConfirmPage({
+  searchParams,
+}: {
+  searchParams: { status?: string };
+}) {
+  const isSuccess = searchParams?.status === "success";
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-teal-50 via-white to-white px-6">
