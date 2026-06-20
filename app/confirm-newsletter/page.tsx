@@ -1,9 +1,16 @@
-export default function ConfirmPage({
-  searchParams,
-}: {
-  searchParams: { status?: string };
-}) {
-  const success = searchParams?.status === "success";
+"use client";
+
+import { useEffect, useState } from "react";
+
+export default function ConfirmPage() {
+  const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get("status");
+
+    setSuccess(status === "success");
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-teal-50 to-white px-6">
