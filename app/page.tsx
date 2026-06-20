@@ -59,19 +59,18 @@ if (!response.ok) {
   setEmail("");
 }
 
-    if (error) {
-      setMessageType("error");
-
-      if (error.code === "23505") {
-        setMessage("✅ Diese E-Mail-Adresse steht bereits auf unserer Warteliste.");
-      } else {
-        setMessage("Leider gab es ein Problem. Bitte versuche es später erneut.");
-      }
-    } else {
-      setMessageType("success");
-      setMessage("🎉 Perfekt! Dein Platz auf der Warteliste ist reserviert. Wir informieren dich zum App-Start.");
-      setEmail("");
-    }
+    if (!response.ok) {
+  setMessageType("error");
+  setMessage(
+    data?.error || "Leider gab es ein Problem. Bitte versuche es später erneut."
+  );
+} else {
+  setMessageType("success");
+  setMessage(
+    "🎉 Perfekt! Dein Platz auf der Warteliste ist reserviert. Wir informieren dich zum App-Start."
+  );
+  setEmail("");
+}
 
     setLoading(false);
   };
