@@ -16,16 +16,12 @@ export async function POST(req: Request) {
       );
     }
 
-    // ENV CHECK
     if (!process.env.RESEND_API_KEY) {
-      console.log("❌ Missing RESEND_API_KEY");
       return NextResponse.json(
         { error: "Missing RESEND_API_KEY" },
         { status: 500 }
       );
     }
-
-    console.log("RESEND KEY EXISTS:", true);
 
     const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -39,7 +35,7 @@ export async function POST(req: Request) {
       .from("waitlist")
       .insert([{ email }]);
 
-    if (error && error.code !== "23505") {
+    if (error) {
       console.log("❌ SUPABASE ERROR:", error);
       return NextResponse.json(
         { error: "DB error" },
@@ -50,29 +46,36 @@ export async function POST(req: Request) {
     console.log("✅ Supabase insert OK");
 
     // 2. Mail senden
-    const result = await resend.emails.send({
-      from: "Khao Lak Insider <onboarding@resend.dev>",
-      to: email,
-      subject: "Du bist auf der Warteliste 🌴",
-      html: `
-        <div style="font-family: sans-serif;">
-          <h1>Danke für deine Anmeldung 🌴</h1>
-          <p>Du bist jetzt auf der Warteliste für die <b>Khao Lak Insider App</b>.</p>
+    try {
+      const result = await resend.emails.send({
+        from: "Khao Lak Insider <onboarding@resend.dev>",
+        to: email,
+        subject: "Du bist auf der Warteliste 🌴",
+        html: `
+          <div style="font-family: sans-serif;">
+            <h1>Danke für deine Anmeldung 🌴</h1>
+            <p>Du bist jetzt auf der Warteliste für die <b>Khao Lak Insider App</b>.</p>
+            <p>Wir informieren dich, sobald wir starten.</p>
+            <hr />
+            <p style="color:#666;">
+              Khao Lak Insider – dein smarter Reiseführer für Thailand
+            </p>
+          </div>
+        `,
+      });
 
-          <p>Wir informieren dich, sobald wir starten.</p>
+      console.log("📧 RESEND RESULT:", result);
+    } catch (mailError) {
+      console.log("❌ RESEND ERROR:", mailError);
+      return NextResponse.json(
+        { error: "Email sending failed" },
+        { status: 500 }
+      );
+    }
 
-          <hr />
-
-          <p style="color:#666;">
-            Khao Lak Insider – dein smarter Reiseführer für Thailand
-          </p>
-        </div>
-      `,
-    });
-
-    console.log("📧 RESEND RESULT:", result);
-
+    // 🔥 DAS FEHLTTE BEI DIR
     return NextResponse.json({ success: true });
+
   } catch (err) {
     console.log("❌ SERVER ERROR:", err);
 
