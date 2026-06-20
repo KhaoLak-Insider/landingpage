@@ -408,7 +408,8 @@ export default function Home() {
             wenn die Khao Lak Insider App startet.
           </p>
 
-          <form
+          
+<form
   onSubmit={joinWaitlist}
   className="mx-auto mt-9 max-w-xl rounded-3xl bg-white/95 p-6 shadow-2xl ring-1 ring-black/5 backdrop-blur"
 >
@@ -421,12 +422,14 @@ export default function Home() {
   />
 
   <div className="mt-4 text-center text-xs text-slate-500">
-    ⭐ Werde einer der ersten Nutzer der Khao Lak Insider App ⭐
+    ⭐ Werde einer der ersten Nutzer der Khao Lak Insider App
   </div>
 
   <div className="mt-5 flex flex-col gap-4 text-left">
 
-    <label className="flex items-start gap-3 rounded-2xl border border-teal-200 bg-teal-50 p-4 transition hover:bg-teal-100">
+    <label className={`flex items-start gap-3 rounded-2xl border p-4 cursor-pointer transition ${
+      waitlistConsent ? "border-teal-400 bg-teal-50 shadow-sm" : "border-slate-200 bg-white"
+    }`}>
       <input
         type="checkbox"
         checked={waitlistConsent}
@@ -434,16 +437,16 @@ export default function Home() {
         className="mt-1 h-4 w-4 accent-teal-600"
       />
       <div>
-        <p className="font-semibold text-slate-900">
-          🚀 Early Access zur App
-        </p>
+        <p className="font-semibold text-slate-900">🚀 Early Access zur App</p>
         <p className="text-xs text-slate-600">
-          Ich werde sofort benachrichtigt, wenn die Khao Lak Insider App startet.
+          Ich werde sofort benachrichtigt, wenn die App startet.
         </p>
       </div>
     </label>
 
-    <label className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4 transition hover:bg-slate-50">
+    <label className={`flex items-start gap-3 rounded-2xl border p-4 cursor-pointer transition ${
+      newsletterConsent ? "border-teal-400 bg-teal-50 shadow-sm" : "border-slate-200 bg-white"
+    }`}>
       <input
         type="checkbox"
         checked={newsletterConsent}
@@ -451,9 +454,7 @@ export default function Home() {
         className="mt-1 h-4 w-4 accent-teal-600"
       />
       <div>
-        <p className="font-semibold text-slate-900">
-          ✨ Reise-Updates & Insider Tipps
-        </p>
+        <p className="font-semibold text-slate-900">✨ Reise-Updates & Insider Tipps</p>
         <p className="text-xs text-slate-500">
           1–2× pro Woche neue Spots, Geheimtipps und Reiseideen.
         </p>
@@ -465,7 +466,7 @@ export default function Home() {
   <button
     type="submit"
     disabled={loading}
-    className="mt-5 h-12 w-full rounded-full bg-gradient-to-r from-slate-900 to-slate-950 font-bold text-white shadow-lg transition hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60"
+    className="mt-5 h-12 w-full rounded-full bg-gradient-to-r from-slate-900 to-slate-950 font-bold text-white shadow-lg transition hover:scale-[1.03] active:scale-[0.98] disabled:opacity-60"
   >
     {loading ? "Speichern..." : "🚀 Early Access sichern"}
   </button>
@@ -474,6 +475,7 @@ export default function Home() {
     Kein Spam. Nur App-Updates.
   </p>
 </form>
+
 
           {message && (
   <div
