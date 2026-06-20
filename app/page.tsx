@@ -443,15 +443,6 @@ export default function Home() {
               </label>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="h-12 rounded-full bg-slate-950 px-7 font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {loading ? "Speichern..." : "Zur Warteliste"}
-            </button>
-          </form>
-
           {message && (
   <div
     className={`mt-4 inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold ${
