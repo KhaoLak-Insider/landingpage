@@ -29,7 +29,7 @@ export default function WelcomeEmail() {
           </Heading>
 
           <Text style={text}>
-            Stell dir vor: 06:47 Uhr, Coconut Beach.
+            Stell Dir vor: 06:47 Uhr, Coconut Beach.
           </Text>
 
           <Text style={text}>
@@ -38,7 +38,7 @@ export default function WelcomeEmail() {
           </Text>
 
           <Text style={text}>
-            Genau solche Momente wirst du hier entdecken.
+            Genau solche Momente wirst Du hier entdecken.
           </Text>
 
           <Hr style={hr} />
@@ -48,7 +48,7 @@ export default function WelcomeEmail() {
             <Text style={bold}>Khao Lak Insider ist kein Reiseführer.</Text>
 
             <Text style={text}>
-              Es ist dein Blick hinter die Kulissen.
+              Es ist Dein Blick hinter die Kulissen.
             </Text>
 
             <Text style={text}>👉 Orte, die Google nicht zeigt</Text>
@@ -66,18 +66,18 @@ export default function WelcomeEmail() {
 
           <Text style={text}>
             Sie suchen nicht nach Sehenswürdigkeiten —
-            sie finden Orte, die man nur kennt, wenn man wirklich dort war.
+            Sie finden Orte, die man nur kennt, wenn man wirklich dort war.
           </Text>
 
           <Hr style={hr} />
 
           {/* MOMENT SHIFT */}
           <Text style={text}>
-            Vielleicht sitzt du gerade noch zu Hause.
+            Vielleicht sitzt Du gerade noch zu Hause.
           </Text>
 
           <Text style={text}>
-            Aber dein erster echter Khao Lak Moment beginnt genau hier.
+            Aber Dein erster echter Khao Lak Moment beginnt genau hier.
           </Text>
 
           <Hr style={hr} />
@@ -85,7 +85,7 @@ export default function WelcomeEmail() {
           {/* CTA */}
           <Section style={center}>
             <Text style={cta}>
-              👉 Öffne die App und finde deinen ersten versteckten Spot
+              👉 Bald öffnest Du die App und finde Deinen ersten versteckten Spot
             </Text>
           </Section>
 
