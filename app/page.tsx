@@ -69,7 +69,7 @@ export default function Home() {
 >
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-900/55 to-slate-900/25" />
 
-        <nav className="relative z-10 mx-auto flex max-w-7xl items-start justify-between px-8 py-1 text-white">
+        <nav className="relative z-10 mx-auto flex max-w-7xl items-start justify-between px-8 py-8 text-white">
           <Image
             src="/images/logo.svg"
             alt="Khao Lak Insider"
@@ -96,16 +96,18 @@ export default function Home() {
         </nav>
 
         <div className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 items-center gap-16 px-8 pt-10 lg:pt-20 md:grid-cols-[1.05fr_0.95fr]">
-          <div className="max-w-3xl text-white -mt-12">
+          <div className="max-w-3xl text-white -mt-50">
             <div className="mb-6 inline-flex rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold backdrop-blur">
               Neuer smarter Reiseführer für Khao Lak
             </div>
 
             <h1 className="text-6xl font-black leading-[1.05] tracking-tight md:text-7xl">
-              Entdecke Khao Lak
-              <br />
-              wie ein <span className="text-teal-300">Insider</span>
-            </h1>
+  Entdecke Khao
+  <br />
+  Lak wie ein
+  <br />
+  <span className="text-teal-300">Insider</span>
+</h1>
 
             <p className="mt-7 max-w-2xl text-xl leading-relaxed text-white/90">
               Die schönsten Strände, Märkte, Tempel, Restaurants und Geheimtipps
@@ -137,16 +139,16 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="hidden justify-end md:flex">
-            <Image
-              src="/images/home-screen.png"
-              alt="Khao Lak Insider App"
-              width={540}
-              height={1060}
-              priority
-              className="relative z-10"
-            />
-          </div>
+          <div className="hidden justify-end md:flex md:-translate-y-12">
+  <Image
+    src="/images/home-screen.png"
+    alt="Khao Lak Insider App"
+    width={540}
+    height={1060}
+    priority
+    className="relative z-10 -mt-12"
+  />
+</div>
         </div>
 
         <svg
@@ -276,7 +278,7 @@ export default function Home() {
               alt="Home Screen"
               width={280}
               height={560}
-              className="absolute left-[4%] top-24 z-10 hidden rotate-[-8deg] md:block"
+              className="absolute left-[4%] top-24 z-10 hidden h-auto w-[280px] rotate-[-8deg] md:block"
             />
 
             <Image
@@ -303,12 +305,13 @@ export default function Home() {
     <div className="absolute top-16 h-72 w-72 rounded-full bg-teal-100 blur-3xl" />
 
     <Image
-      src="/images/map-screen.png"
-      alt="Interaktive Karte"
-      width={430}
-      height={860}
-      className="relative z-10"
-    />
+  src="/images/map-screen.png"
+  alt="Kartenansicht"
+  width={330}
+  height={620}
+  className="relative z-20"
+  style={{ width: "330px", height: "auto" }}
+/>
   </div>
 
   <div>
