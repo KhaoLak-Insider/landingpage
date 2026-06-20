@@ -9,8 +9,36 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://khaolak.app"),
   title: "Khao Lak Insider",
-  description: "Persönlich kuratierter Reiseführer für Khao Lak.",
+  description:
+    "Der smarte Reiseführer für Khao Lak. Entdecke Strände, Märkte, Tempel, Restaurants und echte Geheimtipps.",
+
+  openGraph: {
+    title: "Khao Lak Insider",
+    description:
+      "Entdecke Khao Lak wie ein Insider – mit Stränden, Märkten, Restaurants und Geheimtipps in einer App.",
+    url: "https://khaolak.app",
+    siteName: "Khao Lak Insider",
+    images: [
+      {
+        url: "https://khaolak.app/images/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Khao Lak Insider App",
+      },
+    ],
+    locale: "de_DE",
+    type: "website",
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "Khao Lak Insider",
+    description:
+      "Entdecke Khao Lak wie ein Insider – mit Stränden, Märkten, Restaurants und Geheimtipps in einer App.",
+    images: ["https://khaolak.app/images/og-image.jpg"],
+  },
 };
 
 export default function RootLayout({
