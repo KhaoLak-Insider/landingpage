@@ -417,11 +417,6 @@ export default function Home() {
             wenn die Khao Lak Insider App startet.
           </p>
 
-          
-
-          <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-sm font-semibold backdrop-blur">
-          </div>
-
           <form
   onSubmit={joinWaitlist}
   className="mx-auto mt-9 max-w-xl rounded-3xl bg-white/95 p-6 shadow-2xl ring-1 ring-black/5 backdrop-blur"
