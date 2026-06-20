@@ -41,32 +41,42 @@ export default function WelcomeEmail() {
 
           {/* ================= STORY ================= */}
           <Section style={card}>
-            <table width="100%" cellPadding="0" cellSpacing="0">
-              <tr>
+  <table width="100%" cellPadding="0" cellSpacing="0" style={{ tableLayout: "fixed" }}>
+    <tr>
 
-                <td style={storyLeft}>
-                  <Text style={storyTitle}>06:47 Uhr · Coconut Beach</Text>
+      <td style={storyLeft}>
+        <Text style={storyTitle}>06:47 Uhr · Coconut Beach</Text>
 
-                  <Text style={storyText}>
-                    Kein Lärm. Kein Touribus. Nur Licht, Wellen und ein kleiner Fischer,
-                    der sein Boot ins Wasser schiebt.
-                  </Text>
+        <Text style={storyText}>
+          Kein Lärm. Kein Touribus. Nur Licht, Wellen und ein kleiner Fischer,
+          der sein Boot ins Wasser schiebt.
+        </Text>
 
-                  <Text style={storyHighlight}>
-                    Genau solche Momente wirst du hier entdecken.
-                  </Text>
-                </td>
+        <Text style={storyHighlight}>
+          Genau solche Momente wirst du hier entdecken.
+        </Text>
+      </td>
 
-                <td width="120" style={storyRight}>
-                  <Img
-                    src="https://pub-e91d905941ab460b95ac5248c28e16f3.r2.dev/emails/welcome/sunset.jpg"
-                    style={sideImage}
-                  />
-                </td>
+      {/* 🔥 FIXED IMAGE COLUMN */}
+      <td width="120" style={{ verticalAlign: "top", width: "120px" }}>
+        <Img
+          src="https://pub-e91d905941ab460b95ac5248c28e16f3.r2.dev/emails/welcome/sunset.jpg"
+          width={120}
+          height={120}
+          alt="Sunset"
+          style={{
+            width: "120px",
+            maxWidth: "120px",
+            height: "auto",
+            display: "block",
+            borderRadius: "10px",
+          }}
+        />
+      </td>
 
-              </tr>
-            </table>
-          </Section>
+    </tr>
+  </table>
+</Section>
 
           <Hr style={hr} />
 
