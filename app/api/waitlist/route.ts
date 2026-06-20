@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createClient } from "@supabase/supabase-js";
+import { randomUUID } from "crypto";
 
 export async function POST(req: Request) {
   try {
@@ -8,7 +9,6 @@ export async function POST(req: Request) {
 
     const body = await req.json();
 
-    // 🧠 DEBUG: FULL BODY CHECK
     console.log("📦 BODY FULL:", body);
 
     const email = body?.email;
@@ -28,7 +28,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // 🔐 ENV CHECK
     if (!process.env.RESEND_API_KEY) {
       return NextResponse.json(
         { error: "Missing RESEND_API_KEY" },
@@ -53,11 +52,18 @@ export async function POST(req: Request) {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     );
 
-    // 🧠 1. SAVE TO SUPABASE (SAFE + TRACEABLE)
+    // 🧠 NEWSLETTER DOUBLE OPT-IN TOKEN
+    const newsletter_token = newsletter_opt_in ? randomUUID() : null;
+
+    // 🧠 SAVE TO SUPABASE
     const insertPayload = {
       email,
       waitlist_opt_in: Boolean(waitlist_opt_in),
+
+      // Newsletter wird NICHT direkt aktiviert
       newsletter_opt_in: Boolean(newsletter_opt_in),
+      newsletter_confirmed: false,
+      newsletter_token,
     };
 
     console.log("📥 INSERT PAYLOAD:", insertPayload);
@@ -80,19 +86,45 @@ export async function POST(req: Request) {
 
     console.log("✅ SUPABASE INSERT OK:", data);
 
-    // 📧 EMAIL
-    const result = await resend.emails.send({
+    // 📧 WAITLIST EMAIL (immer)
+    await resend.emails.send({
       from: "Khao Lak Insider <no-reply@khaolak.app>",
       to: email,
       subject: "🌴 Willkommen auf der Warteliste",
-      html: `<div>OK</div>`,
+      html: `<div>Danke für deine Anmeldung!</div>`,
     });
 
-    console.log("📧 RESEND RESPONSE:", result);
+    // 📧 NEWSLETTER DOUBLE OPT-IN EMAIL (nur wenn aktiviert)
+    if (newsletter_opt_in && newsletter_token) {
+      console.log("📤 SENDING DOUBLE OPT-IN EMAIL...");
+
+      await resend.emails.send({
+        from: "Khao Lak Insider <no-reply@khaolak.app>",
+        to: email,
+        subject: "📩 Bitte bestätige deinen Newsletter",
+
+        html: `
+          <div style="font-family:Arial;padding:30px">
+            <h2>Bitte bestätige deinen Newsletter</h2>
+
+            <p>Klicke auf den Button, um dich offiziell anzumelden:</p>
+
+            <a href="https://khaolak.app/api/confirm-newsletter?token=${newsletter_token}"
+               style="display:inline-block;padding:12px 20px;background:#14b8a6;color:white;border-radius:8px;text-decoration:none">
+              Newsletter bestätigen
+            </a>
+
+            <p style="margin-top:20px;font-size:12px;color:#888">
+              Wenn du das nicht warst, kannst du diese Mail ignorieren.
+            </p>
+          </div>
+        `,
+      });
+    }
 
     return NextResponse.json({
       success: true,
-      message: "Email sent + saved",
+      message: "Saved + emails sent",
     });
 
   } catch (error) {
