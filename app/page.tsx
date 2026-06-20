@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import React, { FormEvent, useState, useEffect } from "react";
+import { FormEvent, useState } from "react";
 import { supabase } from "@/src/lib/supabase";
 
 const features = [
@@ -29,35 +29,7 @@ export default function Home() {
   // CONSENT STATES
   const [waitlistConsent, setWaitlistConsent] = useState(true);
   const [newsletterConsent, setNewsletterConsent] = useState(false);
-  const [showExitPopup, setShowExitPopup] = useState(false);
   const [liveCount] = useState(Math.floor(Math.random() * 120) + 780);
-
-  
-  // LEVEL 5: exit intent + engagement trigger
-  useEffect(() => {
-    const handleMouseOut = (e: MouseEvent) => {
-      if (e.clientY <= 0) {
-        setShowExitPopup(true);
-      }
-    };
-
-    const handleScroll = () => {
-      const el = document.getElementById("waitlist");
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      if (rect.top < window.innerHeight * 0.6) {
-        setShowExitPopup(true);
-      }
-    };
-
-    document.addEventListener("mouseout", handleMouseOut);
-    window.addEventListener("scroll", handleScroll);
-
-    return () => {
-      document.removeEventListener("mouseout", handleMouseOut);
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
 
   const joinWaitlist = async (event: FormEvent<HTMLFormElement>) => {
   event.preventDefault();
@@ -620,35 +592,6 @@ export default function Home() {
     </div>
   </div>
 </footer>
-    
-      {showExitPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6">
-          <div className="w-full max-w-md rounded-3xl bg-white p-6 text-center shadow-2xl">
-            <h3 className="text-2xl font-black text-slate-900">
-              🇹🇭 Fast geschafft!
-            </h3>
-
-            <p className="mt-3 text-sm text-slate-600">
-              Sichere dir deinen Platz in der Khao Lak Insider App bevor du gehst.
-            </p>
-
-            <button
-              onClick={() => setShowExitPopup(false)}
-              className="mt-6 h-12 w-full rounded-full bg-gradient-to-r from-slate-900 to-slate-950 font-bold text-white"
-            >
-              Jetzt anmelden
-            </button>
-
-            <button
-              onClick={() => setShowExitPopup(false)}
-              className="mt-3 text-sm text-slate-500 underline"
-            >
-              Nein danke
-            </button>
-          </div>
-        </div>
-      )}
-
-</main>
+    </main>
   );
 }
