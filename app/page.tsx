@@ -40,9 +40,24 @@ export default function Home() {
     setLoading(true);
     setMessage("");
 
-    const { error } = await supabase
-      .from("waitlist")
-      .insert([{ email: normalizedEmail }]);
+    const response = await fetch("/api/waitlist", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({ email: normalizedEmail }),
+});
+
+const data = await response.json();
+
+if (!response.ok) {
+  setMessageType("error");
+  setMessage("Leider gab es ein Problem. Bitte versuche es später erneut.");
+} else {
+  setMessageType("success");
+  setMessage("🎉 Perfekt! Dein Platz auf der Warteliste ist reserviert.");
+  setEmail("");
+}
 
     if (error) {
       setMessageType("error");
