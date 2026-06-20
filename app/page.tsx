@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { FormEvent, useState } from "react";
+import React, { FormEvent, useState, useEffect } from "react";
 import { supabase } from "@/src/lib/supabase";
 
 const features = [
