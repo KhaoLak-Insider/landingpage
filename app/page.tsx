@@ -64,7 +64,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-white text-slate-900">
       <section
-  className="relative min-h-[1050px] overflow-hidden bg-cover bg-center"
+  className="relative min-h-[760px] overflow-hidden bg-cover bg-center md:min-h-[1050px]"
   style={{ backgroundImage: "url('/images/hero.png')" }}
 >
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-900/55 to-slate-900/25" />
