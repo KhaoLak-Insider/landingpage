@@ -39,7 +39,7 @@ export default function WelcomeEmail() {
           </Heading>
 
           <Text style={lead}>
-            Ab jetzt siehst du Khao Lak anders — nicht als Reiseziel, sondern als Sammlung echter Orte und Momente.
+            Ab jetzt siehst Du Khao Lak anders — nicht als Reiseziel, sondern als Sammlung echter Orte und Momente.
           </Text>
 
           {/* STORY */}
@@ -54,7 +54,7 @@ export default function WelcomeEmail() {
             </Text>
 
             <Text style={storyTextBold}>
-              Genau solche Momente wirst du hier entdecken.
+              Genau solche Momente wirst Du hier entdecken.
             </Text>
           </Section>
 
@@ -79,7 +79,7 @@ export default function WelcomeEmail() {
             <Text style={teamText}>
               Sie verbringen seit über 13 Jahren regelmäßig mehrere Monate im Jahr in Khao Lak.
               In dieser Zeit haben sie den Ort weit über die klassischen Touristenrouten hinaus kennengelernt —
-              und genau deshalb zeigen sie dir Khao Lak so, wie es wirklich ist: ehrlich, direkt und abseits der typischen Reisewege.
+              und genau deshalb zeigen sie Dir Khao Lak so, wie es wirklich ist: ehrlich, direkt und abseits der typischen Reisewege.
             </Text>
           </Section>
 
@@ -89,17 +89,17 @@ export default function WelcomeEmail() {
           <Section style={featureBox}>
 
             <Text style={featureTitle}>
-              📱 So wird die Khao Lak App für dich aussehen
+              📱 So wird die Khao Lak App für Dich aussehen
             </Text>
 
             <Text style={featureText}>
               Was hier gerade entsteht, ist mehr als ein Newsletter.
-              In den nächsten Wochen wächst daraus eine App, die dir Khao Lak vor Ort wirklich verständlich macht.
+              In den nächsten Monaten wächst daraus eine App, die Dir Khao Lak vor Ort wirklich verständlich macht.
             </Text>
 
             <Text style={featureText}>
-              Und während sich die App entwickelt, stellen wir dir jede Woche ein neues Feature genauer vor —
-              damit du sie schon verstehst, bevor sie überhaupt fertig ist.
+              Und während sich die App entwickelt, stellen wir Dir jede Woche ein neues Feature genauer vor —
+              damit Du sie schon verstehst, bevor sie überhaupt fertig ist.
             </Text>
 
             <Text style={featureItem}>🏝️ Interaktive Karte mit echten Spots</Text>
@@ -168,6 +168,7 @@ const lead = {
   color: "#334155",
   margin: "0 18px 18px",
   lineHeight: "1.8",
+  textAlign: "left",
 };
 
 const storyBox = {
