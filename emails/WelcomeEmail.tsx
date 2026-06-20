@@ -16,6 +16,7 @@ export default function WelcomeEmail() {
     <Html>
       <Head />
       <Body style={{ ...main, margin: 0, padding: 0 }}>
+
         <Container style={container}>
 
           {/* HERO */}
@@ -25,69 +26,88 @@ export default function WelcomeEmail() {
             style={hero}
           />
 
-          {/* BRAND BAR */}
+          {/* TOP BAR */}
           <Section style={topBar}>
             <Text style={topBarText}>
               🌴 Khao Lak Insider · Travel smarter
             </Text>
           </Section>
 
-          {/* HOOK */}
+          {/* HEADLINE */}
           <Heading style={h1}>
             Du hast gerade den touristischen Blick verlassen.
           </Heading>
 
           <Text style={lead}>
-            Ab jetzt siehst Du Khao Lak anders.
-            Nicht als Reiseziel — sondern als Sammlung echter Momente.
+            Ab jetzt siehst du Khao Lak anders — nicht als Reiseziel, sondern als Sammlung echter Orte und Momente.
           </Text>
 
-          {/* CINEMATIC STORY */}
+          {/* STORY */}
           <Section style={storyBox}>
             <Text style={storyText}>
               06:47 Uhr · Coconut Beach
             </Text>
 
             <Text style={storyText}>
-              Der Strand ist leer.
-              Kein Verkehr. Kein Stimmengewirr.
-              Nur das leise Rollen der Wellen.
-            </Text>
-
-            <Text style={storyText}>
-              Ein kleiner Fischer schiebt sein Boot ins Wasser.
-              Du merkst, dass dieser Moment nicht im Reiseführer steht.
+              Kein Lärm. Kein Touribus. Nur Licht, Wellen und ein kleiner Fischer,
+              der sein Boot ins Wasser schiebt.
             </Text>
 
             <Text style={storyTextBold}>
-              Genau diese Momente bekommst Du hier.
+              Genau solche Momente wirst du hier entdecken.
             </Text>
           </Section>
 
           <Hr style={hr} />
 
-          {/* VALUE SHIFT (no features, only promises) */}
+          {/* VALUE BLOCK */}
           <Section style={grid}>
-            <Text style={gridItem}>Orte, die niemand fotografiert</Text>
-            <Text style={gridItem}>Essen, das nur Locals kennen</Text>
-            <Text style={gridItem}>Infos direkt von vor Ort</Text>
-            <Text style={gridItem}>Updates, bevor sie im Reiseführer stehen</Text>
+            <Text style={gridItem}>🏝️ Orte, die niemand zeigt</Text>
+            <Text style={gridItem}>🍜 Essen, das nur Locals kennen</Text>
+            <Text style={gridItem}>🧭 Insider Wissen direkt vor Ort</Text>
+            <Text style={gridItem}>📍 Updates aus Khao Lak in Echtzeit</Text>
           </Section>
 
           <Hr style={hr} />
 
-          {/* MARC & MELO (PERSONAL STORY) */}
+          {/* MARC & MELO */}
           <Section style={teamBox}>
             <Text style={teamTitle}>
-              Marc & Melo sind vor Ort
+              Marc & Melo vor Ort
             </Text>
 
             <Text style={teamText}>
               Sie verbringen seit über 13 Jahren regelmäßig mehrere Monate im Jahr in Khao Lak.
-
-            Und genau deshalb zeigen sie dir den Ort so, wie ihn kaum ein Tourist je erlebt —
-            ehrlich, direkt und abseits der klassischen Touri-Routen.
+              In dieser Zeit haben sie den Ort weit über die klassischen Touristenrouten hinaus kennengelernt —
+              und genau deshalb zeigen sie dir Khao Lak so, wie es wirklich ist: ehrlich, direkt und abseits der typischen Reisewege.
             </Text>
+          </Section>
+
+          <Hr style={hr} />
+
+          {/* APP PREVIEW + WEEKLY FEATURE IDEA */}
+          <Section style={featureBox}>
+
+            <Text style={featureTitle}>
+              📱 So wird die Khao Lak App für dich aussehen
+            </Text>
+
+            <Text style={featureText}>
+              Was hier gerade entsteht, ist mehr als ein Newsletter.
+              In den nächsten Wochen wächst daraus eine App, die dir Khao Lak vor Ort wirklich verständlich macht.
+            </Text>
+
+            <Text style={featureText}>
+              Und während sich die App entwickelt, stellen wir dir jede Woche ein neues Feature genauer vor —
+              damit du sie schon verstehst, bevor sie überhaupt fertig ist.
+            </Text>
+
+            <Text style={featureItem}>🏝️ Interaktive Karte mit echten Spots</Text>
+            <Text style={featureItem}>🗺️ Intelligente Tagespläne für deinen Urlaub</Text>
+            <Text style={featureItem}>⭐ Geheimtipps von Marc & Melo</Text>
+            <Text style={featureItem}>📍 Live Updates aus Khao Lak</Text>
+            <Text style={featureItem}>🎧 Audio & Story Guides vor Ort</Text>
+
           </Section>
 
           {/* CTA */}
@@ -97,9 +117,9 @@ export default function WelcomeEmail() {
             </Link>
           </Section>
 
-          {/* MICRO FOOTER */}
+          {/* FOOTER */}
           <Text style={footer}>
-            Khao Lak Insider · No filters. Just places.
+            Khao Lak Insider · No fluff. Just real places.
           </Text>
 
         </Container>
@@ -108,7 +128,7 @@ export default function WelcomeEmail() {
   );
 }
 
-/* ===================== STYLES ===================== */
+/* ================= STYLES ================= */
 
 const main = {
   backgroundColor: "#f6f7fb",
@@ -138,10 +158,9 @@ const topBarText = {
 };
 
 const h1 = {
-  fontSize: "32px",
+  fontSize: "30px",
   color: "#0f172a",
   margin: "18px 18px 10px",
-  lineHeight: "1.2",
 };
 
 const lead = {
@@ -179,6 +198,34 @@ const gridItem = {
   fontSize: "14px",
   marginBottom: "8px",
   color: "#0f172a",
+};
+
+/* NEW FEATURE BOX */
+
+const featureBox = {
+  backgroundColor: "#f1f5f9",
+  margin: "18px",
+  padding: "16px",
+  borderRadius: "12px",
+};
+
+const featureTitle = {
+  fontWeight: "bold",
+  fontSize: "15px",
+  marginBottom: "10px",
+};
+
+const featureText = {
+  fontSize: "14px",
+  color: "#475569",
+  lineHeight: "1.6",
+  marginBottom: "10px",
+};
+
+const featureItem = {
+  fontSize: "14px",
+  color: "#0f172a",
+  marginBottom: "6px",
 };
 
 const teamBox = {
