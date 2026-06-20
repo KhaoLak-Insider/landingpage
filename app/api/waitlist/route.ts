@@ -65,7 +65,7 @@ export async function POST(req: Request) {
     console.log("📤 SENDING EMAIL VIA RESEND...");
 
     const result = await resend.emails.send({
-      from: "Khao Lak Insider <onboarding@resend.dev>",
+      from: "Khao Lak Insider <no-reply@khaolak.app>",
       to: email,
       subject: "Du bist auf der Warteliste 🌴",
       html: `
