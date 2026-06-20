@@ -12,10 +12,9 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Khao Lak Insider",
-  description:
-    "Persönlich kuratierter Reiseführer für Khao Lak.",
+  description: "Persönlich kuratierter Reiseführer für Khao Lak.",
 };
 
 export default function RootLayout({
