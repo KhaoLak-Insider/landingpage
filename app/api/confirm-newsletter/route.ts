@@ -12,42 +12,37 @@ export async function GET(req: Request) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
-  // 1. RAW CHECK
-  const { data: rows, error: selectError } = await supabase
+  // 1. FIND ROW FIRST (ABSOLUT SAFE)
+  const { data: rows, error } = await supabase
     .from("waitlist")
-    .select("*");
+    .select("id, newsletter_token")
+    .eq("newsletter_token", token);
 
-  console.log("📦 ALL ROWS:", rows);
-  console.log("❌ SELECT ERROR:", selectError);
+  console.log("📦 ROWS:", rows);
 
-  // 2. EXACT MATCH TEST
-  const match = rows?.find(r => r.newsletter_token === token);
-
-  console.log("🎯 MATCH FOUND:", match);
-
-  if (!match) {
+  if (!rows || rows.length === 0) {
     return NextResponse.json({
       error: "No match found",
-      token,
-      all_tokens: rows?.map(r => r.newsletter_token),
+      token
     });
   }
 
-  // 3. UPDATE BY ID (IMPORTANT FIX)
+  const id = rows[0].id;
+
+  // 2. UPDATE BY ID (NO STRING MATCH PROBLEMS)
   const { data, error: updateError } = await supabase
     .from("waitlist")
     .update({
       newsletter_confirmed: true,
     })
-    .eq("id", match.id)
+    .eq("id", id)
     .select();
 
-  console.log("🔄 UPDATE RESULT:", data);
+  console.log("✅ UPDATED:", data);
   console.log("❌ UPDATE ERROR:", updateError);
 
   return NextResponse.json({
     success: true,
-    updated: data,
-    updateError,
+    updated: data
   });
 }
