@@ -1,42 +1,46 @@
-"use client";
-
-import { useEffect, useState } from "react";
-
 export default function ConfirmPage() {
-  const [success, setSuccess] = useState(false);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const status = params.get("status");
-
-    setSuccess(status === "success");
-  }, []);
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-teal-50 to-white px-6">
-
-      <div className="max-w-md w-full bg-white shadow-xl rounded-2xl p-8 text-center">
-
-        <div className="text-4xl mb-4">
-          {success ? "🎉" : "❌"}
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-teal-50 via-white to-white px-6">
+      
+      <div className="w-full max-w-md text-center bg-white shadow-xl rounded-2xl p-10 border border-gray-100">
+        
+        {/* Icon */}
+        <div className="flex items-center justify-center w-16 h-16 mx-auto rounded-full bg-teal-50 mb-6">
+          <span className="text-3xl">🎉</span>
         </div>
 
-        <h1 className="text-2xl font-bold">
-          {success ? "Newsletter bestätigt" : "Bestätigung fehlgeschlagen"}
+        {/* Headline */}
+        <h1 className="text-2xl font-bold text-gray-900">
+          Danke für deine Anmeldung!
         </h1>
 
-        <p className="mt-2 text-gray-600">
-          {success
-            ? "Du bist jetzt erfolgreich auf der Liste."
-            : "Der Link ist ungültig oder abgelaufen."}
+        {/* Subtext */}
+        <p className="mt-3 text-gray-600 leading-relaxed">
+          Du bist jetzt erfolgreich für den <span className="font-medium text-gray-900">Khao Lak Insider Newsletter</span> eingetragen.
+          <br />
+          Ab sofort erhältst du exklusive Updates, neue Spots und Insider-Tipps direkt in dein Postfach.
         </p>
 
+        {/* Divider */}
+        <div className="my-6 border-t border-gray-100" />
+
+        {/* Info box */}
+        <div className="text-sm text-gray-500">
+          Du kannst dich jederzeit mit einem Klick wieder abmelden.
+        </div>
+
+        {/* Button */}
         <a
           href="/"
-          className="mt-6 inline-block bg-teal-600 text-white px-6 py-3 rounded-xl"
+          className="mt-8 inline-flex items-center justify-center w-full bg-teal-600 hover:bg-teal-700 transition-colors text-white font-medium py-3 rounded-xl"
         >
           Zur App
         </a>
+
+        {/* Footer hint */}
+        <p className="mt-4 text-xs text-gray-400">
+          Khao Lak Insider · Travel smarter
+        </p>
 
       </div>
     </div>
