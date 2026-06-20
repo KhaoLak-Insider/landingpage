@@ -64,7 +64,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-white text-slate-900">
       <section
-  className="relative min-h-[760px] overflow-hidden bg-cover bg-center md:min-h-[1050px]"
+  className="relative min-h-[680px] overflow-hidden bg-cover bg-center md:min-h-[1050px]"
   style={{ backgroundImage: "url('/images/hero.png')" }}
 >
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-900/55 to-slate-900/25" />
@@ -95,8 +95,8 @@ export default function Home() {
           </a>
         </nav>
 
-        <div className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 items-center gap-16 px-8 pt-10 lg:pt-20 md:grid-cols-[1.05fr_0.95fr]">
-          <div className="max-w-3xl text-white -mt-50">
+        <div className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 items-center gap-16 px-6 pt-12 md:px-8 md:pt-20 md:grid-cols-[1.05fr_0.95fr]">
+          <div className="max-w-3xl text-white md:-mt-50">
             <div className="mb-6 inline-flex rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold backdrop-blur">
               Neuer smarter Reiseführer für Khao Lak
             </div>
