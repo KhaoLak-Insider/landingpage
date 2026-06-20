@@ -34,7 +34,7 @@ export default function ConfirmPage() {
           href="/"
           className="mt-8 inline-flex items-center justify-center w-full bg-teal-600 hover:bg-teal-700 transition-colors text-white font-medium py-3 rounded-xl"
         >
-          Zur App
+          Zurück zur Homepage
         </a>
 
         {/* Footer */}
