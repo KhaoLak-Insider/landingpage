@@ -420,39 +420,51 @@ export default function Home() {
     className="h-12 w-full rounded-full px-5 text-slate-900 outline-none"
   />
 
-  <div className="mt-5 flex flex-col gap-3 text-left text-sm text-slate-700">
+  <div className="mt-5 flex flex-col gap-4 text-left">
 
-    <label className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
-      <input
-        type="checkbox"
-        checked={waitlistConsent}
-        onChange={(e) => setWaitlistConsent(e.target.checked)}
-        className="mt-1 h-4 w-4 accent-teal-600"
-      />
-      <div>
-        <p className="font-semibold text-slate-800">App-Start Updates</p>
-        <p className="text-xs text-slate-500">Ich erfahre als Erstes, wenn die App startet.</p>
-      </div>
-    </label>
+  {/* PRIMARY - HIGH VALUE */}
+  <label className="flex items-start gap-3 rounded-2xl border border-teal-200 bg-teal-50 p-4 transition hover:bg-teal-100">
+    <input
+      type="checkbox"
+      checked={waitlistConsent}
+      onChange={(e) => setWaitlistConsent(e.target.checked)}
+      className="mt-1 h-4 w-4 accent-teal-600"
+    />
 
-    <label className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-3">
-      <input
-        type="checkbox"
-        checked={newsletterConsent}
-        onChange={(e) => setNewsletterConsent(e.target.checked)}
-        className="mt-1 h-4 w-4 accent-teal-600"
-      />
-      <div>
-        <p className="font-semibold text-slate-800">Newsletter (optional)</p>
-        <p className="text-xs text-slate-500">1–2× pro Woche Reiseideen & neue Spots</p>
-      </div>
-    </label>
+    <div>
+      <p className="font-semibold text-slate-900">
+        🚀 Early Access zur App
+      </p>
+      <p className="text-xs text-slate-600">
+        Ich werde sofort benachrichtigt, wenn die Khao Lak Insider App startet.
+      </p>
+    </div>
+  </label>
 
-  </div>
+  {/* SECONDARY - SOFT UPSALE */}
+  <label className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4 transition hover:bg-slate-50">
+    <input
+      type="checkbox"
+      checked={newsletterConsent}
+      onChange={(e) => setNewsletterConsent(e.target.checked)}
+      className="mt-1 h-4 w-4 accent-teal-600"
+    />
+
+    <div>
+      <p className="font-semibold text-slate-900">
+        ✨ Reise-Updates & Insider Tipps
+      </p>
+      <p className="text-xs text-slate-500">
+        1–2× pro Woche neue Spots, Geheimtipps und Reiseideen.
+      </p>
+    </div>
+  </label>
+
+</div>
 
   <button
     type="submit"
-    disabled={loading || !waitlistConsent}
+    disabled={loading}
     className="mt-5 h-12 w-full rounded-full bg-slate-950 font-bold text-white transition hover:bg-slate-800 disabled:opacity-60"
   >
     {loading ? "Speichern..." : "Zur Warteliste"}
