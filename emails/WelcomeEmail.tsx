@@ -23,53 +23,61 @@ export default function WelcomeEmail() {
             style={hero}
           />
 
-          {/* HEADER */}
+          {/* OPENING STORY */}
           <Heading style={h1}>
-            Willkommen im Khao Lak Insider 🌴
+            Du bist jetzt nicht mehr nur Besucher.
           </Heading>
 
           <Text style={text}>
-            Schön, dass du hier bist.
+            Stell dir vor: 06:47 Uhr, Coconut Beach.
           </Text>
 
           <Text style={text}>
-            Khao Lak ist kein Ort, den man einfach nur besucht.
-            Es ist ein Ort, den man entdecken muss — abseits der Touristenrouten.
+            Das Meer ist komplett ruhig. Kein Lärm. Keine Touristenbusse.
+            Nur Sand, Licht und ein kleiner Holzbootfahrer, der gerade sein Boot ins Wasser schiebt.
+          </Text>
+
+          <Text style={text}>
+            Genau solche Momente wirst du hier entdecken.
           </Text>
 
           <Hr style={hr} />
 
-          {/* STORY BLOCK */}
+          {/* VALUE SHIFT */}
           <Section style={box}>
-            <Text style={bold}>Was du hier bekommst:</Text>
+            <Text style={bold}>Khao Lak Insider ist kein Reiseführer.</Text>
 
             <Text style={text}>
-              👉 Echte Orte, die nicht in Reiseführern stehen
+              Es ist dein Blick hinter die Kulissen.
             </Text>
 
-            <Text style={text}>
-              👉 Food Spots, die nur Locals kennen
-            </Text>
-
-            <Text style={text}>
-              👉 Strände ohne Menschenmassen
-            </Text>
-
-            <Text style={text}>
-              👉 Updates direkt aus Khao Lak
-            </Text>
+            <Text style={text}>👉 Orte, die Google nicht zeigt</Text>
+            <Text style={text}>👉 Food Spots ohne Touri-Menüs</Text>
+            <Text style={text}>👉 Strände, an denen du alleine bist</Text>
+            <Text style={text}>👉 Updates direkt von vor Ort</Text>
           </Section>
 
           <Hr style={hr} />
 
           {/* MARC & MELO */}
           <Text style={text}>
-            Marc & Melo sind direkt vor Ort unterwegs.
+            Marc & Melo leben genau dort, wo andere Urlaub machen.
           </Text>
 
           <Text style={text}>
-            Sie zeigen dir Khao Lak so, wie es wirklich ist —
-            ohne Filter, ohne Touri-Inszenierung.
+            Sie suchen nicht nach Sehenswürdigkeiten —
+            sie finden Orte, die man nur kennt, wenn man wirklich dort war.
+          </Text>
+
+          <Hr style={hr} />
+
+          {/* MOMENT SHIFT */}
+          <Text style={text}>
+            Vielleicht sitzt du gerade noch zu Hause.
+          </Text>
+
+          <Text style={text}>
+            Aber dein erster echter Khao Lak Moment beginnt genau hier.
           </Text>
 
           <Hr style={hr} />
@@ -77,7 +85,7 @@ export default function WelcomeEmail() {
           {/* CTA */}
           <Section style={center}>
             <Text style={cta}>
-              👉 Öffne die App und entdecke deinen ersten echten Spot
+              👉 Öffne die App und finde deinen ersten versteckten Spot
             </Text>
           </Section>
 
