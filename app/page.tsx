@@ -26,6 +26,10 @@ export default function Home() {
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error">("success");
 
+  // CONSENT STATES
+  const [waitlistConsent, setWaitlistConsent] = useState(true);
+  const [newsletterConsent, setNewsletterConsent] = useState(false);
+
   const joinWaitlist = async (event: FormEvent<HTMLFormElement>) => {
   event.preventDefault();
 
@@ -46,7 +50,11 @@ export default function Home() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email: normalizedEmail }),
+      body: JSON.stringify({
+        email: normalizedEmail,
+        waitlist_opt_in: waitlistConsent,
+        newsletter_opt_in: newsletterConsent,
+      }),
     });
 
     const data = await response.json();
@@ -411,6 +419,29 @@ export default function Home() {
               placeholder="Deine E-Mail-Adresse"
               className="h-12 flex-1 rounded-full px-5 text-slate-900 outline-none"
             />
+
+            {/* CONSENT CHECKBOXES */}
+            <div className="flex flex-col gap-3 px-3 text-left text-sm text-slate-700 sm:text-white">
+              <label className="flex items-start gap-2">
+                <input
+                  type="checkbox"
+                  checked={waitlistConsent}
+                  onChange={(e) => setWaitlistConsent(e.target.checked)}
+                  className="mt-1 h-4 w-4 accent-teal-600"
+                />
+                <span>Ich möchte Updates zum App-Start erhalten</span>
+              </label>
+
+              <label className="flex items-start gap-2">
+                <input
+                  type="checkbox"
+                  checked={newsletterConsent}
+                  onChange={(e) => setNewsletterConsent(e.target.checked)}
+                  className="mt-1 h-4 w-4 accent-teal-600"
+                />
+                <span>Ich möchte regelmäßige Newsletter erhalten</span>
+              </label>
+            </div>
 
             <button
               type="submit"
