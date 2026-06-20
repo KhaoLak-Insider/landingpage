@@ -60,13 +60,16 @@ export async function POST(req: Request) {
     ]);
 
     if (dbError) {
-      console.log("❌ SUPABASE ERROR:", dbError);
+  console.log("❌ SUPABASE FULL ERROR:", dbError);
 
-      return NextResponse.json(
-        { error: "Database error" },
-        { status: 500 }
-      );
-    }
+  return NextResponse.json(
+    {
+      error: "Database error",
+      details: dbError,
+    },
+    { status: 500 }
+  );
+}
 
     console.log("✅ SUPABASE INSERT OK");
 
