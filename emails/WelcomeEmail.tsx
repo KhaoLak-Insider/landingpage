@@ -33,14 +33,16 @@ export default function WelcomeEmail() {
             </Text>
           </Section>
 
-          {/* HEADLINE */}
-          <Heading style={h1}>
-            Du hast gerade den touristischen Blick verlassen.
-          </Heading>
+          {/* INTRO BOX (FIXED - jetzt echte Box wie gewünscht) */}
+          <Section style={introBox}>
+            <Text style={introTitle}>
+              Du hast gerade den touristischen Blick verlassen.
+            </Text>
 
-          <Text style={lead}>
-            Ab jetzt siehst Du Khao Lak anders — nicht als Reiseziel, sondern als Sammlung echter Orte und Momente.
-          </Text>
+            <Text style={introText}>
+              Ab jetzt siehst Du Khao Lak anders — nicht als Reiseziel, sondern als Sammlung echter Orte und Momente.
+            </Text>
+          </Section>
 
           {/* STORY */}
           <Section style={storyBox}>
@@ -85,7 +87,7 @@ export default function WelcomeEmail() {
 
           <Hr style={hr} />
 
-          {/* APP PREVIEW + WEEKLY FEATURE IDEA */}
+          {/* FEATURE BOX */}
           <Section style={featureBox}>
 
             <Text style={featureTitle}>
@@ -94,25 +96,24 @@ export default function WelcomeEmail() {
 
             <Text style={featureText}>
               Was hier gerade entsteht, ist mehr als ein Newsletter.
-              In den nächsten Monaten wächst daraus eine App, die Dir Khao Lak vor Ort wirklich verständlich macht.
+              In den nächsten Wochen wächst daraus eine App, die Dir Khao Lak wirklich verständlich macht.
             </Text>
 
             <Text style={featureText}>
-              Und während sich die App entwickelt, stellen wir Dir jede Woche ein neues Feature genauer vor —
-              damit Du sie schon verstehst, bevor sie überhaupt fertig ist.
+              Und jede Woche zeigen wir Dir ein neues Feature im Detail.
             </Text>
 
             <Text style={featureItem}>🏝️ Interaktive Karte mit echten Spots</Text>
-            <Text style={featureItem}>🗺️ Intelligente Tagespläne für deinen Urlaub</Text>
+            <Text style={featureItem}>🗺️ Intelligente Tagespläne</Text>
             <Text style={featureItem}>⭐ Geheimtipps von Marc & Melo</Text>
             <Text style={featureItem}>📍 Live Updates aus Khao Lak</Text>
-            <Text style={featureItem}>🎧 Audio & Story Guides vor Ort</Text>
+            <Text style={featureItem}>🎧 Audio & Story Guides</Text>
 
           </Section>
 
           {/* CTA */}
           <Section style={center}>
-            <Link href="https://khaolak.app" style={cta}>
+            <Link href="https://khao lak.app" style={cta}>
               👉 Deinen ersten echten Spot öffnen
             </Link>
           </Section>
@@ -157,18 +158,26 @@ const topBarText = {
   margin: 0,
 };
 
-const h1 = {
-  fontSize: "30px",
-  color: "#0f172a",
-  margin: "18px 18px 10px",
+/* ✅ NEW INTRO BOX */
+const introBox = {
+  backgroundColor: "#ecfeff",
+  margin: "18px",
+  padding: "18px",
+  borderRadius: "12px",
+  borderLeft: "4px solid #0f766e",
 };
 
-const lead = {
+const introTitle = {
   fontSize: "16px",
+  fontWeight: "bold",
+  color: "#0f172a",
+  marginBottom: "8px",
+};
+
+const introText = {
+  fontSize: "14px",
   color: "#334155",
-  margin: "0 18px 18px",
-  lineHeight: "1.8",
-  textAlign: "left" as "left",
+  lineHeight: "1.6",
 };
 
 const storyBox = {
@@ -200,8 +209,6 @@ const gridItem = {
   marginBottom: "8px",
   color: "#0f172a",
 };
-
-/* NEW FEATURE BOX */
 
 const featureBox = {
   backgroundColor: "#f1f5f9",
