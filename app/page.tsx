@@ -421,7 +421,7 @@ export default function Home() {
   />
 
   <div className="mt-4 text-center text-xs text-slate-500">
-    ⭐ Bereits über <span className="font-bold text-slate-700">800+</span> Reisende auf der Warteliste
+    ⭐ Werde einer der ersten Nutzer der Khao Lak Insider App ⭐
   </div>
 
   <div className="mt-5 flex flex-col gap-4 text-left">
