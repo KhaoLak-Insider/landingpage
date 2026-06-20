@@ -409,58 +409,54 @@ export default function Home() {
           </p>
 
           <form
-            onSubmit={joinWaitlist}
-            className="mx-auto mt-9 flex max-w-xl flex-col gap-4 rounded-3xl bg-white p-3 shadow-xl"
-          >
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <input
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="Deine E-Mail-Adresse"
-                className="h-12 flex-1 rounded-full px-5 text-slate-900 outline-none"
-              />
+  onSubmit={joinWaitlist}
+  className="mx-auto mt-9 max-w-xl rounded-3xl bg-white p-4 shadow-xl"
+>
+  {/* INPUT */}
+  <input
+    type="email"
+    value={email}
+    onChange={(event) => setEmail(event.target.value)}
+    placeholder="Deine E-Mail-Adresse"
+    className="h-12 w-full rounded-full px-5 text-slate-900 outline-none"
+  />
 
-              <button
-                type="submit"
-                disabled={loading || !waitlistConsent}
-                className="h-12 rounded-full bg-slate-950 px-7 font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {loading ? "Speichern..." : "Zur Warteliste"}
-              </button>
-            </div>
+  {/* CHECKBOXES */}
+  <div className="mt-4 flex flex-col gap-3 text-left text-sm text-slate-700">
+    <label className="flex items-start gap-2">
+      <input
+        type="checkbox"
+        checked={waitlistConsent}
+        onChange={(e) => setWaitlistConsent(e.target.checked)}
+        className="mt-1 h-4 w-4 accent-teal-600"
+      />
+      <span>Ich möchte Updates zum App-Start erhalten</span>
+    </label>
 
-            {/* CONSENT CHECKBOXES */}
-            <div className="flex flex-col gap-3 px-3 text-left text-sm text-slate-700 sm:text-white">
-              <label className="flex items-start gap-2">
-                <input
-                  type="checkbox"
-                  checked={waitlistConsent}
-                  onChange={(e) => setWaitlistConsent(e.target.checked)}
-                  className="mt-1 h-4 w-4 accent-teal-600"
-                />
-                <span>Ich möchte Updates zum App-Start erhalten</span>
-              </label>
+    <label className="flex items-start gap-2">
+      <input
+        type="checkbox"
+        checked={newsletterConsent}
+        onChange={(e) => setNewsletterConsent(e.target.checked)}
+        className="mt-1 h-4 w-4 accent-teal-600"
+      />
+      <span>Ich möchte regelmäßige Newsletter erhalten</span>
+    </label>
+  </div>
 
-              <label className="flex items-start gap-2">
-                <input
-                  type="checkbox"
-                  checked={newsletterConsent}
-                  onChange={(e) => setNewsletterConsent(e.target.checked)}
-                  className="mt-1 h-4 w-4 accent-teal-600"
-                />
-                <span>Ich möchte regelmäßige Newsletter erhalten</span>
-              </label>
-            </div>
+  {/* BUTTON */}
+  <button
+    type="submit"
+    disabled={loading || !waitlistConsent}
+    className="mt-5 h-12 w-full rounded-full bg-slate-950 font-bold text-white transition hover:bg-slate-800 disabled:opacity-60"
+  >
+    {loading ? "Speichern..." : "Zur Warteliste"}
+  </button>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="h-12 rounded-full bg-slate-950 px-7 font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {loading ? "Speichern..." : "Zur Warteliste"}
-            </button>
-          </form>
+  <p className="mt-4 text-center text-xs text-slate-400">
+    Kein Spam. Nur Informationen zum App-Start.
+  </p>
+</form>
 
           {message && (
   <div
