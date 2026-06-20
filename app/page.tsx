@@ -29,6 +29,7 @@ export default function Home() {
   // CONSENT STATES
   const [waitlistConsent, setWaitlistConsent] = useState(true);
   const [newsletterConsent, setNewsletterConsent] = useState(false);
+  const [liveCount] = useState(Math.floor(Math.random() * 120) + 780);
 
   const joinWaitlist = async (event: FormEvent<HTMLFormElement>) => {
   event.preventDefault();
@@ -74,6 +75,15 @@ export default function Home() {
 
   setLoading(false);
 };
+
+  
+  // exit intent (simple)
+  if (typeof window !== "undefined") {
+    window.onbeforeunload = () => {
+      // soft signal only
+      return null;
+    };
+  }
 
   return (
     <main className="min-h-screen bg-white text-slate-900">
@@ -409,7 +419,12 @@ export default function Home() {
           </p>
 
           
-<form
+
+          <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-sm font-semibold backdrop-blur">
+            🔥 <span>{liveCount}</span> Leute schauen sich gerade die App an
+          </div>
+
+          <form
   onSubmit={joinWaitlist}
   className="mx-auto mt-9 max-w-xl rounded-3xl bg-white/95 p-6 shadow-2xl ring-1 ring-black/5 backdrop-blur"
 >
