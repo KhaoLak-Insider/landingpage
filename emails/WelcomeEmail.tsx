@@ -39,7 +39,7 @@ export default function WelcomeEmail() {
             </Text>
           </Section>
 
-          {/* ================= STORY (TABLE SAFE) ================= */}
+          {/* ================= STORY ================= */}
           <Section style={card}>
             <table width="100%" cellPadding="0" cellSpacing="0">
               <tr>
@@ -57,7 +57,7 @@ export default function WelcomeEmail() {
                   </Text>
                 </td>
 
-                <td width="170" style={storyRight}>
+                <td width="120" style={storyRight}>
                   <Img
                     src="https://pub-e91d905941ab460b95ac5248c28e16f3.r2.dev/emails/welcome/sunset.jpg"
                     style={sideImage}
@@ -224,9 +224,11 @@ const storyHighlight = {
   fontWeight: "bold",
 };
 
+/* 🔥 FIX: smaller image */
 const sideImage = {
-  width: "160px",
+  width: "120px",
   borderRadius: "10px",
+  display: "block",
 };
 
 /* GRID */
