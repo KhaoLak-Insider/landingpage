@@ -53,7 +53,9 @@ export default function Home() {
       body: JSON.stringify({
         email: normalizedEmail,
         waitlist_opt_in: waitlistConsent,
-        newsletter_opt_in: true,
+        newsletter_opt_in: document.querySelector<HTMLInputElement>(
+  'input[name="newsletter"]'
+)?.checked ?? false,
       }),
     });
 
