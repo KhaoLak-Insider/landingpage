@@ -394,7 +394,7 @@ export default function Home() {
       </section>
 
 <section id="waitlist" className="px-8 py-20">
-        <div className="mx-auto max-w-5xl rounded-[2.5rem] bg-gradient-to-br from-teal-500 to-teal-600 px-8 py-16 text-center text-white shadow-2xl shadow-teal-100">
+        <div className="mx-auto max-w-5xl rounded-[2.5rem] bg-gradient-to-br from-teal-500 via-teal-500 to-emerald-600 px-8 py-16 text-center text-white shadow-2xl shadow-teal-200/60 ring-1 ring-white/20">
           <div className="mb-4 inline-flex rounded-full bg-white/20 px-4 py-2 text-sm font-semibold backdrop-blur">
             Khao Lak Insider App
           </div>
@@ -410,14 +410,14 @@ export default function Home() {
 
           <form
   onSubmit={joinWaitlist}
-  className="mx-auto mt-9 max-w-xl rounded-3xl bg-white p-5 shadow-xl"
+  className="mx-auto mt-9 max-w-xl rounded-3xl bg-white/95 p-6 shadow-2xl ring-1 ring-black/5 backdrop-blur"
 >
   <input
     type="email"
     value={email}
     onChange={(event) => setEmail(event.target.value)}
     placeholder="Deine E-Mail-Adresse"
-    className="h-12 w-full rounded-full px-5 text-slate-900 outline-none"
+    className="h-12 w-full rounded-full px-5 text-slate-900 outline-none shadow-inner bg-white ring-1 ring-slate-200 focus:ring-2 focus:ring-teal-400 transition"
   />
 
   <div className="mt-4 text-center text-xs text-slate-500">
