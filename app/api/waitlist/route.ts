@@ -38,7 +38,7 @@ export async function POST(req: Request) {
     if (error) {
       console.log("❌ SUPABASE ERROR:", error);
       return NextResponse.json(
-        { error: "DB error" },
+        { error: ""Diese E-Mail Adresse ist bereits eingetragen. },
         { status: 500 }
       );
     }
