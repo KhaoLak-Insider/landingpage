@@ -160,11 +160,10 @@ const topBarText = {
 
 /* ✅ NEW INTRO BOX */
 const introBox = {
-  backgroundColor: "#ecfeff",
+  backgroundColor: "#ffffff",
   margin: "18px",
   padding: "18px",
   borderRadius: "12px",
-  borderLeft: "4px solid #0f766e",
 };
 
 const introTitle = {
