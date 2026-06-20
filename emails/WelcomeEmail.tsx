@@ -102,13 +102,22 @@ export default function WelcomeEmail() {
 
 /* STYLES */
 const main = { backgroundColor: "#f6f7fb", fontFamily: "Arial" };
-const container = { maxWidth: 600, margin: "0 auto", background: "#fff", padding: 20 };
+const container = { maxWidth: 600, margin: "0 auto", background: "#fff", padding: 28 };
 const hero = { width: "100%", borderRadius: 12 };
-const h1 = { fontSize: 22, color: "#0f766e" };
-const text = { fontSize: 14, color: "#334155", lineHeight: 1.6 };
+const h1 = { fontSize: 28, color: "#0f766e" };
+const text = { fontSize: 16, color: "#334155", lineHeight: 1.8 };
 const hr = { margin: "20px 0" };
 const box = { background: "#ecfeff", padding: 14, borderRadius: 10 };
 const bold = { fontWeight: "bold" };
 const center = { textAlign: "center" as const };
-const cta = { fontWeight: "bold", color: "#0f766e" };
+const cta = {
+  display: "inline-block",
+  backgroundColor: "#0f766e",
+  color: "#ffffff",
+  padding: "14px 22px",
+  borderRadius: "10px",
+  fontSize: "16px",
+  fontWeight: "bold",
+  textDecoration: "none",
+};
 const footer = { fontSize: 11, color: "#94a3b8", textAlign: "center" as const };
