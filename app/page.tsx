@@ -29,7 +29,6 @@ export default function Home() {
   // CONSENT STATES
   const [waitlistConsent, setWaitlistConsent] = useState(true);
   const [newsletterConsent, setNewsletterConsent] = useState(false);
-  const [liveCount] = useState(Math.floor(Math.random() * 120) + 780);
 
   const joinWaitlist = async (event: FormEvent<HTMLFormElement>) => {
   event.preventDefault();
@@ -421,7 +420,6 @@ export default function Home() {
           
 
           <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-sm font-semibold backdrop-blur">
-            🔥 <span>{liveCount}</span> Leute schauen sich gerade die App an
           </div>
 
           <form
