@@ -41,9 +41,15 @@ export default function WelcomeEmail() {
 
           {/* ================= STORY ================= */}
           <Section style={card}>
-  <table width="100%" cellPadding="0" cellSpacing="0" style={{ tableLayout: "fixed" }}>
+  <table
+    width="100%"
+    cellPadding="0"
+    cellSpacing="0"
+    style={{ tableLayout: "fixed" }}
+  >
     <tr>
 
+      {/* TEXT */}
       <td style={storyLeft}>
         <Text style={storyTitle}>06:47 Uhr · Coconut Beach</Text>
 
@@ -57,21 +63,23 @@ export default function WelcomeEmail() {
         </Text>
       </td>
 
-      {/* 🔥 FIXED IMAGE COLUMN */}
-      <td width="150" style={storyRight}>
+      {/* IMAGE (HARD CONSTRAINED) */}
+      <td width="110" style={{ width: "110px", verticalAlign: "top" }}>
+
         <Img
           src="https://pub-e91d905941ab460b95ac5248c28e16f3.r2.dev/emails/welcome/sunset.jpg"
-          width={120}
-          height={120}
+          width="110"
+          height="110"
           alt="Sunset"
           style={{
-            width: "120px",
-            maxWidth: "120px",
-            height: "auto",
             display: "block",
+            width: "110px",
+            height: "110px",
+            objectFit: "cover",
             borderRadius: "10px",
           }}
         />
+
       </td>
 
     </tr>
