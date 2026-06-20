@@ -58,7 +58,7 @@ export default function WelcomeEmail() {
       </td>
 
       {/* 🔥 FIXED IMAGE COLUMN */}
-      <td width="120" style={{ verticalAlign: "top", width: "120px" }}>
+      <td width="150" style={storyRight}>
         <Img
           src="https://pub-e91d905941ab460b95ac5248c28e16f3.r2.dev/emails/welcome/sunset.jpg"
           width={120}
@@ -236,7 +236,9 @@ const storyHighlight = {
 
 /* 🔥 FIX: smaller image */
 const sideImage = {
-  width: "120px",
+  width: "150px",
+  maxWidth: "150px",
+  height: "auto",
   borderRadius: "10px",
   display: "block",
 };
