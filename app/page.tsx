@@ -27,53 +27,45 @@ export default function Home() {
   const [messageType, setMessageType] = useState<"success" | "error">("success");
 
   const joinWaitlist = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  event.preventDefault();
 
-    const normalizedEmail = email.trim().toLowerCase();
+  const normalizedEmail = email.trim().toLowerCase();
 
-    if (!normalizedEmail) {
-      setMessageType("error");
-      setMessage("Bitte gib eine E-Mail-Adresse ein.");
-      return;
-    }
+  if (!normalizedEmail) {
+    setMessageType("error");
+    setMessage("Bitte gib eine E-Mail-Adresse ein.");
+    return;
+  }
 
-    setLoading(true);
-    setMessage("");
+  setLoading(true);
+  setMessage("");
 
+  try {
     const response = await fetch("/api/waitlist", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({ email: normalizedEmail }),
-});
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email: normalizedEmail }),
+    });
 
-const data = await response.json();
-
-if (!response.ok) {
-  setMessageType("error");
-  setMessage("Leider gab es ein Problem. Bitte versuche es später erneut.");
-} else {
-  setMessageType("success");
-  setMessage("🎉 Perfekt! Dein Platz auf der Warteliste ist reserviert.");
-  setEmail("");
-}
+    const data = await response.json();
 
     if (!response.ok) {
-  setMessageType("error");
-  setMessage(
-    data?.error || "Leider gab es ein Problem. Bitte versuche es später erneut."
-  );
-} else {
-  setMessageType("success");
-  setMessage(
-    "🎉 Perfekt! Dein Platz auf der Warteliste ist reserviert. Wir informieren dich zum App-Start."
-  );
-  setEmail("");
-}
+      setMessageType("error");
+      setMessage(data?.error || "Leider gab es ein Problem.");
+    } else {
+      setMessageType("success");
+      setMessage("🎉 Perfekt! Dein Platz ist reserviert.");
+      setEmail("");
+    }
+  } catch (err) {
+    setMessageType("error");
+    setMessage("Netzwerkfehler. Bitte später erneut versuchen.");
+  }
 
-    setLoading(false);
-  };
+  setLoading(false);
+};
 
   return (
     <main className="min-h-screen bg-white text-slate-900">
