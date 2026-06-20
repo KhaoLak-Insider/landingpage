@@ -48,7 +48,13 @@ export async function POST(req: Request) {
     // 🧠 1. SAVE TO SUPABASE
     const { error: dbError } = await supabase
       .from("waitlist")
-      .insert([{ email }]);
+      .insert([
+  {
+    email,
+    waitlist_opt_in: body?.waitlist_opt_in ?? false,
+    newsletter_opt_in: body?.newsletter_opt_in ?? false,
+  },
+]);
 
     if (dbError) {
       console.log("❌ SUPABASE ERROR:", dbError);
