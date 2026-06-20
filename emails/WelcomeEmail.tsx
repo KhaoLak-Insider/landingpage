@@ -15,7 +15,7 @@ export default function WelcomeEmail() {
   return (
     <Html>
       <Head />
-      <Body style={main}>
+      <Body style={{ ...main, textAlign: "left", margin: 0, padding: 0 }}>
         <Container style={container}>
 
           {/* HERO IMAGE */}
@@ -97,7 +97,9 @@ export default function WelcomeEmail() {
   );
 }
 
-/* STYLES */
+/* =========================
+   STYLES
+========================= */
 
 const main = {
   backgroundColor: "#f6f7fb",
@@ -105,11 +107,12 @@ const main = {
 };
 
 const container = {
-  maxWidth: "600px",
+  width: "600px",
   margin: "0 auto",
   backgroundColor: "#ffffff",
   borderRadius: "14px",
   overflow: "hidden",
+  textAlign: "left" as const,
 };
 
 const hero = {
@@ -146,6 +149,7 @@ const storyBox = {
   margin: "0 18px",
   padding: "16px",
   borderRadius: "12px",
+  textAlign: "left" as const,
 };
 
 const storyText = {
@@ -163,11 +167,12 @@ const storyTextBold = {
 
 const grid = {
   padding: "0 18px",
+  textAlign: "left" as const,
 };
 
 const gridItem = {
   fontSize: "14px",
-  marginBottom: "6px",
+  marginBottom: "8px",
   color: "#0f172a",
 };
 
@@ -176,6 +181,7 @@ const teamBox = {
   margin: "18px",
   padding: "14px",
   borderRadius: "12px",
+  textAlign: "left" as const,
 };
 
 const teamTitle = {
