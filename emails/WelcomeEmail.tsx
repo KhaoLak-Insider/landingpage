@@ -168,7 +168,7 @@ const lead = {
   color: "#334155",
   margin: "0 18px 18px",
   lineHeight: "1.8",
-  textAlign: "left",
+  textAlign: "left" as "left",
 };
 
 const storyBox = {
