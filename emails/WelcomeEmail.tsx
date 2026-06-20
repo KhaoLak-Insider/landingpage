@@ -16,86 +16,150 @@ export default function WelcomeEmail() {
     <Html>
       <Head />
       <Body style={main}>
+
         <Container style={container}>
 
           {/* HERO */}
           <Img
             src="https://pub-e91d905941ab460b95ac5248c28e16f3.r2.dev/emails/welcome/welcome_hero.jpg"
             style={hero}
-            alt="Khao Lak Insider"
           />
 
           {/* INTRO */}
           <Section style={introBox}>
             <Heading style={h1}>
-              Du bist jetzt nicht mehr nur Besucher.
+              Du hast gerade den touristischen Blick verlassen.
             </Heading>
 
             <Text style={lead}>
-              Ab jetzt siehst du Khao Lak so, wie es wirklich ist —
-              nicht als Reiseziel, sondern als Sammlung echter Orte, Momente und Erlebnisse.
+              Ab jetzt siehst Du Khao Lak anders — nicht als Reiseziel, sondern als Sammlung echter Orte und Momente.
             </Text>
           </Section>
+
+          <Hr style={hr} />
 
           {/* SECTION 1 */}
           <Section style={card}>
-            <Img
-              src="https://pub-e91d905941ab460b95ac5248c28e16f3.r2.dev/emails/welcome/coconut_beach.jpg"
-              style={cardImg}
-            />
-            <Text style={cardTitle}>🌅 06:47 Uhr · Coconut Beach</Text>
-            <Text style={cardText}>
-              Kein Lärm. Kein Touribus. Nur Licht, Wellen und ein kleiner Fischer.
-            </Text>
+            <table width="100%">
+              <tr>
+
+                <td width="40%" style={{ verticalAlign: "top" }}>
+                  <Img
+                    src="https://pub-e91d905941ab460b95ac5248c28e16f3.r2.dev/emails/welcome/coconut_beach.jpg"
+                    style={img}
+                  />
+                </td>
+
+                <td width="60%" style={textCol}>
+                  <Text style={title}>🌅 06:47 Uhr · Coconut Beach</Text>
+
+                  <Text style={text}>
+                    Kein Lärm. Kein Touribus. Nur Licht, Wellen und ein kleiner Fischer.
+                  </Text>
+
+                  <Text style={highlight}>
+                    Genau solche Momente wirst Du hier entdecken.
+                  </Text>
+                </td>
+
+              </tr>
+            </table>
           </Section>
 
           {/* SECTION 2 */}
-          <Section style={cardAlt}>
-            <Img
-              src="https://pub-e91d905941ab460b95ac5248c28e16f3.r2.dev/emails/welcome/hidden_food.jpg"
-              style={cardImg}
-            />
-            <Text style={cardTitle}>🍜 Food Spots, die du nicht im Guide findest</Text>
-            <Text style={cardText}>
-              Kleine Küchen. 3 Tische. Familienrezepte seit Jahrzehnten.
-            </Text>
+          <Section style={card}>
+            <table width="100%">
+              <tr>
+
+                <td width="40%" style={{ verticalAlign: "top" }}>
+                  <Img
+                    src="https://pub-e91d905941ab460b95ac5248c28e16f3.r2.dev/emails/welcome/food.jpg"
+                    style={img}
+                  />
+                </td>
+
+                <td width="60%" style={textCol}>
+                  <Text style={title}>🍜 Food Spots wie Locals sie kennen</Text>
+
+                  <Text style={text}>
+                    Kleine Küchen, frische Gerichte, Orte ohne Google Maps Bewertungen.
+                  </Text>
+
+                  <Text style={highlight}>
+                    Genau das zeigen wir dir.
+                  </Text>
+                </td>
+
+              </tr>
+            </table>
           </Section>
 
           {/* SECTION 3 */}
           <Section style={card}>
-            <Img
-              src="https://pub-e91d905941ab460b95ac5248c28e16f3.r2.dev/emails/welcome/boat.jpg"
-              style={cardImg}
-            />
-            <Text style={cardTitle}>🛶 Orte ohne Touristenroute</Text>
-            <Text style={cardText}>
-              Kleine Buchten, Boote, Strände ohne Namen auf Google Maps.
-            </Text>
+            <table width="100%">
+              <tr>
+
+                <td width="40%" style={{ verticalAlign: "top" }}>
+                  <Img
+                    src="https://pub-e91d905941ab460b95ac5248c28e16f3.r2.dev/emails/welcome/boat.jpg"
+                    style={img}
+                  />
+                </td>
+
+                <td width="60%" style={textCol}>
+                  <Text style={title}>🛶 Orte ohne Touristenroute</Text>
+
+                  <Text style={text}>
+                    Kleine Buchten, versteckte Strände, echte Thailand-Momente.
+                  </Text>
+
+                  <Text style={highlight}>
+                    Abseits von allem, was du kennst.
+                  </Text>
+                </td>
+
+              </tr>
+            </table>
           </Section>
 
           <Hr style={hr} />
 
           {/* MARC & MELO */}
-          <Section style={teamBox}>
-            <Text style={teamTitle}>Marc & Melo vor Ort</Text>
-            <Text style={teamText}>
-              Über 13 Jahre Erfahrung in Khao Lak – mehrere Monate pro Jahr vor Ort.
-              Nicht als Touristen. Sondern als Menschen, die dort leben, wo andere Urlaub machen.
+          <Section style={box}>
+            <Text style={boxTitle}>Marc & Melo vor Ort</Text>
+
+            <Text style={boxText}>
+              Über 13 Jahre Erfahrung in Khao Lak — mehrere Monate pro Jahr direkt vor Ort.
+              Nicht als Touristen, sondern als Menschen, die dort wirklich leben.
             </Text>
           </Section>
 
           <Hr style={hr} />
 
+          {/* WEEKLY FEATURE */}
+          <Section style={box}>
+            <Text style={boxTitle}>📱 Die App entsteht gerade</Text>
+
+            <Text style={boxText}>
+              Jede Woche zeigen wir dir ein neues Feature der kommenden Khao Lak App.
+            </Text>
+
+            <Text style={list}>🏝️ Interaktive Karte mit echten Spots</Text>
+            <Text style={list}>🗺️ Tagesplanung für deinen Urlaub</Text>
+            <Text style={list}>⭐ Geheimtipps von Marc & Melo</Text>
+            <Text style={list}>📍 Live Updates aus Khao Lak</Text>
+          </Section>
+
           {/* CTA */}
           <Section style={center}>
             <Link href="https://khaolak.app" style={cta}>
-              🌴 Erste echte Spots entdecken
+              👉 Erste echte Spots entdecken
             </Link>
           </Section>
 
           {/* FOOTER */}
           <Text style={footer}>
-            Khao Lak Insider · Travel smarter
+            Khao Lak Insider · No fluff. Just real places.
           </Text>
 
         </Container>
@@ -128,61 +192,70 @@ const introBox = {
 const h1 = {
   fontSize: "22px",
   color: "#0f172a",
-  marginBottom: "10px",
 };
 
 const lead = {
-  fontSize: "15px",
+  fontSize: "14px",
   color: "#334155",
   lineHeight: "1.6",
 };
 
 const card = {
-  margin: "18px",
-  backgroundColor: "#ffffff",
+  margin: "14px 18px",
+  border: "1px solid #e5e7eb",
   borderRadius: "12px",
   overflow: "hidden",
 };
 
-const cardAlt = {
-  margin: "18px",
-  backgroundColor: "#f8fafc",
-  borderRadius: "12px",
-  overflow: "hidden",
-};
-
-const cardImg = {
+const img = {
   width: "100%",
   display: "block",
 };
 
-const cardTitle = {
-  fontSize: "15px",
-  fontWeight: "bold",
-  margin: "10px 12px 4px",
+const textCol = {
+  padding: "12px",
+  verticalAlign: "top",
 };
 
-const cardText = {
+const title = {
   fontSize: "14px",
-  color: "#475569",
-  margin: "0 12px 12px",
+  fontWeight: "bold",
+  marginBottom: "6px",
 };
 
-const teamBox = {
+const text = {
+  fontSize: "13px",
+  color: "#475569",
+  marginBottom: "6px",
+};
+
+const highlight = {
+  fontSize: "13px",
+  color: "#0f766e",
+  fontWeight: "bold",
+};
+
+const box = {
   backgroundColor: "#f1f5f9",
   margin: "18px",
   padding: "14px",
   borderRadius: "12px",
 };
 
-const teamTitle = {
+const boxTitle = {
   fontWeight: "bold",
+  marginBottom: "6px",
 };
 
-const teamText = {
-  fontSize: "14px",
+const boxText = {
+  fontSize: "13px",
   color: "#475569",
   lineHeight: "1.6",
+};
+
+const list = {
+  fontSize: "13px",
+  marginTop: "6px",
 };
 
 const center = {
@@ -200,7 +273,7 @@ const cta = {
 };
 
 const hr = {
-  margin: "20px 18px",
+  margin: "18px",
   borderColor: "#e5e7eb",
 };
 
