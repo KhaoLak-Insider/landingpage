@@ -1,175 +1,115 @@
 import { supabase } from "@/src/lib/supabase";
 
-export default async function EntdeckenPage() {
-  const { data: spots } = await supabase
+export default async function EntdeckenPage({
+  searchParams,
+}: {
+  searchParams?: { category?: string };
+}) {
+  const category = searchParams?.category;
+
+  let query = supabase
     .from("spots")
     .select("*")
     .eq("is_published", true)
     .order("created_at", { ascending: false });
 
+  if (category && category !== "Alle") {
+    query = query.eq("category", category);
+  }
+
+  const { data: spots } = await query;
+
+  const categories = [
+    "Alle",
+    "Strand",
+    "Natur",
+    "Restaurant",
+    "Markt",
+    "Tempel",
+    "Geheimtipp",
+  ];
+
   return (
     <main style={{ background: "#f6f7fb", minHeight: "100vh" }}>
 
-      {/* HERO HEADER */}
-      <div style={{
-        padding: "32px 24px 10px 24px",
-        maxWidth: 1200,
-        margin: "0 auto"
-      }}>
-        <h1 style={{ fontSize: 34, margin: 0, fontWeight: 700 }}>
-          Entdecken 🌴
-        </h1>
+      {/* HEADER */}
+      <div style={{ padding: 24, maxWidth: 1200, margin: "0 auto" }}>
+        <h1>Entdecken 🌴</h1>
 
-        <p style={{ color: "#666", marginTop: 6 }}>
-          Finde echte Highlights in Khao Lak
-        </p>
-
-        {/* SEARCH BAR */}
+        {/* FILTERS (REAL LINKS) */}
         <div style={{
-          marginTop: 18,
-          display: "flex",
-          gap: 12,
-        }}>
-          <input
-            placeholder="Suche nach Orten, Stränden, Restaurants..."
-            style={{
-              flex: 1,
-              padding: "12px 14px",
-              borderRadius: 12,
-              border: "1px solid #e5e7eb",
-              outline: "none",
-              fontSize: 14
-            }}
-          />
-
-          <button style={{
-            padding: "12px 16px",
-            borderRadius: 12,
-            border: "1px solid #e5e7eb",
-            background: "white",
-            cursor: "pointer"
-          }}>
-            Filter
-          </button>
-        </div>
-
-        {/* CATEGORY PILLS */}
-        <div style={{
-          marginTop: 16,
           display: "flex",
           gap: 10,
           overflowX: "auto",
-          paddingBottom: 6
+          marginTop: 16
         }}>
-          {["Alle", "Strand", "Natur", "Restaurant", "Markt", "Tempel", "Geheimtipp"].map((cat) => (
-            <div
+          {categories.map((cat) => (
+            <a
               key={cat}
+              href={`/entdecken${cat !== "Alle" ? `?category=${cat}` : ""}`}
               style={{
                 padding: "8px 14px",
                 borderRadius: 999,
-                background: "white",
+                background: category === cat ? "#22c55e" : "white",
+                color: category === cat ? "white" : "black",
                 border: "1px solid #e5e7eb",
                 whiteSpace: "nowrap",
-                fontSize: 13,
-                cursor: "pointer"
+                textDecoration: "none",
+                fontSize: 13
               }}
             >
               {cat}
-            </div>
+            </a>
           ))}
         </div>
       </div>
 
-      {/* GRID CONTAINER */}
+      {/* GRID */}
       <div style={{
         maxWidth: 1200,
         margin: "0 auto",
-        padding: "0 24px 40px 24px"
+        padding: "0 24px 40px",
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+        gap: 20,
       }}>
 
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-          gap: 20,
-        }}>
+        {spots?.map((spot) => (
+          <a
+            key={spot.id}
+            href={`/spot/${spot.slug}`}
+            style={{
+              background: "white",
+              borderRadius: 18,
+              overflow: "hidden",
+              textDecoration: "none",
+              color: "inherit",
+              boxShadow: "0 8px 22px rgba(0,0,0,0.06)",
+            }}
+          >
 
-          {spots?.map((spot) => (
-            <div
-              key={spot.id}
+            <img
+              src={spot.image_url}
               style={{
-                background: "white",
-                borderRadius: 18,
-                overflow: "hidden",
-                boxShadow: "0 8px 22px rgba(0,0,0,0.06)",
-                cursor: "pointer",
-                transition: "transform 0.2s ease",
+                width: "100%",
+                height: 190,
+                objectFit: "cover",
               }}
-            >
+            />
 
-              {/* IMAGE */}
-              <div style={{ position: "relative" }}>
-                <img
-                  src={spot.image_url}
-                  alt={spot.title}
-                  style={{
-                    width: "100%",
-                    height: 190,
-                    objectFit: "cover",
-                  }}
-                />
+            <div style={{ padding: 12 }}>
+              <h3 style={{ margin: 0 }}>{spot.title}</h3>
 
-                {/* HEART */}
-                <div style={{
-                  position: "absolute",
-                  top: 10,
-                  right: 10,
-                  background: "rgba(255,255,255,0.9)",
-                  borderRadius: 999,
-                  width: 32,
-                  height: 32,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 14
-                }}>
-                  ♡
-                </div>
-
-                {/* CATEGORY BADGE */}
-                <div style={{
-                  position: "absolute",
-                  bottom: 10,
-                  left: 10,
-                  background: "rgba(255,255,255,0.92)",
-                  padding: "4px 10px",
-                  borderRadius: 999,
-                  fontSize: 12,
-                  fontWeight: 500
-                }}>
-                  {spot.category}
-                </div>
-              </div>
-
-              {/* CONTENT */}
-              <div style={{ padding: 12 }}>
-                <h3 style={{ margin: 0, fontSize: 16 }}>
-                  {spot.title}
-                </h3>
-
-                <p style={{
-                  marginTop: 6,
-                  fontSize: 13,
-                  color: "#6b7280",
-                  lineHeight: 1.4
-                }}>
-                  {spot.description?.slice(0, 90)}...
-                </p>
-              </div>
-
+              <p style={{
+                fontSize: 13,
+                color: "#6b7280"
+              }}>
+                {spot.description?.slice(0, 80)}...
+              </p>
             </div>
-          ))}
 
-        </div>
+          </a>
+        ))}
 
       </div>
     </main>
