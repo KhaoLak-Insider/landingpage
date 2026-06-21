@@ -74,11 +74,7 @@ export default async function SpotPage({
             <div style={{ marginTop: 24, fontSize: 16, lineHeight: 1.7, color: "#444" }}>
               {spot.description}
             </div>
-                {/* Beschreibung */}
-<div style={{ marginTop: 24, fontSize: 16, lineHeight: 1.7, color: "#444" }}>
-  {spot.description}
-</div>
-
+                
 {/* 🗺 FAKE MAP (HIER EINBAUEN) */}
 <div style={{
   marginTop: 24,
