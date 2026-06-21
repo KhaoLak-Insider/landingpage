@@ -17,7 +17,6 @@ export default async function SpotPage({
 
   return (
     <main style={{ maxWidth: 800, margin: "0 auto", padding: 24 }}>
-
       <img
         src={spot.image_url}
         style={{
@@ -43,7 +42,6 @@ export default async function SpotPage({
       }}>
         {spot.category}
       </span>
-
     </main>
   );
 }
