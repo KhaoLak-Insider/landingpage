@@ -19,7 +19,6 @@ export default function EntdeckenPage() {
     "Geheimtipp",
   ];
 
-  // 🔥 LOAD DATA
   useEffect(() => {
     loadSpots();
   }, [category, search]);
@@ -42,7 +41,6 @@ export default function EntdeckenPage() {
     setSpots(data || []);
   }
 
-  // ❤️ FAVORITES (local)
   function toggleFav(id: string) {
     const favs = JSON.parse(localStorage.getItem("favs") || "[]");
 
@@ -50,8 +48,7 @@ export default function EntdeckenPage() {
       const updated = favs.filter((f: string) => f !== id);
       localStorage.setItem("favs", JSON.stringify(updated));
     } else {
-      favs.push(id);
-      localStorage.setItem("favs", JSON.stringify(favs));
+      localStorage.setItem("favs", JSON.stringify([...favs, id]));
     }
   }
 
@@ -65,8 +62,14 @@ export default function EntdeckenPage() {
     <main style={{ background: "#f6f7fb", minHeight: "100vh" }}>
 
       {/* HEADER */}
-      <div style={{ padding: 24, maxWidth: 1200, margin: "0 auto" }}>
-        <h1 style={{ fontSize: 32 }}>Entdecken 🌴</h1>
+      <div style={{
+        padding: 24,
+        maxWidth: 1200,
+        margin: "0 auto"
+      }}>
+        <h1 style={{ fontSize: 32, color: "#000" }}>
+          Entdecken 🌴
+        </h1>
 
         {/* SEARCH */}
         <input
@@ -79,6 +82,8 @@ export default function EntdeckenPage() {
             borderRadius: 12,
             border: "1px solid #ddd",
             marginTop: 12,
+            background: "#fff",
+            color: "#000"
           }}
         />
 
@@ -89,7 +94,8 @@ export default function EntdeckenPage() {
               padding: "10px 14px",
               borderRadius: 12,
               border: "1px solid #ddd",
-              background: "white",
+              background: "#fff",
+              cursor: "pointer"
             }}
           >
             🗺 Karte öffnen
@@ -111,8 +117,8 @@ export default function EntdeckenPage() {
                 padding: "8px 14px",
                 borderRadius: 999,
                 border: "1px solid #ddd",
-                background: category === cat ? "#22c55e" : "white",
-                color: category === cat ? "white" : "black",
+                background: category === cat ? "#22c55e" : "#fff",
+                color: category === cat ? "#fff" : "#000",
                 whiteSpace: "nowrap",
                 cursor: "pointer",
               }}
@@ -136,14 +142,14 @@ export default function EntdeckenPage() {
           <div
             key={spot.id}
             style={{
-              background: "white",
+              background: "#fff",
               borderRadius: 18,
               overflow: "hidden",
               boxShadow: "0 8px 20px rgba(0,0,0,0.06)",
+              border: "1px solid #eee"
             }}
           >
 
-            {/* IMAGE */}
             <Link href={`/spot/${spot.slug}`}>
               <img
                 src={spot.image_url}
@@ -155,7 +161,6 @@ export default function EntdeckenPage() {
               />
             </Link>
 
-            {/* CONTENT */}
             <div style={{ padding: 12 }}>
 
               <div style={{
@@ -163,9 +168,10 @@ export default function EntdeckenPage() {
                 justifyContent: "space-between",
                 alignItems: "center"
               }}>
-                <h3 style={{ margin: 0 }}>{spot.title}</h3>
+                <h3 style={{ margin: 0, color: "#000" }}>
+                  {spot.title}
+                </h3>
 
-                {/* HEART */}
                 <button
                   onClick={() => toggleFav(spot.id)}
                   style={{
