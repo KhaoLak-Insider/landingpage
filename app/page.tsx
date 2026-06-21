@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { FormEvent, useState } from "react";
 import { supabase } from "@/src/lib/supabase";
+import Link from "next/link";
 
 const features = [
   ["📍", "Interaktive Karte", "Alle Orte auf einen Blick – später auch offline verfügbar."],
