@@ -11,9 +11,9 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          DEFAULT: "#14b8a6", // teal-500 (HAUPTFARBE)
-          dark: "#0d9488",    // hover / active
-          light: "#99f6e4",   // highlights
+          DEFAULT: "#14b8a6",
+          light: "#99f6e4",
+          dark: "#0d9488",
         },
 
         background: "#ffffff",
@@ -21,24 +21,33 @@ const config: Config = {
 
         text: {
           DEFAULT: "#0f172a",
-          muted: "#475569",
-          soft: "#64748b",
-          light: "#94a3b8",
+          muted: "#64748b",
+          soft: "#94a3b8",
         },
 
-        border: "#e2e8f0",
+        border: "rgba(0,0,0,0.06)",
 
-        shadow: "rgba(0,0,0,0.08)",
+        success: {
+          light: "#d1fae5",
+          DEFAULT: "#10b981",
+          dark: "#059669",
+        },
+
+        error: {
+          light: "#fee2e2",
+          DEFAULT: "#ef4444",
+          dark: "#dc2626",
+        },
       },
 
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
+        sans: ["Poppins", "system-ui", "sans-serif"],
       },
 
       boxShadow: {
         soft: "0 10px 30px rgba(0,0,0,0.08)",
         card: "0 8px 20px rgba(0,0,0,0.06)",
-        glow: "0 10px 25px rgba(20, 184, 166, 0.25)",
+        hover: "0 15px 40px rgba(0,0,0,0.12)",
       },
 
       borderRadius: {

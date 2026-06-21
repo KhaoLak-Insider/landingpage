@@ -87,7 +87,7 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-white text-slate-900">
+    <main className="min-h-screen bg-background text-text">
       <section
   className="relative min-h-[680px] overflow-hidden bg-cover bg-center md:min-h-[1050px]"
   style={{ backgroundImage: "url('/images/hero.png')" }}
@@ -114,7 +114,7 @@ export default function Home() {
 
           <a
             href="#waitlist"
-            className="rounded-full bg-teal-500 px-7 py-3.5 text-sm font-bold shadow-xl shadow-teal-950/30 transition hover:bg-teal-400"
+            className="rounded-full bg-brand px-7 py-3.5 text-sm font-bold shadow-xl shadow-teal-950/30 transition hover:bg-brand-light"
           >
             Zur Warteliste
           </a>
@@ -122,7 +122,7 @@ export default function Home() {
 
         <div className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 items-center gap-16 px-6 pt-12 md:px-8 md:pt-20 md:grid-cols-[1.05fr_0.95fr]">
           <div className="max-w-3xl text-white md:-mt-50">
-            <div className="mb-6 inline-flex rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold backdrop-blur">
+            <div className="mb-6 inline-flex rounded-full border border-white/25 bg-background/10 px-4 py-2 text-sm font-semibold backdrop-blur">
               Neuer smarter Reiseführer für Khao Lak
             </div>
 
@@ -131,7 +131,7 @@ export default function Home() {
   <br />
   Lak wie ein
   <br />
-  <span className="text-teal-300">Insider</span>
+  <span className="text-brand-light">Insider</span>
 </h1>
 
             <p className="mt-7 max-w-2xl text-xl leading-relaxed text-white/90">
@@ -149,11 +149,11 @@ export default function Home() {
             <div className="mt-10 flex flex-wrap gap-5">
               <a
                 href="#waitlist"
-                className="rounded-full bg-teal-500 px-9 py-4 font-bold text-white shadow-xl shadow-teal-950/30 transition hover:bg-teal-400"
+                className="rounded-full bg-brand px-9 py-4 font-bold text-white shadow-xl shadow-teal-950/30 transition hover:bg-brand-light"
               >
                 Start nicht verpassen
               </a>
-              <button className="rounded-full border border-white/70 bg-white/10 px-9 py-4 font-bold text-white backdrop-blur transition hover:bg-white/20">
+              <button className="rounded-full border border-white/70 bg-background/10 px-9 py-4 font-bold text-white backdrop-blur transition hover:bg-background/20">
                 App ansehen
               </button>
             </div>
@@ -192,13 +192,13 @@ export default function Home() {
         {features.map(([icon, title, text]) => (
           <div
             key={title}
-            className="rounded-3xl bg-white p-6 text-center shadow-xl shadow-slate-200/80 transition hover:-translate-y-1 hover:shadow-2xl"
+            className="rounded-3xl bg-background p-6 text-center shadow-xl shadow-card transition hover:-translate-y-1 hover:shadow-2xl"
           >
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-teal-50 text-4xl text-teal-600">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-light text-4xl text-teal-600">
               {icon}
             </div>
             <h3 className="mt-5 text-base font-extrabold">{title}</h3>
-            <p className="mt-3 text-xs leading-relaxed text-slate-500">{text}</p>
+            <p className="mt-3 text-xs leading-relaxed text-text-muted">{text}</p>
           </div>
         ))}
       </section>
@@ -206,13 +206,13 @@ export default function Home() {
       <section className="mx-auto grid max-w-7xl gap-10 px-8 py-0 md:grid-cols-[0.8fr_1.2fr]">
         <div className="flex flex-col justify-center">
           <h2 className="text-4xl font-black tracking-tight md:text-5xl">
-            Entdecke <span className="text-teal-500">Khao Lak</span>
+            Entdecke <span className="text-brand">Khao Lak</span>
           </h2>
-          <p className="mt-5 max-w-md text-lg leading-relaxed text-slate-600">
+          <p className="mt-5 max-w-md text-lg leading-relaxed text-text-muted">
             Von traumhaften Stränden über lokale Märkte bis hin zu versteckten
             Wasserfällen – Khao Lak hat so viel zu bieten.
           </p>
-          <button className="mt-8 w-fit rounded-full border border-teal-500 px-7 py-3 font-bold text-teal-600 transition hover:bg-teal-50">
+          <button className="mt-8 w-fit rounded-full border border-teal-500 px-7 py-3 font-bold text-teal-600 transition hover:bg-brand-light">
             Alle Orte entdecken
           </button>
         </div>
@@ -250,31 +250,31 @@ export default function Home() {
             <h2 className="text-5xl font-black leading-[1.05] tracking-tight md:text-6xl">
               Dein Urlaub.
               <br />
-              Perfekt <span className="text-teal-500">organisiert.</span>
+              Perfekt <span className="text-brand">organisiert.</span>
             </h2>
 
-            <p className="mt-7 max-w-md text-lg leading-relaxed text-slate-600">
+            <p className="mt-7 max-w-md text-lg leading-relaxed text-text-muted">
               Plane deine Tage, speichere Lieblingsorte und finde jederzeit genau
               das, was zu deinem Urlaub passt – übersichtlich in einer App.
             </p>
 
             <div className="mt-8 space-y-4 text-base font-semibold text-slate-700">
               <div className="flex items-center gap-3">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-teal-500 text-sm text-white">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-sm text-white">
                   ✓
                 </span>
                 Persönliche Favoriten speichern
               </div>
 
               <div className="flex items-center gap-3">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-teal-500 text-sm text-white">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-sm text-white">
                   ✓
                 </span>
                 Tagesausflüge einfach planen
               </div>
 
               <div className="flex items-center gap-3">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-teal-500 text-sm text-white">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-sm text-white">
                   ✓
                 </span>
                 Strände, Märkte und Restaurants schnell finden
@@ -284,19 +284,19 @@ export default function Home() {
             <div className="mt-10 flex flex-wrap items-center gap-4">
               <a
                 href="#waitlist"
-                className="rounded-full bg-teal-500 px-8 py-4 font-bold text-white shadow-xl shadow-teal-200 transition hover:bg-teal-400"
+                className="rounded-full bg-brand px-8 py-4 font-bold text-white shadow-xl shadow-teal-200 transition hover:bg-brand-light"
               >
                 Zur Warteliste
               </a>
 
-              <div className="rounded-full border border-slate-200 bg-white px-6 py-4 text-sm font-bold text-slate-600 shadow-sm">
+              <div className="rounded-full border border-border bg-background px-6 py-4 text-sm font-bold text-text-muted shadow-sm">
                 App startet 2026
               </div>
             </div>
           </div>
 
           <div className="relative flex min-h-[560px] items-center justify-center">
-            <div className="absolute h-[430px] w-[430px] rounded-full bg-white shadow-2xl shadow-teal-100" />
+            <div className="absolute h-[430px] w-[430px] rounded-full bg-background shadow-2xl shadow-teal-100" />
 
             <Image
               src="/images/home-screen.png"
@@ -347,38 +347,38 @@ export default function Home() {
     <h2 className="text-4xl font-black leading-tight tracking-tight md:text-5xl">
       Finde die schönsten Orte
       <br />
-      auf einen <span className="text-teal-500">Blick.</span>
+      auf einen <span className="text-brand">Blick.</span>
     </h2>
 
-    <p className="mt-6 max-w-md text-lg leading-relaxed text-slate-600">
+    <p className="mt-6 max-w-md text-lg leading-relaxed text-text-muted">
       Strände, Märkte, Restaurants, Tempel und Geheimtipps – alles übersichtlich
       auf der Karte und perfekt für deinen Urlaub sortiert.
     </p>
 
     <div className="mt-8 space-y-4 text-base font-semibold text-slate-700">
       <div className="flex items-center gap-3">
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-teal-500 text-sm text-white">
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-sm text-white">
           ✓
         </span>
         Alle Orte auf einen Blick
       </div>
 
       <div className="flex items-center gap-3">
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-teal-500 text-sm text-white">
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-sm text-white">
           ✓
         </span>
         Nach Stränden, Märkten & Restaurants filtern
       </div>
 
       <div className="flex items-center gap-3">
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-teal-500 text-sm text-white">
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-sm text-white">
           ✓
         </span>
         Entfernungen und Details direkt sehen
       </div>
 
       <div className="flex items-center gap-3">
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-teal-500 text-sm text-white">
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-sm text-white">
           ✓
         </span>
         Offline-Nutzung später geplant
@@ -390,23 +390,23 @@ export default function Home() {
       <section className="mx-auto max-w-7xl px-8 py-16">
         <div className="grid gap-8 text-center md:grid-cols-3">
           <div>
-            <div className="text-5xl font-black text-teal-500">800+</div>
-            <p className="mt-3 text-slate-600">Verkaufte Khao-Lak-Guides.</p>
+            <div className="text-5xl font-black text-brand">800+</div>
+            <p className="mt-3 text-text-muted">Verkaufte Khao-Lak-Guides.</p>
           </div>
           <div>
-            <div className="text-5xl font-black text-teal-500">100+</div>
-            <p className="mt-3 text-slate-600">Orte, Strände, Restaurants und Geheimtipps.</p>
+            <div className="text-5xl font-black text-brand">100+</div>
+            <p className="mt-3 text-text-muted">Orte, Strände, Restaurants und Geheimtipps.</p>
           </div>
           <div>
-            <div className="text-5xl font-black text-teal-500">2026</div>
-            <p className="mt-3 text-slate-600">Start der Khao Lak Insider App.</p>
+            <div className="text-5xl font-black text-brand">2026</div>
+            <p className="mt-3 text-text-muted">Start der Khao Lak Insider App.</p>
           </div>
         </div>
       </section>
 
 <section id="waitlist" className="px-8 py-20">
-        <div className="mx-auto max-w-5xl rounded-[2.5rem] bg-gradient-to-br from-teal-500 via-teal-500 to-emerald-600 px-8 py-16 text-center text-white shadow-2xl shadow-teal-200/60 ring-1 ring-white/20">
-          <div className="mb-4 inline-flex rounded-full bg-white/20 px-4 py-2 text-sm font-semibold backdrop-blur">
+        <div className="mx-auto max-w-5xl rounded-[2.5rem] bg-gradient-to-br from-teal-500 via-teal-500 to-emerald-600 px-8 py-16 text-center text-white shadow-2xl shadow-teal ring-1 ring-white/20">
+          <div className="mb-4 inline-flex rounded-full bg-background/20 px-4 py-2 text-sm font-semibold backdrop-blur">
             Khao Lak Insider App
           </div>
 
@@ -421,30 +421,30 @@ export default function Home() {
 
           
 
-          <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-sm font-semibold backdrop-blur">
+          <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-background/20 px-4 py-2 text-sm font-semibold backdrop-blur">
             🔥 <span>{liveCount}</span> Leute schauen sich gerade die App an
           </div>
 
           <form
   onSubmit={joinWaitlist}
-  className="mx-auto mt-9 max-w-xl rounded-3xl bg-white/95 p-6 shadow-2xl ring-1 ring-black/5 backdrop-blur"
+  className="mx-auto mt-9 max-w-xl rounded-3xl bg-background/95 p-6 shadow-2xl ring-1 ring-black/5 backdrop-blur"
 >
   <input
     type="email"
     value={email}
     onChange={(event) => setEmail(event.target.value)}
     placeholder="Deine E-Mail-Adresse"
-    className="h-12 w-full rounded-full px-5 text-slate-900 outline-none shadow-inner bg-white ring-1 ring-slate-200 focus:ring-2 focus:ring-teal-400 transition"
+    className="h-12 w-full rounded-full px-5 text-text outline-none shadow-inner bg-background ring-1 ring-slate-200 focus:ring-2 focus:ring-teal-400 transition"
   />
 
-  <div className="mt-4 text-center text-xs text-slate-500">
+  <div className="mt-4 text-center text-xs text-text-muted">
     ⭐ Werde einer der ersten Nutzer der Khao Lak Insider App
   </div>
 
   <div className="mt-5 flex flex-col gap-4 text-left">
 
     <label className={`flex items-start gap-3 rounded-2xl border p-4 cursor-pointer transition ${
-      waitlistConsent ? "border-teal-400 bg-teal-50 shadow-sm" : "border-slate-200 bg-white"
+      waitlistConsent ? "border-teal-400 bg-brand-light shadow-sm" : "border-border bg-background"
     }`}>
       <input
         type="checkbox"
@@ -453,15 +453,15 @@ export default function Home() {
         className="mt-1 h-4 w-4 accent-teal-600"
       />
       <div>
-        <p className="font-semibold text-slate-900">🚀 Early Access zur App</p>
-        <p className="text-xs text-slate-600">
+        <p className="font-semibold text-text">🚀 Early Access zur App</p>
+        <p className="text-xs text-text-muted">
           Ich werde sofort benachrichtigt, wenn die App startet.
         </p>
       </div>
     </label>
 
     <label className={`flex items-start gap-3 rounded-2xl border p-4 cursor-pointer transition ${
-      newsletterConsent ? "border-teal-400 bg-teal-50 shadow-sm" : "border-slate-200 bg-white"
+      newsletterConsent ? "border-teal-400 bg-brand-light shadow-sm" : "border-border bg-background"
     }`}>
       <input
         type="checkbox"
@@ -470,8 +470,8 @@ export default function Home() {
         className="mt-1 h-4 w-4 accent-teal-600"
       />
       <div>
-        <p className="font-semibold text-slate-900">✨ Reise-Updates & Insider Tipps</p>
-        <p className="text-xs text-slate-500">
+        <p className="font-semibold text-text">✨ Reise-Updates & Insider Tipps</p>
+        <p className="text-xs text-text-muted">
           1–2× pro Woche neue Spots, Geheimtipps und Reiseideen.
         </p>
       </div>
@@ -482,12 +482,12 @@ export default function Home() {
   <button
     type="submit"
     disabled={loading}
-    className="mt-5 h-12 w-full rounded-full bg-gradient-to-r from-slate-900 to-slate-950 font-bold text-white shadow-lg transition hover:scale-[1.03] active:scale-[0.98] disabled:opacity-60"
+    className="mt-5 h-12 w-full rounded-full bg-gradient-to-r from-dark-900 to-dark-950 font-bold text-white shadow-lg transition hover:scale-[1.03] active:scale-[0.98] disabled:opacity-60"
   >
     {loading ? "Speichern..." : "🚀 Early Access sichern"}
   </button>
 
-  <p className="mt-4 text-center text-xs text-slate-400">
+  <p className="mt-4 text-center text-xs text-text-soft">
     Kein Spam. Nur App-Updates.
   </p>
 </form>
@@ -511,7 +511,7 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="border-t border-slate-200 bg-white">
+      <footer className="border-t border-border bg-background">
   <div className="mx-auto max-w-7xl px-8 py-16">
     <div className="grid gap-12 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
 
@@ -524,7 +524,7 @@ export default function Home() {
   className="h-auto w-[220px]"
 />
 
-        <p className="mt-6 max-w-sm text-sm leading-relaxed text-slate-600">
+        <p className="mt-6 max-w-sm text-sm leading-relaxed text-text-muted">
           Der smarte Reiseführer für Khao Lak. Entdecke Strände,
           Restaurants, Märkte, Tempel und echte Geheimtipps in einer App.
         </p>
@@ -535,11 +535,11 @@ export default function Home() {
       </div>
 
       <div>
-        <h4 className="mb-4 font-bold text-slate-900">
+        <h4 className="mb-4 font-bold text-text">
           App
         </h4>
 
-        <ul className="space-y-3 text-sm text-slate-600">
+        <ul className="space-y-3 text-sm text-text-muted">
           <li><a href="#">Features</a></li>
           <li><a href="#">Interaktive Karte</a></li>
           <li><a href="#">Reiseplaner</a></li>
@@ -548,11 +548,11 @@ export default function Home() {
       </div>
 
       <div>
-        <h4 className="mb-4 font-bold text-slate-900">
+        <h4 className="mb-4 font-bold text-text">
           Unternehmen
         </h4>
 
-        <ul className="space-y-3 text-sm text-slate-600">
+        <ul className="space-y-3 text-sm text-text-muted">
           <li><a href="#">Über uns</a></li>
           <li><a href="#">Warteliste</a></li>
           <li><a href="#">Kontakt</a></li>
@@ -560,11 +560,11 @@ export default function Home() {
       </div>
 
       <div>
-        <h4 className="mb-4 font-bold text-slate-900">
+        <h4 className="mb-4 font-bold text-text">
           Rechtliches
         </h4>
 
-        <ul className="space-y-3 text-sm text-slate-600">
+        <ul className="space-y-3 text-sm text-text-muted">
           <li><a href="/impressum">Impressum</a></li>
           <li><a href="/datenschutz">Datenschutz</a></li>
         </ul>
@@ -572,21 +572,21 @@ export default function Home() {
 
     </div>
 
-    <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-slate-200 pt-8 text-sm text-slate-500 md:flex-row">
+    <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 text-sm text-text-muted md:flex-row">
       <p>
         © 2026 Khao Lak Insider. Alle Rechte vorbehalten.
       </p>
 
       <div className="flex gap-6">
-        <a href="#" className="hover:text-teal-500 transition">
+        <a href="#" className="hover:text-brand transition">
           Instagram
         </a>
 
-        <a href="#" className="hover:text-teal-500 transition">
+        <a href="#" className="hover:text-brand transition">
           YouTube
         </a>
 
-        <a href="#" className="hover:text-teal-500 transition">
+        <a href="#" className="hover:text-brand transition">
           Facebook
         </a>
       </div>
