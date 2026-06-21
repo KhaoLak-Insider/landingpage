@@ -9,9 +9,11 @@ export default async function SpotPage({
     .from("spots")
     .select("*")
     .eq("slug", params.slug)
-    .single();
+    .maybeSingle();
 
-  if (!spot) return <div>Not found</div>;
+  if (!spot) {
+    return <div>Not found</div>;
+  }
 
   return (
     <main style={{ maxWidth: 800, margin: "0 auto", padding: 24 }}>
