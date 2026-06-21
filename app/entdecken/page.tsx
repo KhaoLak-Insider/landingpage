@@ -117,7 +117,7 @@ export default function EntdeckenPage() {
                 padding: "8px 14px",
                 borderRadius: 999,
                 border: "1px solid #ddd",
-                background: category === cat ? "#22c55e" : "#fff",
+                background: category === cat ? "#14b8a6" : "#fff",
                 color: category === cat ? "#fff" : "#000",
                 whiteSpace: "nowrap",
                 cursor: "pointer",
