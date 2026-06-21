@@ -8,49 +8,107 @@ export default async function EntdeckenPage() {
     .order("created_at", { ascending: false });
 
   return (
-    <main style={{ padding: 24 }}>
-      <h1>Entdecken 🌴</h1>
+    <main style={{ background: "#f6f7fb", minHeight: "100vh", padding: 24 }}>
 
-      <div style={{ display: "grid", gap: 16, marginTop: 20 }}>
+      {/* HEADER */}
+      <div style={{ marginBottom: 24 }}>
+        <h1 style={{ fontSize: 28, margin: 0 }}>Entdecken 🌴</h1>
+        <p style={{ color: "#666", marginTop: 6 }}>
+          Finde die besten Orte in Khao Lak
+        </p>
+      </div>
+
+      {/* FILTER BAR (Airbnb-like) */}
+      <div style={{
+        display: "flex",
+        gap: 10,
+        overflowX: "auto",
+        paddingBottom: 12,
+        marginBottom: 20
+      }}>
+        {["Alle", "Strand", "Natur", "Restaurant", "Markt", "Tempel", "Geheimtipp"].map((cat) => (
+          <div
+            key={cat}
+            style={{
+              padding: "8px 14px",
+              borderRadius: 999,
+              background: "white",
+              border: "1px solid #e5e7eb",
+              whiteSpace: "nowrap",
+              fontSize: 13,
+              cursor: "pointer"
+            }}
+          >
+            {cat}
+          </div>
+        ))}
+      </div>
+
+      {/* GRID */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+          gap: 18,
+        }}
+      >
         {spots?.map((spot) => (
           <div
             key={spot.id}
             style={{
-              borderRadius: 16,
+              background: "white",
+              borderRadius: 18,
               overflow: "hidden",
-              border: "1px solid #eee",
-              padding: 12,
+              boxShadow: "0 6px 18px rgba(0,0,0,0.06)",
+              cursor: "pointer",
+              transition: "transform 0.2s ease",
             }}
           >
+
             {/* IMAGE */}
             {spot.image_url && (
-              <img
-                src={spot.image_url}
-                alt={spot.title}
-                style={{
-                  width: "100%",
-                  height: 180,
-                  objectFit: "cover",
-                  borderRadius: 12,
-                }}
-              />
+              <div style={{ position: "relative" }}>
+                <img
+                  src={spot.image_url}
+                  alt={spot.title}
+                  style={{
+                    width: "100%",
+                    height: 180,
+                    objectFit: "cover",
+                  }}
+                />
+
+                {/* CATEGORY BADGE */}
+                <div style={{
+                  position: "absolute",
+                  top: 10,
+                  left: 10,
+                  background: "rgba(255,255,255,0.9)",
+                  padding: "4px 10px",
+                  borderRadius: 999,
+                  fontSize: 12,
+                  fontWeight: 500,
+                }}>
+                  {spot.category}
+                </div>
+              </div>
             )}
 
             {/* CONTENT */}
-            <h2 style={{ marginTop: 10 }}>{spot.title}</h2>
-            <p style={{ color: "#666" }}>{spot.description}</p>
+            <div style={{ padding: 12 }}>
+              <h3 style={{ margin: 0, fontSize: 16 }}>
+                {spot.title}
+              </h3>
 
-            <span
-              style={{
-                fontSize: 12,
-                padding: "4px 8px",
-                borderRadius: 8,
-                background: "#f3f4f6",
-                display: "inline-block",
-              }}
-            >
-              {spot.category}
-            </span>
+              <p style={{
+                marginTop: 6,
+                fontSize: 13,
+                color: "#6b7280",
+                lineHeight: 1.4
+              }}>
+                {spot.description?.slice(0, 80)}...
+              </p>
+            </div>
           </div>
         ))}
       </div>
