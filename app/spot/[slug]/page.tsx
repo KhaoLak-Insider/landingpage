@@ -24,27 +24,28 @@ export default async function SpotPage({
 
       {/* HERO IMAGE */}
       <div style={{
-        width: "100%",
-        height: "420px",
-        overflow: "hidden",
-        position: "relative"
-      }}>
-        <img
-          src={spot.image_url}
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover"
-          }}
-        />
+  width: "100%",
+  height: "420px",
+  overflow: "hidden",
+  position: "relative"
+}}>
+  <img
+    src={spot.image_url}
+    style={{
+      width: "100%",
+      height: "100%",
+      objectFit: "cover",
+      objectPosition: "center" // 👈 DAS FEHLT BEI DIR
+    }}
+  />
 
-        {/* overlay gradient */}
-        <div style={{
-          position: "absolute",
-          inset: 0,
-          background: "linear-gradient(to top, rgba(0,0,0,0.45), transparent)"
-        }} />
-      </div>
+  {/* soft fade like Airbnb */}
+  <div style={{
+    position: "absolute",
+    inset: 0,
+    background: "linear-gradient(to top, rgba(0,0,0,0.35), transparent)"
+  }} />
+</div>
 
       {/* CONTENT WRAPPER */}
       <div style={{
