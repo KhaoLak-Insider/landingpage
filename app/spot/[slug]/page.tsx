@@ -9,7 +9,7 @@ export default async function SpotPage({
     .from("spots")
     .select("*")
     .eq("slug", params.slug)
-    .maybeSingle();
+    .single();
 
   if (!spot) {
     return <div>Not found</div>;
