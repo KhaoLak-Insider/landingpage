@@ -9,17 +9,9 @@ export async function POST(req: Request) {
 
     const body = await req.json();
 
-    console.log("📦 BODY FULL:", body);
-
     const email = body?.email;
     const waitlist_opt_in = body?.waitlist_opt_in;
     const newsletter_opt_in = body?.newsletter_opt_in;
-
-    console.log("📩 EMAIL RECEIVED:", email);
-    console.log("🧠 FLAGS:", {
-      waitlist_opt_in,
-      newsletter_opt_in,
-    });
 
     if (!email) {
       return NextResponse.json(
@@ -28,76 +20,42 @@ export async function POST(req: Request) {
       );
     }
 
-    if (!process.env.RESEND_API_KEY) {
-      return NextResponse.json(
-        { error: "Missing RESEND_API_KEY" },
-        { status: 500 }
-      );
-    }
-
-    if (
-      !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    ) {
-      return NextResponse.json(
-        { error: "Missing Supabase env" },
-        { status: 500 }
-      );
-    }
-
-    const resend = new Resend(process.env.RESEND_API_KEY);
+    const resend = new Resend(process.env.RESEND_API_KEY!);
 
     const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
 
-    // 🧠 NEWSLETTER DOUBLE OPT-IN TOKEN
+    // 🧠 Token nur für Double Opt-in
     const newsletter_token = newsletter_opt_in ? randomUUID() : null;
 
-    // 🧠 SAVE TO SUPABASE
-    const insertPayload = {
-      email,
-      waitlist_opt_in: Boolean(waitlist_opt_in),
-
-      // Newsletter wird NICHT direkt aktiviert
-      newsletter_opt_in: Boolean(newsletter_opt_in),
-      newsletter_confirmed: false,
-      newsletter_token,
-    };
-
-    console.log("📥 INSERT PAYLOAD:", insertPayload);
-
+    // 💾 Save user
     const { data, error: dbError } = await supabase
       .from("waitlist")
-      .insert([insertPayload]);
+      .insert([
+        {
+          email,
+          waitlist_opt_in: Boolean(waitlist_opt_in),
+          newsletter_opt_in: Boolean(newsletter_opt_in),
+          newsletter_confirmed: false,
+          newsletter_token,
+        },
+      ]);
 
     if (dbError) {
-      console.log("❌ SUPABASE ERROR FULL:", dbError);
+      console.log("❌ SUPABASE ERROR:", dbError);
 
       return NextResponse.json(
-        {
-          error: "Database error",
-          details: dbError,
-        },
+        { error: "Database error", details: dbError },
         { status: 500 }
       );
     }
 
-    console.log("✅ SUPABASE INSERT OK:", data);
+    console.log("✅ USER SAVED");
 
-    // 📧 WAITLIST EMAIL (immer)
-    await resend.emails.send({
-      from: "Khao Lak Insider <no-reply@khaolak.app>",
-      to: email,
-      subject: "🌴 Willkommen auf der Warteliste",
-      html: `<div>Danke für deine Anmeldung!</div>`,
-    });
-
-    // 📧 NEWSLETTER DOUBLE OPT-IN EMAIL (nur wenn aktiviert)
+    // 📧 ONLY ONE EMAIL FLOW (DOUBLE OPT-IN)
     if (newsletter_opt_in && newsletter_token) {
-      console.log("📤 SENDING DOUBLE OPT-IN EMAIL...");
-
       await resend.emails.send({
         from: "Khao Lak Insider <no-reply@khaolak.app>",
         to: email,
@@ -105,12 +63,12 @@ export async function POST(req: Request) {
 
         html: `
           <div style="font-family:Arial;padding:30px">
-            <h2>Bitte bestätige deinen Newsletter</h2>
+            <h2>Bitte bestätige deinen Newsletter 🌴</h2>
 
-            <p>Klicke auf den Button, um dich offiziell anzumelden:</p>
+            <p>Damit wir dir Insider-Tipps senden dürfen, bestätige bitte deine Anmeldung:</p>
 
             <a href="https://khaolak.app/api/confirm-newsletter?token=${newsletter_token}"
-               style="display:inline-block;padding:12px 20px;background:#14b8a6;color:white;border-radius:8px;text-decoration:none">
+               style="display:inline-block;margin-top:15px;padding:12px 20px;background:#14b8a6;color:white;border-radius:8px;text-decoration:none">
               Newsletter bestätigen
             </a>
 
@@ -120,11 +78,13 @@ export async function POST(req: Request) {
           </div>
         `,
       });
+
+      console.log("📤 DOUBLE OPT-IN EMAIL SENT");
     }
 
     return NextResponse.json({
       success: true,
-      message: "Saved + emails sent",
+      message: "User saved + opt-in email sent if needed",
     });
 
   } catch (error) {
