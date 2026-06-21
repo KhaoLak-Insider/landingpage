@@ -1,3 +1,4 @@
+import { supabase } from "@/src/lib/supabase";
 import { createClient } from "@supabase/supabase-js";
 
 // ... dein Client-Setup
