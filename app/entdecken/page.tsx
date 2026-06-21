@@ -61,7 +61,46 @@ export default function EntdeckenPage() {
   return (
     <main style={{ background: "#f6f7fb", minHeight: "100vh" }}>
 
-      {/* HEADER */}
+      {/* HEADER NAV (aus Landingpage) */}
+      <div style={{
+        position: "sticky",
+        top: 0,
+        zIndex: 50,
+        background: "#ffffff",
+        borderBottom: "1px solid #ddd"
+      }}>
+        <div style={{
+          maxWidth: 1200,
+          margin: "0 auto",
+          padding: "14px 24px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center"
+        }}>
+          
+          <div style={{
+            fontWeight: 800,
+            color: "#000"
+          }}>
+            Khao Lak Insider 🌴
+          </div>
+
+          <nav style={{
+            display: "flex",
+            gap: 18,
+            fontSize: 14
+          }}>
+            <Link href="/entdecken">Entdecken</Link>
+            <Link href="/planen">Planen</Link>
+            <Link href="/erleben">Erleben</Link>
+            <Link href="/favoriten">Favoriten</Link>
+            <Link href="/community">Community</Link>
+          </nav>
+
+        </div>
+      </div>
+
+      {/* PAGE HEADER */}
       <div style={{
         padding: 24,
         maxWidth: 1200,
