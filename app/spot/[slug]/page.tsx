@@ -21,11 +21,21 @@ export default async function SpotPage({
   return (
     <main style={{ background: "#f6f7fb", minHeight: "100vh", paddingBottom: 60 }}>
       
-      {/* HERO IMAGE - Vollflächig, wie auf Profi-Reiseseiten */}
-      <div style={{ width: "100%", height: "400px", overflow: "hidden" }}>
+      {/* OPTIMIERTER HERO - Responsiv durch AspectRatio */}
+      <div style={{ 
+        width: "100%", 
+        aspectRatio: "21 / 9", 
+        overflow: "hidden",
+        position: "relative"
+      }}>
         <img
           src={spot.image_url}
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          style={{ 
+            width: "100%", 
+            height: "100%", 
+            objectFit: "cover",
+            objectPosition: "center"
+          }}
           alt={spot.title}
         />
       </div>
@@ -33,7 +43,7 @@ export default async function SpotPage({
       {/* CONTENT WRAPPER */}
       <div style={{ maxWidth: 800, margin: "-40px auto 0 auto", padding: "0 24px" }}>
         
-        {/* WEISSE CARD (Haupt-Container) */}
+        {/* WEISSE CARD */}
         <div style={{
           background: "#fff",
           borderRadius: 24,
@@ -42,7 +52,6 @@ export default async function SpotPage({
           border: "1px solid #eee"
         }}>
           
-          {/* HEADER (Titel + Badge) */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
             <div>
               <span style={{
@@ -63,12 +72,10 @@ export default async function SpotPage({
             </div>
           </div>
 
-          {/* BESCHREIBUNG */}
           <div style={{ marginTop: 24, fontSize: 16, lineHeight: 1.7, color: "#444" }}>
             {spot.description}
           </div>
 
-          {/* INFO GRID (Die 3 Boxen) */}
           <div style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
@@ -90,14 +97,15 @@ export default async function SpotPage({
           </div>
         </div>
 
-        {/* YOUTUBE VIDEO (falls vorhanden) */}
         {spot.youtube_url && (
           <div style={{ marginTop: 24 }}>
             <h3 style={{ marginBottom: 16, fontSize: 18 }}>🎥 Video-Eindruck</h3>
-            <iframe
-              src={spot.youtube_url}
-              style={{ width: "100%", height: 350, borderRadius: 24, border: "none", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}
-            />
+            <div style={{ aspectRatio: "16 / 9", width: "100%" }}>
+                <iframe
+                src={spot.youtube_url}
+                style={{ width: "100%", height: "100%", borderRadius: 24, border: "none", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}
+                />
+            </div>
           </div>
         )}
       </div>
@@ -105,7 +113,6 @@ export default async function SpotPage({
   );
 }
 
-// STYLING OBJEKTE
 const cardStyle: React.CSSProperties = {
   background: "#f9fafb",
   borderRadius: 16,
