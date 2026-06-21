@@ -4,11 +4,12 @@ import MapBoxMini from "@/src/components/MapBoxMini";
 export default async function SpotPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: { slug: string };
 }) {
-  const { slug } = await params;
-  const decodedSlug = decodeURIComponent(slug.trim());
+  // ✅ SAFE SLUG HANDLING (DEIN FIX BEHALTEN)
+  const decodedSlug = decodeURIComponent(params.slug.trim());
 
+  // ✅ SUPABASE QUERY (DEIN WORKING STATE)
   const { data: spot, error } = await supabase
     .from("spots")
     .select("*")
@@ -17,182 +18,236 @@ export default async function SpotPage({
 
   if (error || !spot) {
     return (
-      <main style={{ padding: 40, textAlign: "center", minHeight: "100vh" }}>
-        <h1>Ort nicht gefunden.</h1>
+      <main style={{
+        padding: 40,
+        textAlign: "center",
+        minHeight: "100vh",
+        background: "#f6f7fb"
+      }}>
+        <h1>Ort nicht gefunden</h1>
       </main>
     );
   }
 
   return (
-    <main style={{ background: "#f6f7fb", minHeight: "100vh", padding: "40px 24px" }}>
-      
-      {/* Container */}
-      <div style={{ maxWidth: 800, margin: "0 auto" }}>
+    <main style={{ background: "#f6f7fb", minHeight: "100vh" }}>
 
-        {/* CARD */}
+      {/* HERO SECTION */}
+      <div style={{ position: "relative" }}>
+
+        <img
+          src={spot.image_url}
+          alt={spot.title}
+          style={{
+            width: "100%",
+            height: "60vh",
+            objectFit: "cover"
+          }}
+        />
+
+        {/* HERO OVERLAY */}
         <div style={{
-          background: "#fff",
-          borderRadius: 24,
-          overflow: "hidden",
-          boxShadow: "0 8px 30px rgba(0,0,0,0.05)",
-          border: "1px solid #eee"
+          position: "absolute",
+          inset: 0,
+          background:
+            "linear-gradient(to top, rgba(0,0,0,0.65), rgba(0,0,0,0.1))"
+        }} />
+
+        {/* HERO TEXT */}
+        <div style={{
+          position: "absolute",
+          bottom: 30,
+          left: 30,
+          right: 30,
+          color: "#fff"
         }}>
-          
-          {/* HERO IMAGE */}
-          <div style={{ width: "100%", aspectRatio: "16 / 9" }}>
-            <img
-              src={spot.image_url}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover"
-              }}
-              alt={spot.title}
+          <span style={{
+            background: "#14b8a6",
+            padding: "6px 10px",
+            borderRadius: 999,
+            fontSize: 12,
+            fontWeight: 600
+          }}>
+            {spot.category}
+          </span>
+
+          <h1 style={{
+            marginTop: 10,
+            fontSize: 42,
+            fontWeight: 800
+          }}>
+            {spot.title}
+          </h1>
+        </div>
+      </div>
+
+      {/* CONTENT WRAPPER */}
+      <div style={{
+        maxWidth: 1100,
+        margin: "0 auto",
+        padding: 24,
+        display: "grid",
+        gridTemplateColumns: "2fr 1fr",
+        gap: 24
+      }}>
+
+        {/* LEFT SIDE */}
+        <div>
+
+          {/* DESCRIPTION CARD */}
+          <div style={{
+            background: "#fff",
+            borderRadius: 18,
+            padding: 24,
+            boxShadow: "0 8px 20px rgba(0,0,0,0.05)"
+          }}>
+            <h2 style={{ marginBottom: 10 }}>Über diesen Ort</h2>
+
+            <p style={{
+              color: "#555",
+              lineHeight: 1.7
+            }}>
+              {spot.long_description || spot.description}
+            </p>
+          </div>
+
+          {/* MAP */}
+          <div style={{
+            marginTop: 20,
+            background: "#fff",
+            borderRadius: 18,
+            padding: 16,
+            boxShadow: "0 8px 20px rgba(0,0,0,0.05)"
+          }}>
+            <h3 style={{ marginBottom: 12 }}>📍 Lage</h3>
+
+            <MapBoxMini
+              lat={spot.latitude}
+              lng={spot.longitude}
             />
           </div>
 
-          {/* CONTENT */}
-          <div style={{ padding: 32 }}>
-            
-            {/* HEADER */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-              <div>
-                <span style={{ 
-                  display: "inline-block",
-                  padding: "4px 12px",
-                  borderRadius: 999,
-                  background: "#f0fdfa",
-                  color: "#14b8a6",
-                  fontSize: 12,
-                  fontWeight: 600,
-                  marginBottom: 12
-                }}>
-                  {spot.category}
-                </span>
+          {/* INFO GRID */}
+          <div style={{
+            marginTop: 20,
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: 12
+          }}>
 
-                <h1 style={{
-                  fontSize: 32,
-                  fontWeight: 800,
-                  margin: 0,
-                  color: "#111"
-                }}>
-                  {spot.title}
-                </h1>
+            <div style={card}>
+              <div style={label}>📍 Koordinaten</div>
+              <div style={value}>
+                {spot.latitude?.toFixed(2)}, {spot.longitude?.toFixed(2)}
               </div>
             </div>
 
-            {/* DESCRIPTION */}
-            <div style={{
-              marginTop: 24,
-              fontSize: 16,
-              lineHeight: 1.7,
-              color: "#444"
-            }}>
-              {spot.description}
+            <div style={card}>
+              <div style={label}>🏷 Kategorie</div>
+              <div style={value}>{spot.category}</div>
             </div>
 
-          {/* 🗺 MAPBOX MAP */}
-{spot.latitude && spot.longitude && (
-  <div style={{
-    marginTop: 24,
-    borderRadius: 16,
-    overflow: "hidden",
-    border: "1px solid #eee"
-  }}>
-    <div style={{
-      padding: 12,
-      fontSize: 12,
-      fontWeight: 600,
-      color: "#666",
-      background: "#fff",
-      borderBottom: "1px solid #eee"
-    }}>
-      🗺 Ungefähre Lage
-    </div>
+            <div style={card}>
+              <div style={label}>⭐ Level</div>
+              <div style={value}>Geheimtipp</div>
+            </div>
 
-    <MapBoxMini
-      lat={spot.latitude}
-      lng={spot.longitude}
-    />
-  </div>
-)}
+          </div>
+        </div>
 
-            {/* INFO GRID */}
+        {/* RIGHT SIDEBAR (AIRBNB CARD) */}
+        <div style={{
+          position: "sticky",
+          top: 20,
+          height: "fit-content"
+        }}>
+
+          <div style={{
+            background: "#fff",
+            borderRadius: 20,
+            padding: 20,
+            boxShadow: "0 12px 30px rgba(0,0,0,0.08)"
+          }}>
+
             <div style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-              gap: 16,
-              marginTop: 32
+              fontSize: 14,
+              color: "#14b8a6",
+              fontWeight: 700
             }}>
-              
-              <div style={cardStyle}>
-                <div style={labelStyle}>📍 Location</div>
-                <div style={valueStyle}>
-                  {spot.latitude
-                    ? `${spot.latitude.toFixed(2)}, ${spot.longitude.toFixed(2)}`
-                    : "-"}
-                </div>
-              </div>
+              Insider Spot
+            </div>
 
-              <div style={cardStyle}>
-                <div style={labelStyle}>🏷 Kategorie</div>
-                <div style={valueStyle}>{spot.category}</div>
-              </div>
+            <div style={{
+              fontSize: 22,
+              fontWeight: 800,
+              marginTop: 10
+            }}>
+              {spot.title}
+            </div>
 
-              <div style={cardStyle}>
-                <div style={labelStyle}>⭐ Insider Level</div>
-                <div style={valueStyle}>Geheimtipp</div>
-              </div>
+            <div style={{
+              marginTop: 12,
+              fontSize: 13,
+              color: "#666"
+            }}>
+              Perfekt für deinen Khao Lak Trip
+            </div>
+
+            {/* CTA */}
+            <div style={{
+              marginTop: 20,
+              display: "flex",
+              flexDirection: "column",
+              gap: 10
+            }}>
+
+              <button style={{
+                background: "#14b8a6",
+                color: "#fff",
+                border: "none",
+                padding: 12,
+                borderRadius: 12,
+                fontWeight: 600,
+                cursor: "pointer"
+              }}>
+                Route starten
+              </button>
+
+              <button style={{
+                background: "#f3f4f6",
+                border: "none",
+                padding: 12,
+                borderRadius: 12,
+                cursor: "pointer"
+              }}>
+                ❤️ Favorit
+              </button>
 
             </div>
           </div>
         </div>
-
-        {/* VIDEO */}
-        {spot.youtube_url && (
-          <div style={{ marginTop: 32 }}>
-            <h3 style={{ marginBottom: 16, fontSize: 18 }}>
-              🎥 Video-Eindruck
-            </h3>
-
-            <div style={{ aspectRatio: "16 / 9", width: "100%" }}>
-              <iframe
-                src={spot.youtube_url}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  borderRadius: 24,
-                  border: "none",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
-                }}
-              />
-            </div>
-          </div>
-        )}
-
       </div>
     </main>
   );
 }
 
-// STYLES
-const cardStyle: React.CSSProperties = {
-  background: "#f9fafb",
-  borderRadius: 16,
-  padding: 16,
-  border: "1px solid #f3f4f6"
+/* ===== STYLES ===== */
+const card: React.CSSProperties = {
+  background: "#fff",
+  padding: 14,
+  borderRadius: 14,
+  border: "1px solid #eee"
 };
 
-const labelStyle: React.CSSProperties = {
+const label: React.CSSProperties = {
   fontSize: 11,
-  textTransform: "uppercase",
-  letterSpacing: "0.05em",
   color: "#9ca3af",
   fontWeight: 700,
-  marginBottom: 4
+  textTransform: "uppercase"
 };
 
-const valueStyle: React.CSSProperties = {
+const value: React.CSSProperties = {
+  marginTop: 4,
   fontSize: 14,
   fontWeight: 600,
   color: "#111"
