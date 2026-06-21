@@ -149,7 +149,8 @@ function InfoItem({ icon, label, value }: { icon: React.ReactNode, label: string
 
 function getIcon(name: string) {
   const size = 18;
-  const icons: { [key: string]: JSX.Element } = {
+  // Ändere JSX.Element zu React.ReactNode
+  const icons: { [key: string]: React.ReactNode } = {
     Beach: <Palmtree size={size} />,
     Utensils: <Utensils size={size} />,
     Waves: <Waves size={size} />,
