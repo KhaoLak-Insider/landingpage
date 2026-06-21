@@ -1,9 +1,8 @@
 "use client";
 
-import mapboxgl from "mapbox-gl";
 import { useEffect, useRef } from "react";
-
-mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
 
 export default function MapBoxMini({
   lat,
@@ -16,13 +15,23 @@ export default function MapBoxMini({
 
   useEffect(() => {
     if (!mapRef.current) return;
+    if (!lat || !lng) return;
+
+    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+
+    if (!token) {
+      console.error("Mapbox token fehlt");
+      return;
+    }
+
+    mapboxgl.accessToken = token;
 
     const map = new mapboxgl.Map({
       container: mapRef.current,
       style: "mapbox://styles/mapbox/streets-v12",
       center: [lng, lat],
       zoom: 11,
-      interactive: false, // wichtig für Detailseiten UX
+      interactive: false,
     });
 
     new mapboxgl.Marker({ color: "#14b8a6" })
@@ -34,13 +43,20 @@ export default function MapBoxMini({
 
   return (
     <div
-      ref={mapRef}
       style={{
         width: "100%",
         height: 220,
         borderRadius: 16,
         overflow: "hidden",
       }}
-    />
+    >
+      <div
+        ref={mapRef}
+        style={{
+          width: "100%",
+          height: "100%",
+        }}
+      />
+    </div>
   );
 }
