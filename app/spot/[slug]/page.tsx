@@ -1,4 +1,5 @@
 import { supabase } from "@/src/lib/supabase";
+import MapBoxMini from "@/src/components/MapBoxMini";
 
 export default async function SpotPage({
   params,
@@ -25,131 +26,158 @@ export default async function SpotPage({
   return (
     <main style={{ background: "#f6f7fb", minHeight: "100vh", padding: "40px 24px" }}>
       
-      {/* Container zentriert die gesamte Einheit */}
+      {/* Container */}
       <div style={{ maxWidth: 800, margin: "0 auto" }}>
 
-        {/* Die Haupt-Card, die Bild und Infos als Einheit umschließt */}
+        {/* CARD */}
         <div style={{
           background: "#fff",
           borderRadius: 24,
-          overflow: "hidden", // Sorgt dafür, dass das Bild die Ecken der Card übernimmt
+          overflow: "hidden",
           boxShadow: "0 8px 30px rgba(0,0,0,0.05)",
           border: "1px solid #eee"
         }}>
           
-          {/* BILD - Responsiv mit aspectRatio */}
+          {/* HERO IMAGE */}
           <div style={{ width: "100%", aspectRatio: "16 / 9" }}>
             <img
               src={spot.image_url}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover"
+              }}
               alt={spot.title}
             />
           </div>
 
-          {/* INFO BEREICH */}
+          {/* CONTENT */}
           <div style={{ padding: 32 }}>
             
-            {/* Header mit Badge */}
+            {/* HEADER */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
               <div>
                 <span style={{ 
-                  display: "inline-block", 
-                  padding: "4px 12px", 
-                  borderRadius: 999, 
-                  background: "#f0fdfa", 
-                  color: "#14b8a6", 
-                  fontSize: 12, 
-                  fontWeight: 600, 
-                  marginBottom: 12 
+                  display: "inline-block",
+                  padding: "4px 12px",
+                  borderRadius: 999,
+                  background: "#f0fdfa",
+                  color: "#14b8a6",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  marginBottom: 12
                 }}>
                   {spot.category}
                 </span>
-                <h1 style={{ fontSize: 32, fontWeight: 800, margin: 0, color: "#111" }}>
+
+                <h1 style={{
+                  fontSize: 32,
+                  fontWeight: 800,
+                  margin: 0,
+                  color: "#111"
+                }}>
                   {spot.title}
                 </h1>
               </div>
             </div>
 
-            {/* Beschreibung */}
-            <div style={{ marginTop: 24, fontSize: 16, lineHeight: 1.7, color: "#444" }}>
+            {/* DESCRIPTION */}
+            <div style={{
+              marginTop: 24,
+              fontSize: 16,
+              lineHeight: 1.7,
+              color: "#444"
+            }}>
               {spot.description}
             </div>
-                
-{/* 🗺 FAKE MAP (HIER EINBAUEN) */}
-<div style={{
-  marginTop: 24,
-  borderRadius: 16,
-  overflow: "hidden",
-  border: "1px solid #eee",
-  background: "#f3f4f6"
-}}>
 
-  <div style={{
-    padding: 12,
-    fontSize: 12,
-    fontWeight: 600,
-    color: "#666",
-    background: "#fff",
-    borderBottom: "1px solid #eee"
-  }}>
-    🗺 Ungefähre Lage
-  </div>
+            {/* 🗺 MAPBOX MAP */}
+            {spot.latitude && spot.longitude && (
+              <div style={{
+                marginTop: 24,
+                borderRadius: 16,
+                overflow: "hidden",
+                border: "1px solid #eee"
+              }}>
 
-  <div style={{
-    height: 220,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    color: "#777",
-    fontSize: 14
-  }}>
-    Map Placeholder (kommt später Mapbox / Google Static Map)
-  </div>
+                <div style={{
+                  padding: 12,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: "#666",
+                  background: "#fff",
+                  borderBottom: "1px solid #eee"
+                }}>
+                  🗺 Ungefähre Lage
+                </div>
 
-</div>
+                <MapBoxMini
+                  lat={spot.latitude}
+                  lng={spot.longitude}
+                />
 
+              </div>
+            )}
 
-            {/* Info-Grid */}
+            {/* INFO GRID */}
             <div style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
               gap: 16,
               marginTop: 32
             }}>
+              
               <div style={cardStyle}>
                 <div style={labelStyle}>📍 Location</div>
-                <div style={valueStyle}>{spot.latitude ? `${spot.latitude.toFixed(2)}, ${spot.longitude.toFixed(2)}` : "-"}</div>
+                <div style={valueStyle}>
+                  {spot.latitude
+                    ? `${spot.latitude.toFixed(2)}, ${spot.longitude.toFixed(2)}`
+                    : "-"}
+                </div>
               </div>
+
               <div style={cardStyle}>
                 <div style={labelStyle}>🏷 Kategorie</div>
                 <div style={valueStyle}>{spot.category}</div>
               </div>
+
               <div style={cardStyle}>
                 <div style={labelStyle}>⭐ Insider Level</div>
                 <div style={valueStyle}>Geheimtipp</div>
               </div>
+
             </div>
           </div>
         </div>
-        
-        {/* Separates Video-Element */}
+
+        {/* VIDEO */}
         {spot.youtube_url && (
-            <div style={{ marginTop: 32 }}>
-              <h3 style={{ marginBottom: 16, fontSize: 18 }}>🎥 Video-Eindruck</h3>
-              <div style={{ aspectRatio: "16 / 9", width: "100%" }}>
-                  <iframe 
-                    src={spot.youtube_url} 
-                    style={{ width: "100%", height: "100%", borderRadius: 24, border: "none", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }} 
-                  />
-              </div>
+          <div style={{ marginTop: 32 }}>
+            <h3 style={{ marginBottom: 16, fontSize: 18 }}>
+              🎥 Video-Eindruck
+            </h3>
+
+            <div style={{ aspectRatio: "16 / 9", width: "100%" }}>
+              <iframe
+                src={spot.youtube_url}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  borderRadius: 24,
+                  border: "none",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+                }}
+              />
             </div>
+          </div>
         )}
+
       </div>
     </main>
   );
 }
 
-// Styling Objekte
+// STYLES
 const cardStyle: React.CSSProperties = {
   background: "#f9fafb",
   borderRadius: 16,
