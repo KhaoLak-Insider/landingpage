@@ -91,36 +91,31 @@ export default async function SpotPage({
               {spot.description}
             </div>
 
-          {/* 🗺 MAP PLACEHOLDER */}
-<div style={{
-  marginTop: 24,
-  borderRadius: 16,
-  overflow: "hidden",
-  border: "1px solid #eee",
-  background: "#f3f4f6"
-}}>
+          {/* 🗺 MAPBOX MAP */}
+{spot.latitude && spot.longitude && (
   <div style={{
-    padding: 12,
-    fontSize: 12,
-    fontWeight: 600,
-    color: "#666",
-    background: "#fff",
-    borderBottom: "1px solid #eee"
+    marginTop: 24,
+    borderRadius: 16,
+    overflow: "hidden",
+    border: "1px solid #eee"
   }}>
-    🗺 Ungefähre Lage
-  </div>
+    <div style={{
+      padding: 12,
+      fontSize: 12,
+      fontWeight: 600,
+      color: "#666",
+      background: "#fff",
+      borderBottom: "1px solid #eee"
+    }}>
+      🗺 Ungefähre Lage
+    </div>
 
-  <div style={{
-    height: 220,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    color: "#777",
-    fontSize: 14
-  }}>
-    Map Placeholder
+    <MapBoxMini
+      lat={spot.latitude}
+      lng={spot.longitude}
+    />
   </div>
-</div>
+)}
 
             {/* INFO GRID */}
             <div style={{
