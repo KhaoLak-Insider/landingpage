@@ -1,15 +1,17 @@
 import { supabase } from "@/src/lib/supabase";
 import MapBoxMini from "@/src/components/MapBoxMini";
 
+// ✅ HIER: params als Promise definiert (Fix für Next.js 15)
 export default async function SpotPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  // ✅ SAFE SLUG HANDLING (DEIN FIX BEHALTEN)
-  const decodedSlug = decodeURIComponent(params.slug.trim());
+  // ✅ HIER: params auflösen
+  const { slug } = await params;
+  const decodedSlug = decodeURIComponent(slug.trim());
 
-  // ✅ SUPABASE QUERY (DEIN WORKING STATE)
+  // ✅ DEIN QUERY (UNVERÄNDERT)
   const { data: spot, error } = await supabase
     .from("spots")
     .select("*")
@@ -29,6 +31,7 @@ export default async function SpotPage({
     );
   }
 
+  // ✅ DEIN DESIGN (UNVERÄNDERT)
   return (
     <main style={{ background: "#f6f7fb", minHeight: "100vh" }}>
 
@@ -155,7 +158,7 @@ export default async function SpotPage({
           </div>
         </div>
 
-        {/* RIGHT SIDEBAR (AIRBNB CARD) */}
+        {/* RIGHT SIDEBAR */}
         <div style={{
           position: "sticky",
           top: 20,
@@ -193,7 +196,6 @@ export default async function SpotPage({
               Perfekt für deinen Khao Lak Trip
             </div>
 
-            {/* CTA */}
             <div style={{
               marginTop: 20,
               display: "flex",
