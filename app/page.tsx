@@ -104,7 +104,7 @@ export default function Home() {
           />
 
           <div className="hidden gap-10 text-sm font-semibold md:flex">
-            <a href="#">Entdecken</a>
+            <Link href="/entdecken">Entdecken</Link>
             <a href="#">Planen</a>
             <a href="#">Erleben</a>
             <a href="#">Favoriten</a>
