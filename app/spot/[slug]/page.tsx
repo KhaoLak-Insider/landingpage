@@ -1,22 +1,24 @@
-import { supabase } from "@/src/lib/supabase";
+import { supabaseServer } from "@/src/lib/supabase-server";
 
 export default async function SpotPage({ params }: any) {
 
-  // 🔍 DEBUG: zeigt exakt was Next.js liefert
-  console.log("SLUG:", params.slug);
-  console.log("RAW SLUG:", JSON.stringify(params.slug));
+  const slug = params.slug?.trim();
 
-  // 🧠 DB QUERY (mit Trim gegen versteckte Leerzeichen)
-  const { data, error } = await supabase
+  const { data: spot, error } = await supabaseServer
     .from("spots")
     .select("*")
-    .eq("slug", params.slug.trim());
+    .eq("slug", slug)
+    .single();
+
+  if (!spot) {
+    return <div>Not found</div>;
+  }
 
   return (
-    <div style={{ padding: 40 }}>
-      <div>SLUG: {params.slug}</div>
-      <div>RESULT: {JSON.stringify(data)}</div>
-      <div>ERROR: {JSON.stringify(error)}</div>
-    </div>
+    <main style={{ padding: 40 }}>
+      <img src={spot.image_url} style={{ width: "100%", height: 300 }} />
+      <h1>{spot.title}</h1>
+      <p>{spot.description}</p>
+    </main>
   );
 }
