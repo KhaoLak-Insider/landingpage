@@ -8,6 +8,7 @@ export default function EntdeckenPage() {
   const [spots, setSpots] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("Alle");
+  const [suggestions, setSuggestions] = useState<any[]>([]);
 
   const categories = [
     "Alle",
@@ -39,6 +40,24 @@ export default function EntdeckenPage() {
 
     const { data } = await query;
     setSpots(data || []);
+  }
+
+  // 🔍 AUTOCOMPLETE SEARCH (NEU)
+  async function handleSearch(value: string) {
+    setSearch(value);
+
+    if (value.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+
+    const { data } = await supabase
+      .from("spots")
+      .select("id, title, slug, image_url")
+      .ilike("title", `${value}%`)
+      .limit(5);
+
+    setSuggestions(data || []);
   }
 
   function toggleFav(id: string) {
@@ -78,18 +97,11 @@ export default function EntdeckenPage() {
           alignItems: "center"
         }}>
           
-          <div style={{
-            fontWeight: 800,
-            color: "#000"
-          }}>
+          <div style={{ fontWeight: 800, color: "#000" }}>
             Khao Lak Insider 🌴
           </div>
 
-          <nav style={{
-            display: "flex",
-            gap: 18,
-            fontSize: 14
-          }}>
+          <nav style={{ display: "flex", gap: 18, fontSize: 14 }}>
             <Link href="/entdecken">Entdecken</Link>
             <Link href="/planen">Planen</Link>
             <Link href="/erleben">Erleben</Link>
@@ -101,19 +113,15 @@ export default function EntdeckenPage() {
       </div>
 
       {/* PAGE HEADER */}
-      <div style={{
-        padding: 24,
-        maxWidth: 1200,
-        margin: "0 auto"
-      }}>
+      <div style={{ padding: 24, maxWidth: 1200, margin: "0 auto" }}>
         <h1 style={{ fontSize: 32, color: "#000" }}>
           Entdecken 🌴
         </h1>
 
-        {/* SEARCH */}
+        {/* SEARCH INPUT */}
         <input
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => handleSearch(e.target.value)}
           placeholder="Suche nach Orten..."
           style={{
             width: "100%",
@@ -126,17 +134,54 @@ export default function EntdeckenPage() {
           }}
         />
 
+        {/* 🔥 AUTOCOMPLETE DROPDOWN */}
+        {suggestions.length > 0 && (
+          <div style={{
+            background: "#fff",
+            border: "1px solid #eee",
+            borderRadius: 12,
+            marginTop: 6,
+            overflow: "hidden"
+          }}>
+            {suggestions.map((s) => (
+              <Link
+                key={s.id}
+                href={`/spot/${s.slug}`}
+                style={{
+                  display: "flex",
+                  gap: 10,
+                  padding: 10,
+                  alignItems: "center",
+                  textDecoration: "none",
+                  color: "#000"
+                }}
+              >
+                <img
+                  src={s.image_url}
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 8,
+                    objectFit: "cover",
+                  }}
+                />
+                <div style={{ fontSize: 14, fontWeight: 500 }}>
+                  {s.title}
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+
         {/* MAP BUTTON */}
         <div style={{ marginTop: 10 }}>
-          <button
-            style={{
-              padding: "10px 14px",
-              borderRadius: 12,
-              border: "1px solid #ddd",
-              background: "#fff",
-              cursor: "pointer"
-            }}
-          >
+          <button style={{
+            padding: "10px 14px",
+            borderRadius: 12,
+            border: "1px solid #ddd",
+            background: "#fff",
+            cursor: "pointer"
+          }}>
             🗺 Karte öffnen
           </button>
         </div>
