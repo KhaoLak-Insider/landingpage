@@ -30,8 +30,15 @@ export default function MapBoxMini({
       container: mapRef.current,
       style: "mapbox://styles/mapbox/streets-v12",
       center: [lng, lat],
-      zoom: 11,
-      interactive: false,
+      zoom: 10,
+      interactive: true,
+    });
+
+    // WARTEN, bis die Karte geladen ist, bevor wir schwenken
+    map.on("load", () => {
+      // Ändere den Wert 50, um die Karte weiter nach unten (Marker höher) zu schieben
+      // Positive Y-Werte verschieben den Ausschnitt nach unten
+      map.panBy([0, 50], { duration: 0 }); 
     });
 
     new mapboxgl.Marker({ color: "#14b8a6" })
@@ -45,7 +52,7 @@ export default function MapBoxMini({
     <div
       style={{
         width: "100%",
-        height: 220,
+        height: "100%", // Nutzt jetzt den kompletten Platz der Eltern-Box
         borderRadius: 16,
         overflow: "hidden",
       }}
