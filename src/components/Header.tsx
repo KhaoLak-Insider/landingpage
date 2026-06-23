@@ -18,7 +18,7 @@ export default function Header() {
       if (user) {
         const { data: profile } = await supabase
           .from("profiles")
-          .select("username, first_name, avatar_url")
+          .select("username, first_name, avatar_url, role")
           .eq("id", user.id)
           .single();
         setProfile(profile);
@@ -27,7 +27,6 @@ export default function Header() {
 
     fetchUserData();
 
-    // Realtime-Abonnement für Profil-Änderungen
     const channel = supabase
       .channel('schema-db-changes')
       .on('postgres_changes', { 
@@ -35,7 +34,6 @@ export default function Header() {
         schema: 'public', 
         table: 'profiles' 
       }, (payload) => {
-        // Wenn das Update den aktuellen User betrifft, Daten neu laden
         if (payload.new.id === user?.id || payload.new.id === profile?.id) {
           fetchUserData();
         }
@@ -80,12 +78,11 @@ export default function Header() {
       <div className="flex-grow" />
 
       {user ? (
-        <div className="flex items-center gap-4">
-          <Link href="/profil" className="flex items-center gap-3">
+        <div className="relative group flex items-center gap-2 cursor-pointer">
+          <div className="flex items-center gap-2 pr-2">
             <span className="text-sm font-bold text-slate-900">
               {profile?.username || "Profil"}
             </span>
-            {/* Avatar Anzeige */}
             <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-200 border border-slate-300">
               {profile?.avatar_url ? (
                 <Image 
@@ -101,13 +98,36 @@ export default function Header() {
                 </div>
               )}
             </div>
-          </Link>
-          <button 
-            onClick={() => supabase.auth.signOut()}
-            className="text-sm font-bold text-slate-500 hover:text-red-500 ml-4"
-          >
-            Logout
-          </button>
+            <svg className="w-4 h-4 text-slate-500 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+
+          <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+            <div className="p-2">
+              <Link href="/profil" className="block px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 rounded-lg">Profil</Link>
+              
+              {/* Sichtbarkeit nur für Admins/Editoren */}
+              {(profile?.role === 'admin' || profile?.role === 'editor') && (
+                <>
+                  <Link href="/editor" className="block px-4 py-2 text-sm font-bold text-teal-600 hover:bg-teal-50 rounded-lg">
+                    Spot einpflegen
+                  </Link>
+                  <Link href="/editor/list" className="block px-4 py-2 text-sm font-bold text-teal-600 hover:bg-teal-50 rounded-lg">
+                    Spots bearbeiten
+                  </Link>
+                </>
+              )}
+
+              <div className="border-t border-slate-100 my-1"></div>
+              <button 
+                onClick={() => supabase.auth.signOut()} 
+                className="w-full text-left px-4 py-2 text-sm font-bold text-red-600 hover:bg-red-50 rounded-lg"
+              >
+                Abmelden
+              </button>
+            </div>
+          </div>
         </div>
       ) : (
         <Link
