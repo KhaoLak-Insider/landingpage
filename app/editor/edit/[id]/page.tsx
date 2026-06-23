@@ -8,6 +8,18 @@ import GalleryUpload from "@/src/components/GalleryUpload";
 import { iconNames, iconMap } from "@/src/components/IconLibrary";
 import { MapPin } from "lucide-react";
 
+// HELPER: Text zu JSON konvertieren
+function convertTextToJson(text: string) {
+  if (!text) return [];
+  const lines = text.split('\n').filter(line => line.trim() !== '');
+  return lines.map(line => {
+    if (line.trim().startsWith('### ')) {
+      return { type: 'heading', content: line.replace('### ', '').trim() };
+    }
+    return { type: 'paragraph', content: line.trim() };
+  });
+}
+
 export default function EditSpotPage() {
   const params = useParams();
   const id = params.id as string;
@@ -19,6 +31,7 @@ export default function EditSpotPage() {
     latitude: "", longitude: "", price_level: "", opening_hours: "", youtube_url: "",
     youtube_timestamp: "", features: [{ label: "", value: "", icon: "Sparkles" as keyof typeof iconMap }],
     best_months: [] as number[], galleryUrlsText: "",
+    parking_info: { name: "", price: "", details: "", lat: "", lng: "" }, // ERGÄNZT
   });
   const [loading, setLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -28,12 +41,22 @@ export default function EditSpotPage() {
       async function loadSpot() {
         const { data } = await supabase.from("spots").select("*").eq("id", id).single();
         if (data) {
+          // JSON Struktur zurück in Text für den Editor wandeln
+          let textDesc = "";
+          if (Array.isArray(data.long_description)) {
+            textDesc = data.long_description.map((b: any) => 
+              b.type === 'heading' ? `### ${b.content}` : b.content
+            ).join('\n\n');
+          } else {
+            textDesc = data.long_description || "";
+          }
+
           setFormData({
             title: data.title || "",
             image_url: data.image_url || "",
             category: data.category || "",
             description: data.description || "",
-            long_description: data.long_description || "",
+            long_description: textDesc,
             latitude: data.latitude?.toString() || "",
             longitude: data.longitude?.toString() || "",
             price_level: data.price_level || "",
@@ -42,7 +65,8 @@ export default function EditSpotPage() {
             youtube_timestamp: data.youtube_timestamp?.toString() || "",
             features: data.details_config?.features || [{ label: "", value: "", icon: "Sparkles" }],
             best_months: data.best_months || [],
-            galleryUrlsText: data.gallery_urls?.join("\n") || ""
+            galleryUrlsText: data.gallery_urls?.join("\n") || "",
+            parking_info: data.parking_info || { name: "", price: "", details: "", lat: "", lng: "" }, // ERGÄNZT
           });
         }
       }
@@ -64,10 +88,14 @@ export default function EditSpotPage() {
     setLoading(true);
     const slug = formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
     
+    // JSON KONVERTIERUNG BEIM SPEICHERN
+    const jsonDescription = convertTextToJson(formData.long_description);
+    
     const { error } = await supabase.from("spots").update({
       title: formData.title, image_url: formData.image_url, slug: slug,
       category: formData.category, description: formData.description,
-      long_description: formData.long_description,
+      long_description: jsonDescription, // Hier wird das JSON-Array gespeichert
+      parking_info: formData.parking_info, // ERGÄNZT
       latitude: formData.latitude !== "" ? parseFloat(formData.latitude) : null,
       longitude: formData.longitude !== "" ? parseFloat(formData.longitude) : null,
       price_level: formData.price_level, opening_hours: formData.opening_hours,
@@ -91,13 +119,14 @@ export default function EditSpotPage() {
       </header>
 
       <form onSubmit={handleSubmit} className="space-y-8 pb-24">
+        {/* Basis-Informationen */}
         <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
           <h2 className="text-lg font-bold text-slate-800 border-b pb-2">Basis-Informationen</h2>
           <input className="w-full p-4 border rounded-xl" placeholder="Titel des Spots" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} />
           <ImageUpload slug={formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') || "temp"} onUpload={(url) => setFormData({...formData, image_url: url})} />
           <div className="grid grid-cols-2 gap-4">
-             <input className="w-full p-3 border rounded-xl" placeholder="YouTube URL" value={formData.youtube_url} onChange={(e) => setFormData({...formData, youtube_url: e.target.value})} />
-             <input className="w-full p-3 border rounded-xl" placeholder="Startzeit (Sekunden)" type="number" value={formData.youtube_timestamp} onChange={(e) => setFormData({...formData, youtube_timestamp: e.target.value})} />
+              <input className="w-full p-3 border rounded-xl" placeholder="YouTube URL" value={formData.youtube_url} onChange={(e) => setFormData({...formData, youtube_url: e.target.value})} />
+              <input className="w-full p-3 border rounded-xl" placeholder="Startzeit (Sekunden)" type="number" value={formData.youtube_timestamp} onChange={(e) => setFormData({...formData, youtube_timestamp: e.target.value})} />
           </div>
           <div>
             <label className="block text-sm font-bold mb-3 text-slate-700">Kategorie:</label>
@@ -111,12 +140,26 @@ export default function EditSpotPage() {
           </div>
         </section>
 
+        {/* PARKING SEKTION */}
+        <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+          <h2 className="text-lg font-bold text-slate-800 border-b pb-2">Parkplatz-Informationen</h2>
+          <input className="w-full p-4 border rounded-xl" placeholder="Name/Ort des Parkplatzes" value={formData.parking_info.name} onChange={(e) => setFormData({...formData, parking_info: {...formData.parking_info, name: e.target.value}})} />
+          <div className="grid grid-cols-2 gap-4">
+            <input className="w-full p-3 border rounded-xl" placeholder="Gebühr (z.B. kostenlos)" value={formData.parking_info.price} onChange={(e) => setFormData({...formData, parking_info: {...formData.parking_info, price: e.target.value}})} />
+            <input className="w-full p-3 border rounded-xl" placeholder="Weitere Details" value={formData.parking_info.details} onChange={(e) => setFormData({...formData, parking_info: {...formData.parking_info, details: e.target.value}})} />
+            <input className="w-full p-3 border rounded-xl" placeholder="Parkplatz Breitengrad" value={formData.parking_info.lat} onChange={(e) => setFormData({...formData, parking_info: {...formData.parking_info, lat: e.target.value}})} />
+            <input className="w-full p-3 border rounded-xl" placeholder="Parkplatz Längengrad" value={formData.parking_info.lng} onChange={(e) => setFormData({...formData, parking_info: {...formData.parking_info, lng: e.target.value}})} />
+          </div>
+        </section>
+
+        {/* Beschreibungen */}
         <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
           <h2 className="text-lg font-bold text-slate-800 border-b pb-2">Beschreibungen</h2>
           <textarea className="w-full p-4 border rounded-xl" placeholder="Kurze Beschreibung" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} />
-          <textarea className="w-full p-4 border rounded-xl" rows={4} placeholder="Lange Beschreibung" value={formData.long_description} onChange={(e) => setFormData({...formData, long_description: e.target.value})} />
+          <textarea className="w-full p-4 border rounded-xl" rows={4} placeholder="Lange Beschreibung (Nutze ### für Überschriften)" value={formData.long_description} onChange={(e) => setFormData({...formData, long_description: e.target.value})} />
         </section>
 
+        {/* Reisezeit */}
         <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
           <h2 className="text-lg font-bold text-slate-800 border-b pb-4">Beste Reisezeit</h2>
           <div className="grid grid-cols-6 gap-2">
@@ -129,6 +172,7 @@ export default function EditSpotPage() {
           </div>
         </section>
 
+        {/* Features & Koordinaten */}
         <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
           <h2 className="text-lg font-bold text-slate-800 border-b pb-2">Features & Koordinaten</h2>
           <div className="grid grid-cols-2 gap-4">
@@ -138,7 +182,8 @@ export default function EditSpotPage() {
           <div className="space-y-2">
             <label className="block text-sm font-bold text-slate-700">Features hinzufügen:</label>
             {formData.features.map((f, i) => {
-               const IconComponent = iconMap[f.icon];
+               // Wir suchen das Icon, wenn es nicht existiert (undefined), nehmen wir MapPin
+const IconComponent = iconMap[f.icon] || iconMap["MapPin"];
                return (
                  <div key={i} className="flex gap-2 items-center bg-slate-50 p-2 rounded-xl">
                     <input className="p-2 border rounded-lg w-1/4" placeholder="Label" value={f.label} onChange={(e) => { const n = [...formData.features]; n[i].label = e.target.value; setFormData({...formData, features: n}); }} />
@@ -168,63 +213,6 @@ export default function EditSpotPage() {
           </div>
         </div>
       </form>
-
-      {showPreview && (
-        <div className="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl relative shadow-2xl">
-            <button onClick={() => setShowPreview(false)} className="absolute top-4 right-4 z-50 p-2 bg-white/80 rounded-full hover:bg-slate-100">✕</button>
-            <div className="relative w-full h-[300px] bg-slate-900">
-              {formData.youtube_url ? (
-                <iframe className="w-full h-full" src={`https://www.youtube.com/embed/${formData.youtube_url.split('v=')[1]?.split('&')[0]}?start=${formData.youtube_timestamp}`} allowFullScreen />
-              ) : formData.image_url ? (
-                <img src={formData.image_url} className="w-full h-full object-cover" alt="Preview" />
-              ) : <div className="w-full h-full bg-slate-200 flex items-center justify-center">Kein Bild</div>}
-              <div className="absolute bottom-6 left-8 bg-[#14b8a6] text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider">{formData.category || "Kategorie"}</div>
-            </div>
-            <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-12">
-              <div>
-                <h1 className="text-4xl font-black mb-2">{formData.title || "Titel..."}</h1>
-                <p className="text-lg text-slate-600 mb-8">{formData.description}</p>
-                <div className="whitespace-pre-wrap mb-8 text-slate-600">{formData.long_description}</div>
-                <div className="grid grid-cols-2 gap-4 mb-8">
-                  {formData.features.map((f, i) => f.label && (
-                    <div key={i} className="flex gap-3 items-center bg-slate-50 p-3 rounded-xl border">
-                      {(() => { const Icon = iconMap[f.icon]; return Icon ? <Icon size={20} className="text-[#14b8a6]" /> : null; })()}
-                      <div><div className="text-[10px] font-bold text-slate-400 uppercase">{f.label}</div><div className="text-sm font-bold">{f.value}</div></div>
-                    </div>
-                  ))}
-                </div>
-                {formData.best_months.length > 0 && (
-                  <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 mb-8">
-                    <h3 className="text-sm font-bold text-slate-800 mb-4 uppercase tracking-wider">Beste Reisezeit</h3>
-                    <div className="grid grid-cols-6 gap-2">
-                      {["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"].map((monat, index) => {
-                        const isSelected = formData.best_months.includes(index);
-                        return (<div key={monat} className={`p-2 rounded-lg text-xs font-bold text-center ${isSelected ? "bg-[#14b8a6] text-white" : "bg-white text-slate-300 border border-slate-200"}`}>{monat}</div>);
-                      })}
-                    </div>
-                  </div>
-                )}
-                {formData.galleryUrlsText.trim() && (
-                  <div>
-                    <h3 className="text-sm font-bold text-slate-800 mb-4 uppercase tracking-wider">Galerie</h3>
-                    <div className="grid grid-cols-4 gap-2">
-                      {formData.galleryUrlsText.split("\n").filter(u => u.trim() !== "").map((url, i) => (
-                        <div key={i} className="aspect-square rounded-xl overflow-hidden border"><img src={url} className="w-full h-full object-cover" alt="Galerie" /></div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-              <div className="bg-slate-50 rounded-2xl border-2 border-dashed h-64 flex flex-col items-center justify-center text-slate-400 p-6 text-center">
-                <MapPin size={40} className="mb-2 text-slate-300" />
-                <p className="text-sm font-bold text-slate-500 mb-1">Hier wird später die Karte mit der angegebenen Position angezeigt.</p>
-                <p className="text-xs">(Aktuelle Koordinaten: {formData.latitude || "0.00"}, {formData.longitude || "0.00"})</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

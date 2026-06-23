@@ -9,16 +9,17 @@ export default function EntdeckenPage() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("Alle");
   const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [categories, setCategories] = useState<string[]>(["Alle"]);
 
-  const categories = [
-    "Alle",
-    "Strand",
-    "Natur",
-    "Restaurant",
-    "Markt",
-    "Tempel",
-    "Geheimtipp",
-  ];
+  useEffect(() => {
+    async function loadCategories() {
+      const { data } = await supabase.from("categories").select("name").order("name");
+      if (data) {
+        setCategories(["Alle", ...data.map((c) => c.name)]);
+      }
+    }
+    loadCategories();
+  }, []);
 
   useEffect(() => {
     loadSpots();
@@ -42,7 +43,6 @@ export default function EntdeckenPage() {
     setSpots(data || []);
   }
 
-  // 🔍 AUTOCOMPLETE SEARCH (NEU)
   async function handleSearch(value: string) {
     setSearch(value);
 
@@ -69,6 +69,7 @@ export default function EntdeckenPage() {
     } else {
       localStorage.setItem("favs", JSON.stringify([...favs, id]));
     }
+    window.dispatchEvent(new Event("storage"));
   }
 
   function isFav(id: string) {
@@ -78,59 +79,27 @@ export default function EntdeckenPage() {
   }
 
   return (
-    <main style={{ background: "#f6f7fb", minHeight: "100vh" }}>
-
-      {/* HEADER NAV (aus Landingpage) */}
-      <div style={{
-        position: "sticky",
-        top: 0,
-        zIndex: 50,
-        background: "#ffffff",
-        borderBottom: "1px solid #ddd"
-      }}>
-        <div style={{
-          maxWidth: 1200,
-          margin: "0 auto",
-          padding: "14px 24px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center"
-        }}>
-          
-          <div style={{ fontWeight: 800, color: "#000" }}>
-            Khao Lak Insider 🌴
-          </div>
-
-          <nav style={{ display: "flex", gap: 18, fontSize: 14 }}>
-            <Link href="/entdecken">Entdecken</Link>
-            <Link href="/planen">Planen</Link>
-            <Link href="/erleben">Erleben</Link>
-            <Link href="/favoriten">Favoriten</Link>
-            <Link href="/community">Community</Link>
-          </nav>
-
-        </div>
-      </div>
-
+    <main style={{ background: "#f8fafc", minHeight: "100vh", paddingBottom: "80px" }}>
       {/* PAGE HEADER */}
-      <div style={{ padding: 24, maxWidth: 1200, margin: "0 auto" }}>
-        <h1 style={{ fontSize: 32, color: "#000" }}>
+      <div style={{ padding: "40px 24px", maxWidth: 1100, margin: "0 auto" }}>
+        <h1 style={{ fontSize: "2.5rem", fontWeight: 800, color: "#0f172a", marginBottom: "8px" }}>
           Entdecken 🌴
         </h1>
+        <p style={{ color: "#64748b", fontSize: "1.1rem", marginBottom: "32px" }}>Finde die besten Spots in Khao Lak.</p>
 
         {/* SEARCH INPUT */}
         <input
           value={search}
           onChange={(e) => handleSearch(e.target.value)}
-          placeholder="Suche nach Orten..."
+          placeholder="Wonach suchst du?..."
           style={{
             width: "100%",
-            padding: "12px 14px",
-            borderRadius: 12,
-            border: "1px solid #ddd",
-            marginTop: 12,
+            padding: "16px 20px",
+            borderRadius: 16,
+            border: "1px solid #e2e8f0",
             background: "#fff",
-            color: "#000"
+            fontSize: "16px",
+            boxShadow: "0 1px 2px rgba(0,0,0,0.05)"
           }}
         />
 
@@ -138,10 +107,11 @@ export default function EntdeckenPage() {
         {suggestions.length > 0 && (
           <div style={{
             background: "#fff",
-            border: "1px solid #eee",
-            borderRadius: 12,
-            marginTop: 6,
-            overflow: "hidden"
+            border: "1px solid #e2e8f0",
+            borderRadius: 16,
+            marginTop: 8,
+            overflow: "hidden",
+            boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)"
           }}>
             {suggestions.map((s) => (
               <Link
@@ -149,38 +119,33 @@ export default function EntdeckenPage() {
                 href={`/spot/${s.slug}`}
                 style={{
                   display: "flex",
-                  gap: 10,
-                  padding: 10,
+                  gap: 12,
+                  padding: 12,
                   alignItems: "center",
                   textDecoration: "none",
-                  color: "#000"
+                  color: "#334155"
                 }}
               >
                 <img
                   src={s.image_url}
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 8,
-                    objectFit: "cover",
-                  }}
+                  style={{ width: 44, height: 44, borderRadius: 10, objectFit: "cover" }}
                 />
-                <div style={{ fontSize: 14, fontWeight: 500 }}>
-                  {s.title}
-                </div>
+                <div style={{ fontSize: 15, fontWeight: 600 }}>{s.title}</div>
               </Link>
             ))}
           </div>
         )}
 
         {/* MAP BUTTON */}
-        <div style={{ marginTop: 10 }}>
+        <div style={{ marginTop: 20 }}>
           <button style={{
-            padding: "10px 14px",
+            padding: "12px 20px",
             borderRadius: 12,
-            border: "1px solid #ddd",
+            border: "1px solid #e2e8f0",
             background: "#fff",
-            cursor: "pointer"
+            cursor: "pointer",
+            fontWeight: 600,
+            color: "#475569"
           }}>
             🗺 Karte öffnen
           </button>
@@ -191,20 +156,23 @@ export default function EntdeckenPage() {
           display: "flex",
           gap: 10,
           overflowX: "auto",
-          marginTop: 14,
+          marginTop: 24,
+          paddingBottom: 4
         }}>
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setCategory(cat)}
               style={{
-                padding: "8px 14px",
-                borderRadius: 999,
-                border: "1px solid #ddd",
-                background: category === cat ? "#14b8a6" : "#fff",
-                color: category === cat ? "#fff" : "#000",
+                padding: "10px 22px",
+                borderRadius: 50,
+                border: category === cat ? "none" : "1px solid #e2e8f0",
+                background: category === cat ? "#0f172a" : "#fff",
+                color: category === cat ? "#fff" : "#475569",
+                fontWeight: 600,
                 whiteSpace: "nowrap",
                 cursor: "pointer",
+                transition: "all 0.2s"
               }}
             >
               {cat}
@@ -215,44 +183,39 @@ export default function EntdeckenPage() {
 
       {/* GRID */}
       <div style={{
-        maxWidth: 1200,
+        maxWidth: 1100,
         margin: "0 auto",
-        padding: "0 24px 40px",
+        padding: "0 24px",
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-        gap: 18,
+        gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+        gap: "24px",
       }}>
         {spots.map((spot) => (
           <div
             key={spot.id}
             style={{
               background: "#fff",
-              borderRadius: 18,
+              borderRadius: 20,
               overflow: "hidden",
-              boxShadow: "0 8px 20px rgba(0,0,0,0.06)",
-              border: "1px solid #eee"
+              border: "1px solid #f1f5f9",
+              boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)",
+              transition: "transform 0.2s"
             }}
           >
-
             <Link href={`/spot/${spot.slug}`}>
               <img
                 src={spot.image_url}
-                style={{
-                  width: "100%",
-                  height: 180,
-                  objectFit: "cover",
-                }}
+                style={{ width: "100%", height: 200, objectFit: "cover" }}
               />
             </Link>
 
-            <div style={{ padding: 12 }}>
-
+            <div style={{ padding: 20 }}>
               <div style={{
                 display: "flex",
                 justifyContent: "space-between",
-                alignItems: "center"
+                alignItems: "start"
               }}>
-                <h3 style={{ margin: 0, color: "#000" }}>
+                <h3 style={{ margin: "0 0 8px 0", color: "#0f172a", fontSize: "1.25rem" }}>
                   {spot.title}
                 </h3>
 
@@ -261,7 +224,7 @@ export default function EntdeckenPage() {
                   style={{
                     border: "none",
                     background: "transparent",
-                    fontSize: 18,
+                    fontSize: 20,
                     cursor: "pointer",
                   }}
                 >
@@ -270,19 +233,17 @@ export default function EntdeckenPage() {
               </div>
 
               <p style={{
-                fontSize: 13,
-                color: "#666",
-                marginTop: 6
+                fontSize: "0.95rem",
+                color: "#64748b",
+                margin: 0,
+                lineHeight: 1.5
               }}>
-                {spot.description?.slice(0, 80)}...
+                {spot.description?.slice(0, 100)}...
               </p>
-
             </div>
-
           </div>
         ))}
       </div>
-
     </main>
   );
 }

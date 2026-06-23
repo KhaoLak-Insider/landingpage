@@ -7,6 +7,18 @@ import GalleryUpload from "@/src/components/GalleryUpload";
 import { iconNames, iconMap } from "@/src/components/IconLibrary";
 import { MapPin } from "lucide-react"; 
 
+// HELPER: Text zu JSON konvertieren
+function convertTextToJson(text: string) {
+  if (!text) return [];
+  const lines = text.split('\n').filter(line => line.trim() !== '');
+  return lines.map(line => {
+    if (line.trim().startsWith('### ')) {
+      return { type: 'heading', content: line.replace('### ', '').trim() };
+    }
+    return { type: 'paragraph', content: line.trim() };
+  });
+}
+
 export default function SpotEditorPage() {
   const categories = ["Strand", "Natur", "Restaurant", "Markt", "Tempel", "Geheimtipp"];
   
@@ -14,9 +26,10 @@ export default function SpotEditorPage() {
     title: "", image_url: "", category: "", description: "", long_description: "",
     latitude: "", longitude: "", price_level: "", opening_hours: "", youtube_url: "",
     youtube_timestamp: "", 
-    features: [{ label: "", value: "", icon: "Sparkles" }],
+    features: [{ label: "", value: "", icon: "Sparkles" as keyof typeof iconMap }],
     best_months: [] as number[],
-    galleryUrlsText: "",   
+    galleryUrlsText: "",
+    parking_info: { name: "", price: "", details: "", lat: "", lng: "" }, // ERWEITERT
   });
   const [loading, setLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -35,10 +48,13 @@ export default function SpotEditorPage() {
     setLoading(true);
 
     const slug = formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const jsonDescription = convertTextToJson(formData.long_description);
+
     const { error } = await supabase.from("spots").insert([{
       title: formData.title, image_url: formData.image_url, slug: slug,
       category: formData.category, description: formData.description,
-      long_description: formData.long_description,
+      long_description: jsonDescription,
+      parking_info: formData.parking_info,
       latitude: parseFloat(formData.latitude) || null,
       longitude: parseFloat(formData.longitude) || null,
       price_level: formData.price_level, opening_hours: formData.opening_hours,
@@ -58,7 +74,7 @@ export default function SpotEditorPage() {
         title: "", image_url: "", category: "", description: "", long_description: "",
         latitude: "", longitude: "", price_level: "", opening_hours: "", 
         youtube_url: "", youtube_timestamp: "", features: [{ label: "", value: "", icon: "Sparkles" }], 
-        best_months: [], galleryUrlsText: ""
+        best_months: [], galleryUrlsText: "", parking_info: { name: "", price: "", details: "", lat: "", lng: "" }
       });
     }
   };
@@ -95,9 +111,20 @@ export default function SpotEditorPage() {
         </section>
 
         <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+          <h2 className="text-lg font-bold text-slate-800 border-b pb-2">Parkplatz-Informationen</h2>
+          <input className="w-full p-4 border rounded-xl" placeholder="Name/Ort des Parkplatzes" value={formData.parking_info.name} onChange={(e) => setFormData({...formData, parking_info: {...formData.parking_info, name: e.target.value}})} />
+          <div className="grid grid-cols-2 gap-4">
+            <input className="w-full p-3 border rounded-xl" placeholder="Gebühr (z.B. kostenlos)" value={formData.parking_info.price} onChange={(e) => setFormData({...formData, parking_info: {...formData.parking_info, price: e.target.value}})} />
+            <input className="w-full p-3 border rounded-xl" placeholder="Weitere Details" value={formData.parking_info.details} onChange={(e) => setFormData({...formData, parking_info: {...formData.parking_info, details: e.target.value}})} />
+            <input className="w-full p-3 border rounded-xl" placeholder="Parkplatz Breitengrad" value={formData.parking_info.lat} onChange={(e) => setFormData({...formData, parking_info: {...formData.parking_info, lat: e.target.value}})} />
+            <input className="w-full p-3 border rounded-xl" placeholder="Parkplatz Längengrad" value={formData.parking_info.lng} onChange={(e) => setFormData({...formData, parking_info: {...formData.parking_info, lng: e.target.value}})} />
+          </div>
+        </section>
+
+        <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
           <h2 className="text-lg font-bold text-slate-800 border-b pb-2">Beschreibungen</h2>
-          <textarea className="w-full p-4 border rounded-xl" placeholder="Kurze Beschreibung (für die Übersicht)" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} />
-          <textarea className="w-full p-4 border rounded-xl" rows={4} placeholder="Lange Beschreibung (für die Detailseite)" value={formData.long_description} onChange={(e) => setFormData({...formData, long_description: e.target.value})} />
+          <textarea className="w-full p-4 border rounded-xl" placeholder="Kurze Beschreibung" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} />
+          <textarea className="w-full p-4 border rounded-xl" rows={4} placeholder="Lange Beschreibung (Nutze ### für Überschriften)" value={formData.long_description} onChange={(e) => setFormData({...formData, long_description: e.target.value})} />
         </section>
 
         <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
@@ -129,7 +156,7 @@ export default function SpotEditorPage() {
                     <input className="p-2 border rounded-lg w-1/4" placeholder="Wert" value={f.value} onChange={(e) => { const n = [...formData.features]; n[i].value = e.target.value; setFormData({...formData, features: n}); }} />
                     <div className="flex items-center gap-2 w-1/2">
                       <div className="p-2 bg-white border rounded-lg shrink-0"><IconComponent size={20} className="text-teal-600" /></div>
-                      <select className="p-2 border rounded-lg w-full bg-white text-sm truncate" value={f.icon} onChange={(e) => { const n = [...formData.features]; n[i].icon = e.target.value; setFormData({...formData, features: n}); }}>
+                      <select className="p-2 border rounded-lg w-full bg-white text-sm truncate" value={f.icon} onChange={(e) => { const n = [...formData.features]; n[i].icon = e.target.value as keyof typeof iconMap; setFormData({...formData, features: n}); }}>
                         {iconNames.map(name => <option key={name} value={name}>{name}</option>)}
                       </select>
                    </div>
@@ -140,21 +167,15 @@ export default function SpotEditorPage() {
           </div>
         </section>
 
-        <GalleryUpload 
-          slug={formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') || "temp"} 
-          onUpload={(urls) => setFormData(prev => ({
-            ...prev,
-            galleryUrlsText: prev.galleryUrlsText ? prev.galleryUrlsText + "\n" + urls.join("\n") : urls.join("\n")
-          }))} 
-        />
+        <GalleryUpload slug={formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') || "temp"} onUpload={(urls) => setFormData(prev => ({...prev, galleryUrlsText: prev.galleryUrlsText ? prev.galleryUrlsText + "\n" + urls.join("\n") : urls.join("\n")}))} />
         <textarea className="w-full p-3 border rounded-xl font-mono text-xs" value={formData.galleryUrlsText} onChange={(e) => setFormData({...formData, galleryUrlsText: e.target.value})} placeholder="Galerie-URLs..." rows={3} />
 
         <div className="fixed bottom-0 left-0 w-full bg-white border-t p-4 shadow-lg z-50">
           <div className="max-w-4xl mx-auto flex justify-end gap-4">
-              <button type="button" onClick={() => setShowPreview(true)} className="bg-slate-100 text-slate-700 px-8 py-4 rounded-2xl font-bold text-lg hover:bg-slate-200 transition-all">Vorschau</button>
-              <button disabled={loading} type="submit" className="bg-teal-500 text-white px-12 py-4 rounded-2xl font-bold text-lg hover:bg-teal-600 transition-all shadow-xl shadow-teal-500/20">
-                {loading ? "Wird gespeichert..." : "Spot veröffentlichen"}
-              </button>
+             <button type="button" onClick={() => setShowPreview(true)} className="bg-slate-100 text-slate-700 px-8 py-4 rounded-2xl font-bold text-lg hover:bg-slate-200 transition-all">Vorschau</button>
+             <button disabled={loading} type="submit" className="bg-teal-500 text-white px-12 py-4 rounded-2xl font-bold text-lg hover:bg-teal-600 transition-all shadow-xl shadow-teal-500/20">
+               {loading ? "Wird gespeichert..." : "Spot veröffentlichen"}
+             </button>
           </div>
         </div>
       </form>

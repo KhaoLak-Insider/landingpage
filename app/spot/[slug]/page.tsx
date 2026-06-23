@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/src/lib/supabase";
 import MapBoxMini from "@/src/components/MapBoxMini";
-import { MapPin, Tag, Star, Navigation } from "lucide-react";
+import { MapPin, Tag, Navigation, DollarSign, Clock, Car } from "lucide-react"; 
 import { iconMap } from "@/src/components/IconLibrary";
 import Link from "next/link";
 import Lightbox from "yet-another-react-lightbox";
@@ -52,6 +52,7 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
         {/* HERO */}
         <div style={{ position: "relative", width: "100%", height: "450px" }}>
           <img src={spot.image_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          
           <Link href="/entdecken" style={{ position: "absolute", top: "30px", left: "30px", zIndex: 20, display: "flex", alignItems: "center", gap: "8px", background: "rgba(255,255,255,0.9)", padding: "10px 20px", borderRadius: "50px", fontSize: "14px", fontWeight: 600, color: "#333", textDecoration: "none", boxShadow: "0 4px 10px rgba(0,0,0,0.1)" }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
             Zurück zu allen Spots
@@ -69,16 +70,52 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
 
         <div style={{ padding: "40px" }}>
           {/* DETAILS BOX */}
-          <aside style={{ position: "absolute", top: "200px", right: "calc((100% - 1280px) / 2 + 40px)", width: 280, background: "#fff", borderRadius: 20, padding: "40px 30px 60px 30px", boxShadow: "0 15px 30px rgba(0,0,0,0.1)", zIndex: 50 }}>
-             <h3 style={{ fontSize: "10px", fontWeight: 800, letterSpacing: "0.15em", marginBottom: 30, color: "#94a3b8", textTransform: "uppercase" }}>Details</h3>
-             <div style={{ display: "flex", flexDirection: "column", gap: 28, marginBottom: 50 }}>
-               <InfoItem icon={<Tag size={16} />} label="Kategorie" value={spot.category} />
-               <InfoItem icon={<MapPin size={16} />} label="Koordinaten" value={`${spot.latitude?.toFixed(2)}, ${spot.longitude?.toFixed(2)}`} />
-               <InfoItem icon={<Star size={16} />} label="Insider Level" value="Geheimtipp" />
-             </div>
-             <button style={{ width: "100%", padding: 14, background: "#14b8a6", color: "#fff", borderRadius: 12, border: "none", fontWeight: 700, cursor: "pointer", fontSize: 13, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-               <Navigation size={16} /> Route starten
-             </button>
+          <aside style={{ 
+            position: "absolute", 
+            top: "200px", 
+            right: "calc((100% - 1280px) / 2 + 40px)", 
+            width: 320, 
+            background: "#ffffff", 
+            borderRadius: 24, 
+            padding: "32px", 
+            boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05)", 
+            border: "1px solid #f1f5f9",
+            zIndex: 50 
+          }}>
+            <h3 style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.2em", marginBottom: 32, color: "#94a3b8", textTransform: "uppercase" }}>
+              Spot Details
+            </h3>
+            
+            <div style={{ display: "flex", flexDirection: "column", gap: 24, marginBottom: 40 }}>
+              <InfoItem icon={<Tag size={16} />} label="Kategorie" value={spot.category} />
+              <InfoItem icon={<MapPin size={16} />} label="Koordinaten" value={`${spot.latitude?.toFixed(2)}, ${spot.longitude?.toFixed(2)}`} />
+              <InfoItem icon={<DollarSign size={16} />} label="Budget" value={spot.price_level || "Keine Angabe"} />
+              <InfoItem icon={<Clock size={16} />} label="Öffnungszeiten" value={spot.opening_hours || "Keine Angabe"} />
+              
+              {/* KORRIGIERTE ZEILE FÜR PARKEN: Preis wieder hinzugefügt */}
+              {spot.parking_info?.name && (
+                <InfoItem icon={<Car size={16} />} label="Parken" value={`${spot.parking_info.name} ${spot.parking_info.price ? `(${spot.parking_info.price})` : ""}`} />
+              )}
+            </div>
+
+            <button style={{ 
+              width: "100%", 
+              padding: "14px", 
+              background: "#0f172a", 
+              color: "#ffffff", 
+              borderRadius: 14, 
+              border: "none", 
+              fontWeight: 600, 
+              cursor: "pointer", 
+              fontSize: 14, 
+              display: "flex", 
+              alignItems: "center", 
+              justifyContent: "center", 
+              gap: 8,
+              transition: "background 0.2s ease"
+            }}>
+              <Navigation size={16} /> Route starten
+            </button>
           </aside>
 
           {/* GALERIE */}
@@ -95,54 +132,36 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
             </div>
           )}
 
-          {/* CONTENT */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "40px", marginTop: "60px", paddingBottom: "60px", maxWidth: "1200px", alignItems: "start" }}>
-            <div>
-              <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: "20px" }}>Über {spot.title}</h2>
-              <p style={{ color: "#475569", lineHeight: 1.8, marginBottom: "30px", fontSize: "15px" }}>{spot.long_description}</p>
-              
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px", marginBottom: "40px" }}>
+          {/* FEATURE KACHELN, REISEZEIT & KARTE */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "40px", marginTop: "40px", maxWidth: "1200px", alignItems: "start" }}>
+            
+            <div style={{ maxWidth: "800px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px" }}>
                 {spot.details_config?.features?.map((f: any, i: number) => (
-                  <div key={i} style={{ display: "flex", gap: "8px", alignItems: "center", background: "#f9fafb", padding: "12px", borderRadius: "12px", border: "1px solid #e5e5e5" }}>
+                  <div key={i} style={{ display: "flex", gap: "8px", alignItems: "center", background: "#f9fafb", padding: "10px", borderRadius: "12px", border: "1px solid #e5e5e5" }}>
                     <div style={{ color: "#14b8a6" }}>{getIcon(f.icon)}</div>
                     <div>
-                      <div style={{ fontSize: 10, fontWeight: 800, color: "#94a3b8" }}>{(f.label || "").toUpperCase()}</div>
-                      <div style={{ fontSize: 13, fontWeight: 700 }}>{f.value || "-"}</div>
+                      <div style={{ fontSize: 9, fontWeight: 800, color: "#94a3b8" }}>{(f.label || "").toUpperCase()}</div>
+                      <div style={{ fontSize: 12, fontWeight: 700 }}>{f.value || "-"}</div>
                     </div>
                   </div>
                 ))}
               </div>
 
-              {/* Beste Reisezeit Sektion */}
-{(() => {
-  const monthsData = spot.best_months || spot.details_config?.best_months || [];
-  const activeMonths = monthsData.map((m: any) => parseInt(m));
-  
-  return activeMonths.length > 0 ? (
-    <div style={{ marginTop: "40px", background: "#f8fafc", padding: "20px", borderRadius: "16px", border: "1px solid #e2e8f0" }}>
-      <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: "15px", color: "#334155" }}>Beste Reisezeit</h3>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "8px" }}>
-        {["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"].map((monat, index) => (
-          <div 
-            key={monat} 
-            style={{ 
-              padding: "8px 0", 
-              borderRadius: "8px", 
-              fontSize: "11px", 
-              fontWeight: 700,
-              textAlign: "center",
-              background: activeMonths.includes(index) ? "#14b8a6" : "#ffffff",
-              color: activeMonths.includes(index) ? "#fff" : "#94a3b8",
-              border: activeMonths.includes(index) ? "none" : "1px solid #e2e8f0"
-            }}
-          >
-            {monat}
-          </div>
-        ))}
-      </div>
-    </div>
-  ) : null;
-})()}
+              {(() => {
+                const monthsData = spot.best_months || spot.details_config?.best_months || [];
+                const activeMonths = monthsData.map((m: any) => parseInt(m));
+                return activeMonths.length > 0 ? (
+                  <div style={{ marginTop: "20px", background: "#f8fafc", padding: "15px", borderRadius: "16px", border: "1px solid #e2e8f0" }}>
+                    <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: "10px", color: "#334155" }}>Beste Reisezeit</h3>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "6px" }}>
+                      {["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"].map((monat, index) => (
+                        <div key={monat} style={{ padding: "6px 0", borderRadius: "6px", fontSize: "10px", fontWeight: 700, textAlign: "center", background: activeMonths.includes(index) ? "#14b8a6" : "#ffffff", color: activeMonths.includes(index) ? "#fff" : "#94a3b8", border: activeMonths.includes(index) ? "none" : "1px solid #e2e8f0" }}>{monat}</div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null;
+              })()}
             </div>
 
             <div style={{ background: "#fff", borderRadius: 24, padding: "20px", border: "1px solid #f1f5f9", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)" }}>
@@ -155,6 +174,26 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
               </div>
             </div>
           </div>
+
+          {/* BESCHREIBUNG */}
+          <div style={{ marginTop: "60px", paddingBottom: "60px", maxWidth: "1200px" }}>
+            <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: "20px" }}>Über {spot.title}</h2>
+            {(() => {
+              let descriptionData = spot.long_description;
+              if (typeof descriptionData === 'string') {
+                try { descriptionData = JSON.parse(descriptionData); } catch (e) { }
+              }
+
+              if (Array.isArray(descriptionData)) {
+                return descriptionData.map((block: any, i: number) => {
+                  if (block.type === 'heading') return <h3 key={i} style={{ fontSize: 20, fontWeight: 700, marginTop: "24px", marginBottom: "12px" }}>{block.content}</h3>;
+                  if (block.type === 'paragraph') return <p key={i} style={{ color: "#475569", lineHeight: 1.8, fontSize: "15px", marginBottom: "16px" }}>{block.content}</p>;
+                  return null;
+                });
+              }
+              return <p style={{ color: "#475569", lineHeight: 1.8, fontSize: "15px" }}>{descriptionData}</p>;
+            })()}
+          </div>
         </div>
       </div>
       <Lightbox open={open} close={() => setOpen(false)} slides={slides} index={index} on={{ view: ({ index: i }) => setIndex(i) }} />
@@ -164,14 +203,23 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
 
 function InfoItem({ icon, label, value }: { icon: React.ReactNode, label: string, value: string }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#94a3b8", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em" }}>{icon} {label}</div>
-      <div style={{ color: "#1e293b", fontSize: 14, fontWeight: 700, paddingLeft: 24 }}>{value}</div>
+    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+      <div style={{ color: "#14b8a6", background: "#f0fdfa", padding: "8px", borderRadius: "8px" }}>
+        {icon}
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+        <span style={{ fontSize: "10px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+          {label}
+        </span>
+        <span style={{ fontSize: "13px", fontWeight: 600, color: "#334155" }}>
+          {value}
+        </span>
+      </div>
     </div>
   );
 }
 
 function getIcon(name: string) {
-  const IconComponent = iconMap[name];
-  return IconComponent ? <IconComponent size={18} /> : <iconMap.Sparkles size={18} />;
+  const IconComponent = iconMap[name as keyof typeof iconMap];
+  return IconComponent ? <IconComponent size={18} /> : <MapPin size={18} />;
 }
