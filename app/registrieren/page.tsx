@@ -12,24 +12,25 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [subscribeNewsletter, setSubscribeNewsletter] = useState(false); // NEU
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [usernameError, setUsernameError] = useState(""); 
+  const [usernameError, setUsernameError] = useState("");
   const router = useRouter();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (password.length < 12) {
       setError("Das Passwort muss mindestens 12 Zeichen lang sein.");
       return;
     }
-    
+
     if (password !== confirmPassword) {
       setError("Die Passwörter stimmen nicht überein.");
       return;
     }
-    
+
     if (!acceptedTerms) {
       setError("Bitte akzeptiere unsere Datenschutzerklärung.");
       return;
@@ -39,7 +40,7 @@ export default function RegisterPage() {
     setError("");
     setUsernameError("");
 
-    // 1. Vorab-Check Username (in der Tabelle profiles)
+    // 1. Vorab-Check Username
     const { data: existingUser } = await supabase
       .from("profiles")
       .select("username")
@@ -52,12 +53,16 @@ export default function RegisterPage() {
       return;
     }
 
-    // 2. Registrierung (E-Mail wird automatisch in auth.users gespeichert)
+    // 2. Registrierung
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { username, full_name: name },
+        data: { 
+          username, 
+          full_name: name, 
+          newsletter: subscribeNewsletter // Newsletter Status übertragen
+        },
         emailRedirectTo: "http://localhost:3000/login",
       },
     });
@@ -77,7 +82,7 @@ export default function RegisterPage() {
     <div className="flex min-h-[60vh] items-center justify-center px-6">
       <form onSubmit={handleRegister} className="w-full max-w-sm rounded-3xl bg-white p-8 shadow-xl border border-slate-100">
         <h2 className="text-2xl font-black mb-6">Registrieren</h2>
-        
+
         <input
           type="email"
           placeholder="E-Mail"
@@ -115,7 +120,7 @@ export default function RegisterPage() {
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
-        
+
         <input
           type="password"
           placeholder="Passwort"
@@ -138,10 +143,11 @@ export default function RegisterPage() {
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
         />
-        
-        <label className="flex items-start gap-2 mb-6 text-xs text-slate-500 cursor-pointer">
-          <input 
-            type="checkbox" 
+
+        {/* Checkboxen für Bedingungen */}
+        <label className="flex items-start gap-2 mb-3 text-xs text-slate-500 cursor-pointer">
+          <input
+            type="checkbox"
             className="mt-0.5"
             checked={acceptedTerms}
             onChange={(e) => setAcceptedTerms(e.target.checked)}
@@ -151,7 +157,16 @@ export default function RegisterPage() {
             <Link href="/datenschutz" className="text-teal-500 hover:underline">Datenschutzerklärung</Link>.
           </span>
         </label>
-        
+
+        <label className="flex items-center gap-2 mb-6 text-xs text-slate-500 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={subscribeNewsletter}
+            onChange={(e) => setSubscribeNewsletter(e.target.checked)}
+          />
+          <span>Newsletter abonnieren (Reise-Updates & Insider Tipps)</span>
+        </label>
+
         <button
           disabled={loading}
           className="w-full h-12 rounded-full bg-teal-500 font-bold text-white hover:bg-teal-400 transition"
