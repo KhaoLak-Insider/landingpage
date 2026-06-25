@@ -83,9 +83,12 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
           
           setUserProfile(profileData);
 
-          // Berechne Distanz, falls Koordinaten verfügbar
-const hLat = profileData?.hotel_id ? profileData.hotels?.[0]?.lat : profileData?.custom_hotel_lat;
-const hLng = profileData?.hotel_id ? profileData.hotels?.[0]?.lng : profileData?.custom_hotel_lng;
+          // Wir behandeln 'hotels' explizit als Array, um TypeScript zufrieden zu stellen,
+// aber wir prüfen zur Laufzeit auf das erste Element, um die Daten zu erhalten.
+const hotelData = Array.isArray(profileData?.hotels) ? profileData.hotels[0] : (profileData?.hotels as any);
+
+const hLat = profileData?.hotel_id ? hotelData?.lat : profileData?.custom_hotel_lat;
+const hLng = profileData?.hotel_id ? hotelData?.lng : profileData?.custom_hotel_lng;
           
           if (hLat && hLng) {
             fetchDrivingDistance({lat: hLat, lng: hLng}, {lat: spotData.latitude, lng: spotData.longitude});
