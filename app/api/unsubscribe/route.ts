@@ -1,27 +1,30 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/src/lib/supabase"; // Achte auf den richtigen Import
+import { createClient } from "@supabase/supabase-js";
 
 export async function GET(req: Request) {
+  // Initialisiere den Client lokal in der Funktion
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY! // Nutze hier den Service Role Key für Admin-Rechte
+  );
+
   const { searchParams } = new URL(req.url);
-  const email = searchParams.get("email");
+  const id = searchParams.get("id");
 
-  if (!email) {
-    return NextResponse.json({ error: "Keine E-Mail angegeben" }, { status: 400 });
-  }
+  if (!id) return NextResponse.json({ error: "Keine ID" }, { status: 400 });
 
-  // Setze Newsletter in der Datenbank auf false
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("profiles")
     .update({ newsletter: false })
-    .eq("email", email);
+    .eq("id", id);
 
   if (error) {
-    return NextResponse.json({ error: "Fehler beim Abmelden" }, { status: 500 });
+    console.error("SUPABASE ERROR:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  // Schöne Rückmeldung für den Nutzer
-  return new NextResponse(
-    "<h1>Abgemeldet</h1><p>Du hast dich erfolgreich vom Newsletter abgemeldet. Wir werden dich nicht mehr kontaktieren.</p>",
-    { status: 200, headers: { "Content-Type": "text/html" } }
-  );
+  return new NextResponse("<h1>Abgemeldet</h1><p>Du wurdest erfolgreich ausgetragen.</p>", { 
+    status: 200, 
+    headers: { "Content-Type": "text/html" } 
+  });
 }
