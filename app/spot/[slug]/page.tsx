@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/src/lib/supabase";
 import MapBoxMini from "@/src/components/MapBoxMini";
-import { MapPin, Tag, Navigation, DollarSign, Clock, Car } from "lucide-react"; 
+import { MapPin, Tag, Navigation, DollarSign, Clock, Car, Play } from "lucide-react"; 
 import { iconMap } from "@/src/components/IconLibrary";
 import Link from "next/link";
 import Lightbox from "yet-another-react-lightbox";
@@ -14,31 +14,80 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
   const [gallery, setGallery] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState(0);
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [routeDist, setRouteDist] = useState<string | null>(null);
+  const [routeTime, setRouteTime] = useState<number | null>(null);
+  const [isRouting, setIsRouting] = useState(false);
+
+  // Distanz berechnen (Haversine-Formel)
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    if (!lat1 || !lon1 || !lat2 || !lon2) return null;
+    const R = 6371;
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))).toFixed(1);
+  };
+
+  const fetchDrivingDistance = async (start: {lat: number, lng: number}, end: {lat: number, lng: number}) => {
+    setIsRouting(true);
+    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+    const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start.lng},${start.lat};${end.lng},${end.lat}?access_token=${token}`;
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      if (data.routes && data.routes.length > 0) {
+        setRouteDist((data.routes[0].distance / 1000).toFixed(1));
+        setRouteTime(Math.round(data.routes[0].duration / 60));
+      }
+    } catch (e) { console.error("Routing Fehler:", e); }
+    finally { setIsRouting(false); }
+  };
 
   useEffect(() => {
-    async function fetchData() {
+    async function initPage() {
       const resolvedParams = await params;
       const decodedSlug = decodeURIComponent(resolvedParams.slug.trim());
       
-      const { data } = await supabase
+      // 1. Spot laden
+      const { data: spotData } = await supabase
         .from("spots")
         .select("*")
-        .ilike("slug", decodedSlug) 
+        .ilike("slug", decodedSlug)
         .maybeSingle();
-      
-      if (data) {
-        setSpot(data);
+
+      if (spotData) {
+        setSpot(spotData);
         let parsedGallery = [];
-        if (data.gallery_urls) {
-          if (Array.isArray(data.gallery_urls)) parsedGallery = data.gallery_urls;
-          else if (typeof data.gallery_urls === 'string') {
-            try { parsedGallery = JSON.parse(data.gallery_urls); } catch (e) { parsedGallery = []; }
-          }
+        if (spotData.gallery_urls) {
+          try {
+            parsedGallery = Array.isArray(spotData.gallery_urls) ? spotData.gallery_urls : JSON.parse(spotData.gallery_urls);
+          } catch (e) { parsedGallery = []; }
         }
         setGallery(parsedGallery);
+
+        // 2. Profil laden
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profileData } = await supabase
+            .from("profiles")
+            .select("hotel_id, custom_hotel_lat, custom_hotel_lng, hotels(lat, lng)")
+            .eq("id", user.id)
+            .maybeSingle();
+          
+          setUserProfile(profileData);
+
+          // Berechne Distanz, falls Koordinaten verfügbar
+          const hLat = profileData?.hotel_id ? profileData.hotels?.lat : profileData?.custom_hotel_lat;
+          const hLng = profileData?.hotel_id ? profileData.hotels?.lng : profileData?.custom_hotel_lng;
+          
+          if (hLat && hLng) {
+            fetchDrivingDistance({lat: hLat, lng: hLng}, {lat: spotData.latitude, lng: spotData.longitude});
+          }
+        }
       }
-    }
-    fetchData();
+      }
+      initPage();
   }, [params]);
 
   if (!spot) return <main style={{ padding: 40, textAlign: "center", minHeight: "100vh" }}>Spot wird geladen....</main>;
@@ -89,10 +138,24 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
             <div style={{ display: "flex", flexDirection: "column", gap: 24, marginBottom: 40 }}>
               <InfoItem icon={<Tag size={16} />} label="Kategorie" value={spot.category} />
               <InfoItem icon={<MapPin size={16} />} label="Koordinaten" value={`${spot.latitude?.toFixed(2)}, ${spot.longitude?.toFixed(2)}`} />
+              
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                 <div style={{ color: "#14b8a6", background: "#f0fdfa", padding: "8px", borderRadius: "8px" }}><Navigation size={16} /></div>
+                 <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                    <span style={{ fontSize: "10px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em" }}>Fahrtweg</span>
+                    {isRouting ? (
+                        <span style={{ fontSize: "13px", fontWeight: 600, color: "#334155" }}>Route wird berechnet...</span>
+                    ) : routeDist ? (
+                        <span style={{ fontSize: "13px", fontWeight: 600, color: "#334155" }}>{routeDist} km ({routeTime} Min.)</span>
+                    ) : (
+                        <Link href="/profil" style={{ fontSize: "12px", color: "#14b8a6", fontWeight: 600, textDecoration: "underline" }}>Unterkunft eintragen</Link>
+                    )}
+                 </div>
+              </div>
+              
               <InfoItem icon={<DollarSign size={16} />} label="Budget" value={spot.price_level || "Keine Angabe"} />
               <InfoItem icon={<Clock size={16} />} label="Öffnungszeiten" value={spot.opening_hours || "Keine Angabe"} />
               
-              {/* KORRIGIERTE ZEILE FÜR PARKEN: Preis wieder hinzugefügt */}
               {spot.parking_info?.name && (
                 <InfoItem icon={<Car size={16} />} label="Parken" value={`${spot.parking_info.name} ${spot.parking_info.price ? `(${spot.parking_info.price})` : ""}`} />
               )}
@@ -116,6 +179,36 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
             }}>
               <Navigation size={16} /> Route starten
             </button>
+
+            {spot.youtube_url && spot.youtube_url.trim() !== "" && (
+              <a 
+                href={spot.youtube_url.includes('?') 
+                  ? `${spot.youtube_url}&t=${spot.youtube_timestamp || 0}` 
+                  : `${spot.youtube_url}?t=${spot.youtube_timestamp || 0}`
+                } 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                style={{ 
+                  marginTop: "12px",
+                  width: "100%", 
+                  padding: "14px", 
+                  background: "#ef4444", 
+                  color: "#ffffff", 
+                  borderRadius: 14, 
+                  border: "none", 
+                  fontWeight: 600, 
+                  cursor: "pointer", 
+                  fontSize: 14, 
+                  display: "flex", 
+                  alignItems: "center", 
+                  justifyContent: "center", 
+                  gap: 8,
+                  textDecoration: "none"
+                }}
+              >
+                <Play size={16} /> YouTube Video
+              </a>
+            )}
           </aside>
 
           {/* GALERIE */}
@@ -132,7 +225,7 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
             </div>
           )}
 
-          {/* FEATURE KACHELN, REISEZEIT & KARTE */}
+          {/* FEATURES, REISEZEIT & KARTE */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "40px", marginTop: "40px", maxWidth: "1200px", alignItems: "start" }}>
             
             <div style={{ maxWidth: "800px" }}>

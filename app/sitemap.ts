@@ -6,7 +6,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
       url: "https://khaolak.app",
-      lastModified: "2026-06-20",
+      lastModified: "2026-06-25",
       changeFrequency: "weekly",
       priority: 1,
     },

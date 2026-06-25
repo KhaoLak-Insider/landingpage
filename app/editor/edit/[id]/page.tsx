@@ -31,7 +31,7 @@ export default function EditSpotPage() {
     latitude: "", longitude: "", price_level: "", opening_hours: "", youtube_url: "",
     youtube_timestamp: "", features: [{ label: "", value: "", icon: "Sparkles" as keyof typeof iconMap }],
     best_months: [] as number[], galleryUrlsText: "",
-    parking_info: { name: "", price: "", details: "", lat: "", lng: "" }, // ERGÄNZT
+    parking_info: { name: "", price: "", details: "", lat: "", lng: "" },
   });
   const [loading, setLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -41,7 +41,6 @@ export default function EditSpotPage() {
       async function loadSpot() {
         const { data } = await supabase.from("spots").select("*").eq("id", id).single();
         if (data) {
-          // JSON Struktur zurück in Text für den Editor wandeln
           let textDesc = "";
           if (Array.isArray(data.long_description)) {
             textDesc = data.long_description.map((b: any) => 
@@ -66,7 +65,7 @@ export default function EditSpotPage() {
             features: data.details_config?.features || [{ label: "", value: "", icon: "Sparkles" }],
             best_months: data.best_months || [],
             galleryUrlsText: data.gallery_urls?.join("\n") || "",
-            parking_info: data.parking_info || { name: "", price: "", details: "", lat: "", lng: "" }, // ERGÄNZT
+            parking_info: data.parking_info || { name: "", price: "", details: "", lat: "", lng: "" },
           });
         }
       }
@@ -86,40 +85,53 @@ export default function EditSpotPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const slug = formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
     
-    // JSON KONVERTIERUNG BEIM SPEICHERN
+    const slug = formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
     const jsonDescription = convertTextToJson(formData.long_description);
     
-    const { error } = await supabase.from("spots").update({
-      title: formData.title, image_url: formData.image_url, slug: slug,
-      category: formData.category, description: formData.description,
-      long_description: jsonDescription, // Hier wird das JSON-Array gespeichert
-      parking_info: formData.parking_info, // ERGÄNZT
-      latitude: formData.latitude !== "" ? parseFloat(formData.latitude) : null,
-      longitude: formData.longitude !== "" ? parseFloat(formData.longitude) : null,
-      price_level: formData.price_level, opening_hours: formData.opening_hours,
-      youtube_url: formData.youtube_url, 
-      youtube_timestamp: formData.youtube_timestamp !== "" ? parseInt(formData.youtube_timestamp) : null,
-      best_months: formData.best_months,
+    // Hilfsfunktionen
+    const toNum = (val: string) => (val && val.trim() !== "" ? parseFloat(val) : null);
+    // Hier erzwingen wir die 0 statt null für das Timestamp-Feld, falls es ein Integer ist
+    const toIntForce = (val: string) => (val && val.trim() !== "" ? parseInt(val) : 0);
+
+    const updatePayload = {
+      title: formData.title || null,
+      image_url: formData.image_url || null,
+      slug: slug,
+      category: formData.category || null,
+      description: formData.description || null,
+      long_description: jsonDescription,
+      parking_info: formData.parking_info || null,
+      latitude: toNum(formData.latitude),
+      longitude: toNum(formData.longitude),
+      price_level: formData.price_level || null,
+      opening_hours: formData.opening_hours || null,
+      youtube_url: formData.youtube_url && formData.youtube_url.trim() !== "" ? formData.youtube_url : null,
+      youtube_timestamp: toIntForce(formData.youtube_timestamp),
+      best_months: formData.best_months || [],
       details_config: { features: formData.features.filter(f => f.label !== "") },
-      gallery_urls: formData.galleryUrlsText.split("\n").filter(u => u.trim() !== ""),
-    }).eq("id", id);
+      gallery_urls: formData.galleryUrlsText ? formData.galleryUrlsText.split("\n").filter(u => u.trim() !== "") : [],
+    };
+
+    const { error } = await supabase.from("spots").update(updatePayload).eq("id", id);
 
     setLoading(false);
-    if (error) alert("Fehler: " + error.message);
-    else { alert("Spot erfolgreich aktualisiert!"); router.push("/editor/list"); }
+    if (error) {
+      console.error("Supabase Error Details:", error);
+      alert("Fehler bei der Übertragung: " + error.message);
+    } else { 
+      alert("Spot erfolgreich aktualisiert!"); 
+      router.push("/editor/list"); 
+    }
   };
 
   return (
     <div className="max-w-4xl mx-auto p-8 bg-slate-50 min-h-screen">
       <header className="mb-8">
         <h1 className="text-3xl font-black text-slate-900">Spot bearbeiten</h1>
-        <p className="text-slate-500">Bearbeite die Details für diesen Ort.</p>
       </header>
 
       <form onSubmit={handleSubmit} className="space-y-8 pb-24">
-        {/* Basis-Informationen */}
         <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
           <h2 className="text-lg font-bold text-slate-800 border-b pb-2">Basis-Informationen</h2>
           <input className="w-full p-4 border rounded-xl" placeholder="Titel des Spots" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} />
@@ -140,26 +152,23 @@ export default function EditSpotPage() {
           </div>
         </section>
 
-        {/* PARKING SEKTION */}
         <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
           <h2 className="text-lg font-bold text-slate-800 border-b pb-2">Parkplatz-Informationen</h2>
           <input className="w-full p-4 border rounded-xl" placeholder="Name/Ort des Parkplatzes" value={formData.parking_info.name} onChange={(e) => setFormData({...formData, parking_info: {...formData.parking_info, name: e.target.value}})} />
           <div className="grid grid-cols-2 gap-4">
-            <input className="w-full p-3 border rounded-xl" placeholder="Gebühr (z.B. kostenlos)" value={formData.parking_info.price} onChange={(e) => setFormData({...formData, parking_info: {...formData.parking_info, price: e.target.value}})} />
-            <input className="w-full p-3 border rounded-xl" placeholder="Weitere Details" value={formData.parking_info.details} onChange={(e) => setFormData({...formData, parking_info: {...formData.parking_info, details: e.target.value}})} />
-            <input className="w-full p-3 border rounded-xl" placeholder="Parkplatz Breitengrad" value={formData.parking_info.lat} onChange={(e) => setFormData({...formData, parking_info: {...formData.parking_info, lat: e.target.value}})} />
-            <input className="w-full p-3 border rounded-xl" placeholder="Parkplatz Längengrad" value={formData.parking_info.lng} onChange={(e) => setFormData({...formData, parking_info: {...formData.parking_info, lng: e.target.value}})} />
+            <input className="w-full p-3 border rounded-xl" placeholder="Gebühr" value={formData.parking_info.price} onChange={(e) => setFormData({...formData, parking_info: {...formData.parking_info, price: e.target.value}})} />
+            <input className="w-full p-3 border rounded-xl" placeholder="Details" value={formData.parking_info.details} onChange={(e) => setFormData({...formData, parking_info: {...formData.parking_info, details: e.target.value}})} />
+            <input className="w-full p-3 border rounded-xl" placeholder="Breitengrad" value={formData.parking_info.lat} onChange={(e) => setFormData({...formData, parking_info: {...formData.parking_info, lat: e.target.value}})} />
+            <input className="w-full p-3 border rounded-xl" placeholder="Längengrad" value={formData.parking_info.lng} onChange={(e) => setFormData({...formData, parking_info: {...formData.parking_info, lng: e.target.value}})} />
           </div>
         </section>
 
-        {/* Beschreibungen */}
         <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
           <h2 className="text-lg font-bold text-slate-800 border-b pb-2">Beschreibungen</h2>
           <textarea className="w-full p-4 border rounded-xl" placeholder="Kurze Beschreibung" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} />
-          <textarea className="w-full p-4 border rounded-xl" rows={4} placeholder="Lange Beschreibung (Nutze ### für Überschriften)" value={formData.long_description} onChange={(e) => setFormData({...formData, long_description: e.target.value})} />
+          <textarea className="w-full p-4 border rounded-xl" rows={4} placeholder="Lange Beschreibung (### für Überschriften)" value={formData.long_description} onChange={(e) => setFormData({...formData, long_description: e.target.value})} />
         </section>
 
-        {/* Reisezeit */}
         <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
           <h2 className="text-lg font-bold text-slate-800 border-b pb-4">Beste Reisezeit</h2>
           <div className="grid grid-cols-6 gap-2">
@@ -172,7 +181,6 @@ export default function EditSpotPage() {
           </div>
         </section>
 
-        {/* Features & Koordinaten */}
         <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
           <h2 className="text-lg font-bold text-slate-800 border-b pb-2">Features & Koordinaten</h2>
           <div className="grid grid-cols-2 gap-4">
@@ -182,8 +190,7 @@ export default function EditSpotPage() {
           <div className="space-y-2">
             <label className="block text-sm font-bold text-slate-700">Features hinzufügen:</label>
             {formData.features.map((f, i) => {
-               // Wir suchen das Icon, wenn es nicht existiert (undefined), nehmen wir MapPin
-const IconComponent = iconMap[f.icon] || iconMap["MapPin"];
+               const IconComponent = iconMap[f.icon] || iconMap["MapPin"];
                return (
                  <div key={i} className="flex gap-2 items-center bg-slate-50 p-2 rounded-xl">
                     <input className="p-2 border rounded-lg w-1/4" placeholder="Label" value={f.label} onChange={(e) => { const n = [...formData.features]; n[i].label = e.target.value; setFormData({...formData, features: n}); }} />

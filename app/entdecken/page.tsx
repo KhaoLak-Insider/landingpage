@@ -3,19 +3,26 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/src/lib/supabase";
 import Link from "next/link";
+import * as LucideIcons from "lucide-react";
 
 export default function EntdeckenPage() {
   const [spots, setSpots] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("Alle");
   const [suggestions, setSuggestions] = useState<any[]>([]);
-  const [categories, setCategories] = useState<string[]>(["Alle"]);
+  const [categories, setCategories] = useState<any[]>([{ name: "Alle", icon: "LayoutGrid" }]);
+
+  // Hilfsfunktion für Icons
+  const IconComponent = ({ name }: { name: string }) => {
+    const LucideIcon = (LucideIcons as any)[name];
+    return LucideIcon ? <LucideIcon size={14} /> : null;
+  };
 
   useEffect(() => {
     async function loadCategories() {
-      const { data } = await supabase.from("categories").select("name").order("name");
+      const { data } = await supabase.from("categories").select("name, icon").order("name");
       if (data) {
-        setCategories(["Alle", ...data.map((c) => c.name)]);
+        setCategories([{ name: "Alle", icon: "LayoutGrid" }, ...data]);
       }
     }
     loadCategories();
@@ -41,6 +48,12 @@ export default function EntdeckenPage() {
 
     const { data } = await query;
     setSpots(data || []);
+  }
+
+  // Hilfsfunktion, um das Icon anhand des Kategorienamens zu finden
+  function getIconForCategory(catName: string) {
+    const found = categories.find((c) => c.name === catName);
+    return found ? found.icon : "MapPin";
   }
 
   async function handleSearch(value: string) {
@@ -83,7 +96,7 @@ export default function EntdeckenPage() {
       {/* PAGE HEADER */}
       <div style={{ padding: "40px 24px", maxWidth: 1100, margin: "0 auto" }}>
         <h1 style={{ fontSize: "2.5rem", fontWeight: 800, color: "#0f172a", marginBottom: "8px" }}>
-          Entdecken 🌴
+          Entdecke Khao Lak
         </h1>
         <p style={{ color: "#64748b", fontSize: "1.1rem", marginBottom: "32px" }}>Finde die besten Spots in Khao Lak.</p>
 
@@ -161,21 +174,25 @@ export default function EntdeckenPage() {
         }}>
           {categories.map((cat) => (
             <button
-              key={cat}
-              onClick={() => setCategory(cat)}
+              key={cat.name}
+              onClick={() => setCategory(cat.name)}
               style={{
                 padding: "10px 22px",
                 borderRadius: 50,
-                border: category === cat ? "none" : "1px solid #e2e8f0",
-                background: category === cat ? "#0f172a" : "#fff",
-                color: category === cat ? "#fff" : "#475569",
+                border: category === cat.name ? "none" : "1px solid #e2e8f0",
+                background: category === cat.name ? "#0f172a" : "#fff",
+                color: category === cat.name ? "#fff" : "#475569",
                 fontWeight: 600,
                 whiteSpace: "nowrap",
                 cursor: "pointer",
-                transition: "all 0.2s"
+                transition: "all 0.2s",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px"
               }}
             >
-              {cat}
+              <IconComponent name={cat.icon || "LayoutGrid"} />
+              {cat.name}
             </button>
           ))}
         </div>
@@ -199,10 +216,32 @@ export default function EntdeckenPage() {
               overflow: "hidden",
               border: "1px solid #f1f5f9",
               boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)",
-              transition: "transform 0.2s"
+              transition: "transform 0.2s",
+              position: "relative"
             }}
           >
             <Link href={`/spot/${spot.slug}`}>
+              {/* KATEGORIE BADGE */}
+              <div style={{
+                position: "absolute",
+                top: 16,
+                left: 16,
+                zIndex: 10,
+                background: "rgba(255,255,255,0.9)",
+                backdropFilter: "blur(4px)",
+                padding: "6px 12px",
+                borderRadius: 50,
+                fontSize: 12,
+                fontWeight: 700,
+                color: "#0f172a",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px"
+              }}>
+                <IconComponent name={getIconForCategory(spot.category)} />
+                {spot.category}
+              </div>
+
               <img
                 src={spot.image_url}
                 style={{ width: "100%", height: 200, objectFit: "cover" }}
