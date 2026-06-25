@@ -10,13 +10,14 @@ import { MapPin } from "lucide-react";
 // HELPER: Text zu JSON konvertieren
 function convertTextToJson(text: string) {
   if (!text) return [];
-  const lines = text.split('\n').filter(line => line.trim() !== '');
-  return lines.map(line => {
-    if (line.trim().startsWith('### ')) {
-      return { type: 'heading', content: line.replace('### ', '').trim() };
+  return text.split('\n').map(line => {
+    const trimmedLine = line.trim();
+    if (trimmedLine.startsWith('###')) {
+      return { type: 'heading', content: trimmedLine.replace(/###\s*/, '') };
     }
-    return { type: 'paragraph', content: line.trim() };
-  });
+    if (trimmedLine === '') return null;
+    return { type: 'paragraph', content: trimmedLine };
+  }).filter(block => block !== null);
 }
 
 export default function SpotEditorPage() {
@@ -29,7 +30,7 @@ export default function SpotEditorPage() {
     features: [{ label: "", value: "", icon: "Sparkles" as keyof typeof iconMap }],
     best_months: [] as number[],
     galleryUrlsText: "",
-    parking_info: { name: "", price: "", details: "", lat: "", lng: "" }, // ERWEITERT
+    parking_info: { name: "", price: "", details: "", lat: "", lng: "" },
   });
   const [loading, setLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -96,6 +97,8 @@ export default function SpotEditorPage() {
           <div className="grid grid-cols-2 gap-4">
              <input className="w-full p-3 border rounded-xl" placeholder="YouTube URL" value={formData.youtube_url} onChange={(e) => setFormData({...formData, youtube_url: e.target.value})} />
              <input className="w-full p-3 border rounded-xl" placeholder="Startzeit (Sekunden)" value={formData.youtube_timestamp} onChange={(e) => setFormData({...formData, youtube_timestamp: e.target.value})} />
+             <input className="w-full p-3 border rounded-xl" placeholder="Preis-Level" value={formData.price_level} onChange={(e) => setFormData({...formData, price_level: e.target.value})} />
+             <input className="w-full p-3 border rounded-xl" placeholder="Öffnungszeiten" value={formData.opening_hours} onChange={(e) => setFormData({...formData, opening_hours: e.target.value})} />
           </div>
 
           <div>
@@ -145,7 +148,6 @@ export default function SpotEditorPage() {
             <input className="w-full p-3 border rounded-xl" placeholder="Breitengrad" value={formData.latitude} onChange={(e) => setFormData({...formData, latitude: e.target.value})} />
             <input className="w-full p-3 border rounded-xl" placeholder="Längengrad" value={formData.longitude} onChange={(e) => setFormData({...formData, longitude: e.target.value})} />
           </div>
-          
           <div className="space-y-2">
             <label className="block text-sm font-bold text-slate-700">Features hinzufügen:</label>
             {formData.features.map((f, i) => {
@@ -196,7 +198,13 @@ export default function SpotEditorPage() {
               <div>
                 <h1 className="text-4xl font-black mb-2">{formData.title || "Titel..."}</h1>
                 <p className="text-lg text-slate-600 mb-8">{formData.description}</p>
-                <div className="whitespace-pre-wrap mb-8 text-slate-600">{formData.long_description}</div>
+                <div className="mb-8 text-slate-600">
+                    {convertTextToJson(formData.long_description).map((block: any, i: number) => (
+                      block.type === 'heading' 
+                        ? <h3 key={i} className="text-xl font-bold mt-6 mb-3">{block.content}</h3>
+                        : <p key={i} className="mb-4">{block.content}</p>
+                    ))}
+                </div>
                 <div className="grid grid-cols-2 gap-4 mb-8">
                   {formData.features.map((f, i) => f.label && (
                     <div key={i} className="flex gap-3 items-center bg-slate-50 p-3 rounded-xl border">
@@ -229,8 +237,8 @@ export default function SpotEditorPage() {
               </div>
               <div className="bg-slate-50 rounded-2xl border-2 border-dashed h-64 flex flex-col items-center justify-center text-slate-400 p-6 text-center">
                 <MapPin size={40} className="mb-2 text-slate-300" />
-                <p className="text-sm font-bold text-slate-500 mb-1">Hier wird später die Karte mit der angegebenen Position angezeigt.</p>
-                <p className="text-xs">(Aktuelle Koordinaten: {formData.latitude || "0.00"}, {formData.longitude || "0.00"})</p>
+                <p className="text-sm font-bold text-slate-500 mb-1">Vorschau für Karte</p>
+                <p className="text-xs">Koordinaten: {formData.latitude || "0.00"}, {formData.longitude || "0.00"}</p>
               </div>
             </div>
           </div>
