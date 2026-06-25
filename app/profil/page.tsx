@@ -48,17 +48,28 @@ export default function ProfilPage() {
 
   // Newsletter Status in DB aktualisieren
   const updateNewsletterStatus = async (status: boolean) => {
-    const { error } = await supabase
-      .from("profiles")
-      .update({ newsletter: status })
-      .eq("id", profile.id);
+  // Wenn der Nutzer abmelden möchte (status ist false), zeige die Bestätigung
+  if (status === false) {
+    const confirmed = window.confirm(
+      "Möchtest du dich wirklich vom Newsletter abmelden? Du verpasst dann exklusive Tipps für deinen Urlaub in Khao Lak."
+    );
+    
+    // Wenn der Nutzer auf "Abbrechen" klickt, machen wir nichts und beenden die Funktion
+    if (!confirmed) return;
+  }
 
-    if (!error) {
-      setProfile({ ...profile, newsletter: status });
-    } else {
-      alert("Fehler beim Speichern der Newsletter-Einstellung");
-    }
-  };
+  // Hier geht es wie gewohnt weiter
+  const { error } = await supabase
+    .from("profiles")
+    .update({ newsletter: status })
+    .eq("id", profile.id);
+
+  if (!error) {
+    setProfile({ ...profile, newsletter: status });
+  } else {
+    alert("Fehler beim Speichern der Newsletter-Einstellung");
+  }
+};
 
   const uploadAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
@@ -168,11 +179,12 @@ export default function ProfilPage() {
         <div>
           <label className="flex items-center gap-3 cursor-pointer p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition">
             <input
-              type="checkbox"
-              checked={profile?.newsletter || false}
-              onChange={(e) => updateNewsletterStatus(e.target.checked)}
-              className="w-5 h-5 accent-teal-500"
-            />
+  type="checkbox"
+  checked={profile?.newsletter || false}
+  // Wenn der Nutzer klickt, wird der neue Wert (true oder false) an die Funktion gegeben
+  onChange={(e) => updateNewsletterStatus(e.target.checked)}
+  className="w-5 h-5 accent-teal-500"
+/>
             <span className="text-sm font-bold text-slate-700">Newsletter abonnieren</span>
           </label>
         </div>
