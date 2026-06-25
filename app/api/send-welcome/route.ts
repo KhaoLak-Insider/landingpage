@@ -28,10 +28,14 @@ export async function GET(req: Request) {
     const resend = new Resend(process.env.RESEND_API_KEY!);
 
     // 📩 HTML EMAIL LADEN (WICHTIG!)
-    const html = fs.readFileSync(
+    let html = fs.readFileSync(
       path.join(process.cwd(), "emails/WelcomeEmail.html"),
       "utf8"
     );
+
+    // 🔗 ABMELDE-LINK ERSETZEN
+    const unsubscribeUrl = `https://khaolak.app/api/unsubscribe?email=${encodeURIComponent(email)}`;
+    html = html.replace("{{UNSUBSCRIBE_LINK}}", unsubscribeUrl);
 
     // 🚀 EMAIL SENDEN
     const { data, error } = await resend.emails.send({

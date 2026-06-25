@@ -46,6 +46,20 @@ export default function ProfilPage() {
     setHotels(data || []);
   };
 
+  // Newsletter Status in DB aktualisieren
+  const updateNewsletterStatus = async (status: boolean) => {
+    const { error } = await supabase
+      .from("profiles")
+      .update({ newsletter: status })
+      .eq("id", profile.id);
+
+    if (!error) {
+      setProfile({ ...profile, newsletter: status });
+    } else {
+      alert("Fehler beim Speichern der Newsletter-Einstellung");
+    }
+  };
+
   const uploadAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
       setUploading(true);
@@ -137,7 +151,6 @@ export default function ProfilPage() {
       </div>
 
       <div className="space-y-6">
-        {/* BASISDATEN */}
         <div className="space-y-4">
           <div>
             <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Benutzername</label>
@@ -147,6 +160,21 @@ export default function ProfilPage() {
             <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Vorname</label>
             <p className="font-semibold text-slate-900 text-lg">{profile?.first_name || "Nicht angegeben"}</p>
           </div>
+        </div>
+
+        <hr className="border-slate-100" />
+
+        {/* NEWSLETTER EINSTELLUNG */}
+        <div>
+          <label className="flex items-center gap-3 cursor-pointer p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition">
+            <input
+              type="checkbox"
+              checked={profile?.newsletter || false}
+              onChange={(e) => updateNewsletterStatus(e.target.checked)}
+              className="w-5 h-5 accent-teal-500"
+            />
+            <span className="text-sm font-bold text-slate-700">Newsletter abonnieren</span>
+          </label>
         </div>
 
         <hr className="border-slate-100" />
@@ -214,5 +242,5 @@ export default function ProfilPage() {
         </div>
       </div>
     </div>
-  );
+  ); 
 }

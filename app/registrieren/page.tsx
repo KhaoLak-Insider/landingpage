@@ -72,6 +72,17 @@ export default function RegisterPage() {
     } else if (data?.user && data.user.identities?.length === 0) {
       setError("Diese E-Mail-Adresse ist bereits registriert. Bitte logge dich ein.");
     } else {
+      // 3. Willkommens-Mail triggern, falls Newsletter gewünscht
+      if (subscribeNewsletter) {
+        try {
+          await fetch(`/api/send-welcome?email=${encodeURIComponent(email)}`, {
+            method: "GET",
+          });
+        } catch (err) {
+          console.error("Fehler beim Senden der Willkommens-Mail:", err);
+        }
+      }
+
       alert("Registrierung erfolgreich! Bitte bestätige deine E-Mail-Adresse.");
       router.push("/login");
     }
