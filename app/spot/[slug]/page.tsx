@@ -226,18 +226,18 @@ const hLng = profileData?.hotel_id ? hotelData?.lng : profileData?.custom_hotel_
             <div style={{ background: "#ffffff", borderRadius: 24, padding: "32px", boxShadow: "0 10px 25px -5px rgba(0,0,0,0.05)", border: "1px solid #f1f5f9" }}>
               <h3 style={{ fontSize: "11px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", marginBottom: 32 }}>Spot Informationen</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: 24, marginBottom: 40 }}>
-                <InfoItem icon={<Tag size={16} />} label="Kategorie" value={spot.category} />
+                {spot.category && <InfoItem icon={<Tag size={16} />} label="Kategorie" value={spot.category} />}
                 <InfoItem icon={<Navigation size={16} />} label="Fahrtweg" value={isRouting ? "..." : routeDist ? `${routeDist} km (${routeTime} Min.)` : "Eintragen"} />
-                <InfoItem icon={<DollarSign size={16} />} label="Budget" value={spot.price_level || "Keine Angabe"} />
-                <InfoItem icon={<Clock size={16} />} label="Öffnungszeiten" value={spot.opening_hours || "Keine Angabe"} />
-                {spot.best_time && <InfoItem icon={<Sun size={16} />} label="Beste Besuchszeit" value={spot.best_time} />}
+                {spot.price_level && spot.price_level.trim() !== "" && <InfoItem icon={<DollarSign size={16} />} label="Budget" value={spot.price_level} />}
+                {spot.opening_hours && spot.opening_hours.trim() !== "" && <InfoItem icon={<Clock size={16} />} label="Öffnungszeiten" value={spot.opening_hours} />}
+                {spot.best_time && spot.best_time.trim() !== "" && <InfoItem icon={<Sun size={16} />} label="Beste Besuchszeit" value={spot.best_time} />}
                 
                 {/* Parkplatz-Infos */}
-                {spot.parking_info?.name && (
+                {spot.parking_info?.name && spot.parking_info.name.trim() !== "" && (
                   <>
                     <InfoItem icon={<Car size={16} />} label="Parkplatz" value={spot.parking_info.name} />
-                    <InfoItem icon={<DollarSign size={16} />} label="Parkkosten" value={spot.parking_info.price || "Keine Angabe"} />
-                    <InfoItem icon={<MapPin size={16} />} label="Details" value={spot.parking_info.details || "-"} />
+                    {spot.parking_info.price && spot.parking_info.price.trim() !== "" && <InfoItem icon={<DollarSign size={16} />} label="Parkkosten" value={spot.parking_info.price} />}
+                    {spot.parking_info.details && spot.parking_info.details.trim() !== "" && <InfoItem icon={<MapPin size={16} />} label="Details" value={spot.parking_info.details} />}
                   </>
                 )}
               </div>
@@ -253,14 +253,17 @@ const hLng = profileData?.hotel_id ? hotelData?.lng : profileData?.custom_hotel_
 
 {/* Tourempfehlungen Button (nur anzeigen, wenn ein Link hinterlegt ist) */}
 {spot.tour_link && (
-  <a 
-    href={`${spot.tour_link}${spot.tour_link.includes('?') ? '&' : '?'}partner_id=JAPXTFH`}
-    target="_blank"
-    rel="noopener noreferrer"
-    style={{ marginTop: "12px", width: "100%", padding: "14px", background: "#ff7b00", color: "#fff", borderRadius: 14, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, textDecoration: "none" }}
-  >
-    <Sparkles size={16} /> Tourempfehlungen
-  </a>
+  <>
+    <a 
+      href={`${spot.tour_link}${spot.tour_link.includes('?') ? '&' : '?'}partner_id=JAPXTFH`}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{ marginTop: "12px", width: "100%", padding: "14px", background: "#ff7b00", color: "#fff", borderRadius: 14, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, textDecoration: "none" }}
+    >
+      <Sparkles size={16} /> Tourempfehlungen
+    </a>
+    <p style={{ fontSize: "10px", color: "#94a3b8", marginTop: "8px", textAlign: "center" }}>*enthält Affiliate-Link</p>
+  </>
 )}
 
 <a 
