@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/src/lib/supabase";
 import MapBoxMini from "@/src/components/MapBoxMini";
-import { MapPin, Tag, Navigation, DollarSign, Clock, Car, Play, AlertCircle } from "lucide-react"; 
+import { MapPin, Tag, Navigation, DollarSign, Clock, Car, Play, AlertCircle, Sparkles, Sun } from "lucide-react"; 
 import { iconMap } from "@/src/components/IconLibrary";
 import Link from "next/link";
 import Lightbox from "yet-another-react-lightbox";
@@ -19,6 +19,7 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
   const [routeTime, setRouteTime] = useState<number | null>(null);
   const [isRouting, setIsRouting] = useState(false);
   const [routeGeoJSON, setRouteGeoJSON] = useState<any>(null);
+  const [tours, setTours] = useState<any[]>([]);
 
   // Distanz berechnen (Haversine-Formel)
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -64,6 +65,13 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
 
       if (spotData) {
         setSpot(spotData);
+        
+        // Touren via API laden
+        fetch(`/api/tours?location=${spotData.title}`)
+          .then(res => res.json())
+          .then(data => setTours(data.result || []))
+          .catch(e => console.error("Tour Ladefehler:", e));
+
         let parsedGallery = [];
         if (spotData.gallery_urls) {
           try {
@@ -164,6 +172,16 @@ const hLng = profileData?.hotel_id ? hotelData?.lng : profileData?.custom_hotel_
                 ))}
               </div>
 
+              {/* REISEZEIT-KACHELN */}
+              <div style={{ background: "#fff", borderRadius: 24, padding: "20px", border: "1px solid #f1f5f9", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)" }}>
+                <h3 style={{ fontSize: "12px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", marginBottom: 16 }}>Beste Reisezeit</h3>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "8px" }}>
+                  {["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"].map((m, i) => (
+                    <div key={i} style={{ padding: "10px 0", borderRadius: "8px", textAlign: "center", fontSize: "11px", fontWeight: 700, background: spot.best_months?.includes(i) ? "#14b8a6" : "#f1f5f9", color: spot.best_months?.includes(i) ? "#fff" : "#94a3b8" }}>{m}</div>
+                  ))}
+                </div>
+              </div>
+
               {/* LAGE KARTE */}
               <div style={{ background: "#fff", borderRadius: 24, padding: "20px", border: "1px solid #f1f5f9", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
@@ -212,6 +230,7 @@ const hLng = profileData?.hotel_id ? hotelData?.lng : profileData?.custom_hotel_
                 <InfoItem icon={<Navigation size={16} />} label="Fahrtweg" value={isRouting ? "..." : routeDist ? `${routeDist} km (${routeTime} Min.)` : "Eintragen"} />
                 <InfoItem icon={<DollarSign size={16} />} label="Budget" value={spot.price_level || "Keine Angabe"} />
                 <InfoItem icon={<Clock size={16} />} label="Öffnungszeiten" value={spot.opening_hours || "Keine Angabe"} />
+                {spot.best_time && <InfoItem icon={<Sun size={16} />} label="Beste Besuchszeit" value={spot.best_time} />}
                 
                 {/* Parkplatz-Infos */}
                 {spot.parking_info?.name && (
@@ -232,12 +251,36 @@ const hLng = profileData?.hotel_id ? hotelData?.lng : profileData?.custom_hotel_
   <Navigation size={16} /> Route starten
 </a>
 
+{/* Tourempfehlungen Button (nur anzeigen, wenn ein Link hinterlegt ist) */}
+{spot.tour_link && (
+  <a 
+    href={`${spot.tour_link}${spot.tour_link.includes('?') ? '&' : '?'}partner_id=JAPXTFH`}
+    target="_blank"
+    rel="noopener noreferrer"
+    style={{ marginTop: "12px", width: "100%", padding: "14px", background: "#ff7b00", color: "#fff", borderRadius: 14, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, textDecoration: "none" }}
+  >
+    <Sparkles size={16} /> Tourempfehlungen
+  </a>
+)}
+
 <a 
-  href={`mailto:info@khaolak.app?subject=Änderungsvorschlag für ${spot.title}`}
+  href={`mailto:admin@khaolak.app?subject=Änderungsvorschlag für ${spot.title}`}
   style={{ marginTop: "12px", width: "100%", padding: "14px", background: "#f1f5f9", color: "#475569", borderRadius: 14, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, textDecoration: "none" }}
 >
   <AlertCircle size={16} /> Änderung melden
 </a>
+
+{tours.length > 0 && (
+  <div style={{ marginTop: "24px" }}>
+    <h3 style={{ fontSize: "11px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", marginBottom: 12 }}>Ausflüge & Aktivitäten</h3>
+    {tours.slice(0, 3).map((tour: any, i: number) => (
+      <div key={i} style={{ marginBottom: "10px", padding: "10px", border: "1px solid #e5e5e5", borderRadius: "10px" }}>
+        <p style={{ fontSize: "13px", fontWeight: 600 }}>{tour.title}</p>
+        <p style={{ fontSize: "12px", color: "#14b8a6" }}>{tour.price} {tour.currency}</p>
+      </div>
+    ))}
+  </div>
+)}
 
               {spot.youtube_url && (
                 <a 

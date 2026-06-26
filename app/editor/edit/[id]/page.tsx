@@ -28,12 +28,12 @@ export default function EditSpotPage() {
   const params = useParams();
   const id = params.id as string;
   const router = useRouter();
-  const categories = ["Strand", "Natur", "Restaurant", "Markt", "Tempel", "Geheimtipp"];
+  const [categories, setCategories] = useState<string[]>([]);
 
   const [formData, setFormData] = useState({
     title: "", image_url: "", category: "", description: "", long_description: "",
     latitude: "", longitude: "", price_level: "", opening_hours: "", youtube_url: "",
-    youtube_timestamp: "", features: [{ label: "", value: "", icon: "Sparkles" as keyof typeof iconMap }],
+    youtube_timestamp: "", tour_link: "", features: [{ label: "", value: "", icon: "Sparkles" as keyof typeof iconMap }],
     best_months: [] as number[], galleryUrlsText: "",
     parking_info: { name: "", price: "", details: "", lat: "", lng: "" },
   });
@@ -41,8 +41,13 @@ export default function EditSpotPage() {
   const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
-    if (id) {
-      async function loadSpot() {
+    async function fetchData() {
+      // Kategorien laden
+      const { data: catData } = await supabase.from("categories").select("name");
+      if (catData) setCategories(catData.map(item => item.name));
+
+      // Spot Daten laden
+      if (id) {
         const { data } = await supabase.from("spots").select("*").eq("id", id).single();
         if (data) {
           let textDesc = "";
@@ -66,6 +71,7 @@ export default function EditSpotPage() {
             opening_hours: data.opening_hours || "",
             youtube_url: data.youtube_url || "",
             youtube_timestamp: data.youtube_timestamp?.toString() || "",
+            tour_link: data.tour_link || "",
             features: data.details_config?.features || [{ label: "", value: "", icon: "Sparkles" }],
             best_months: data.best_months || [],
             galleryUrlsText: data.gallery_urls?.join("\n") || "",
@@ -73,8 +79,8 @@ export default function EditSpotPage() {
           });
         }
       }
-      loadSpot();
     }
+    fetchData();
   }, [id]);
 
   const toggleMonth = (monthIndex: number) => {
@@ -110,6 +116,7 @@ export default function EditSpotPage() {
       opening_hours: formData.opening_hours || null,
       youtube_url: formData.youtube_url && formData.youtube_url.trim() !== "" ? formData.youtube_url : null,
       youtube_timestamp: toIntForce(formData.youtube_timestamp),
+      tour_link: formData.tour_link || null,
       best_months: formData.best_months || [],
       details_config: { features: formData.features.filter(f => f.label !== "") },
       gallery_urls: formData.galleryUrlsText ? formData.galleryUrlsText.split("\n").filter(u => u.trim() !== "") : [],
@@ -142,6 +149,7 @@ export default function EditSpotPage() {
               <input className="w-full p-3 border rounded-xl" placeholder="YouTube URL" value={formData.youtube_url} onChange={(e) => setFormData({...formData, youtube_url: e.target.value})} />
               <input className="w-full p-3 border rounded-xl" placeholder="Startzeit (Sekunden)" type="number" value={formData.youtube_timestamp} onChange={(e) => setFormData({...formData, youtube_timestamp: e.target.value})} />
           </div>
+          <input className="w-full p-3 border rounded-xl" placeholder="GetYourGuide Tour-Link" value={formData.tour_link} onChange={(e) => setFormData({...formData, tour_link: e.target.value})} />
           <div>
             <label className="block text-sm font-bold mb-3 text-slate-700">Kategorie:</label>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">

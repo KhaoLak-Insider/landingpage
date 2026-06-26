@@ -26,7 +26,7 @@ export default function SpotEditorPage() {
   const [formData, setFormData] = useState({
     title: "", image_url: "", category: "", description: "", long_description: "",
     latitude: "", longitude: "", price_level: "", opening_hours: "", youtube_url: "",
-    youtube_timestamp: "", 
+    youtube_timestamp: "", tour_link: "",
     features: [{ label: "", value: "", icon: "Sparkles" as keyof typeof iconMap }],
     best_months: [] as number[],
     galleryUrlsText: "",
@@ -69,6 +69,7 @@ export default function SpotEditorPage() {
       price_level: formData.price_level, opening_hours: formData.opening_hours,
       youtube_url: formData.youtube_url,
       youtube_timestamp: formData.youtube_timestamp,
+      tour_link: formData.tour_link,
       best_months: formData.best_months,
       details_config: { features: formData.features.filter(f => f.label !== "") },
       gallery_urls: formData.galleryUrlsText.split("\n").filter(u => u.trim() !== ""),
@@ -82,7 +83,7 @@ export default function SpotEditorPage() {
       setFormData({
         title: "", image_url: "", category: "", description: "", long_description: "",
         latitude: "", longitude: "", price_level: "", opening_hours: "", 
-        youtube_url: "", youtube_timestamp: "", features: [{ label: "", value: "", icon: "Sparkles" }], 
+        youtube_url: "", youtube_timestamp: "", tour_link: "", features: [{ label: "", value: "", icon: "Sparkles" }], 
         best_months: [], galleryUrlsText: "", parking_info: { name: "", price: "", details: "", lat: "", lng: "" }
       });
     }
@@ -108,6 +109,7 @@ export default function SpotEditorPage() {
              <input className="w-full p-3 border rounded-xl" placeholder="Preis-Level" value={formData.price_level} onChange={(e) => setFormData({...formData, price_level: e.target.value})} />
              <input className="w-full p-3 border rounded-xl" placeholder="Öffnungszeiten" value={formData.opening_hours} onChange={(e) => setFormData({...formData, opening_hours: e.target.value})} />
           </div>
+          <input className="w-full p-3 border rounded-xl" placeholder="GetYourGuide Tour-Link" value={formData.tour_link} onChange={(e) => setFormData({...formData, tour_link: e.target.value})} />
 
           <div>
             <label className="block text-sm font-bold mb-3 text-slate-700">Kategorie:</label>

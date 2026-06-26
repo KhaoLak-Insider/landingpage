@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Khao Lak Insider",
     description:
-      "Entdecke Khao Lak wie ein Insider – mit Stränden, Märkten, Restaurants und Geheimtipps in einer App.",
+      "Entdecke Khao Lak wie ein Insider – mit Strände, Märkte, Restaurants und Geheimtipps in einer App.",
     images: ["https://khaolak.app/images/og-image.jpg"],
   },
 };
@@ -56,6 +56,12 @@ export default function RootLayout({
           {children}
         </main>
         <Analytics />
+        <Script
+          id="gyg-analytics"
+          src="https://widget.getyourguide.com/dist/pa.umd.production.min.js"
+          strategy="afterInteractive"
+          data-gyg-partner-id="JAPXTFH"
+        />
         <Script
           id="travelpayouts-script"
           strategy="afterInteractive"
