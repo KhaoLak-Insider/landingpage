@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/src/lib/supabase";
 import ImageUpload from "@/src/components/ImageUpload";
 import GalleryUpload from "@/src/components/GalleryUpload";
@@ -21,7 +21,7 @@ function convertTextToJson(text: string) {
 }
 
 export default function SpotEditorPage() {
-  const categories = ["Strand", "Natur", "Restaurant", "Markt", "Tempel", "Geheimtipp"];
+  const [categories, setCategories] = useState<string[]>([]);
   
   const [formData, setFormData] = useState({
     title: "", image_url: "", category: "", description: "", long_description: "",
@@ -34,6 +34,14 @@ export default function SpotEditorPage() {
   });
   const [loading, setLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+
+  useEffect(() => {
+    async function fetchCategories() {
+      const { data } = await supabase.from("categories").select("name");
+      if (data) setCategories(data.map(item => item.name));
+    }
+    fetchCategories();
+  }, []);
 
   const toggleMonth = (monthIndex: number) => {
     setFormData(prev => ({
@@ -174,10 +182,10 @@ export default function SpotEditorPage() {
 
         <div className="fixed bottom-0 left-0 w-full bg-white border-t p-4 shadow-lg z-50">
           <div className="max-w-4xl mx-auto flex justify-end gap-4">
-             <button type="button" onClick={() => setShowPreview(true)} className="bg-slate-100 text-slate-700 px-8 py-4 rounded-2xl font-bold text-lg hover:bg-slate-200 transition-all">Vorschau</button>
-             <button disabled={loading} type="submit" className="bg-teal-500 text-white px-12 py-4 rounded-2xl font-bold text-lg hover:bg-teal-600 transition-all shadow-xl shadow-teal-500/20">
-               {loading ? "Wird gespeichert..." : "Spot veröffentlichen"}
-             </button>
+              <button type="button" onClick={() => setShowPreview(true)} className="bg-slate-100 text-slate-700 px-8 py-4 rounded-2xl font-bold text-lg hover:bg-slate-200 transition-all">Vorschau</button>
+              <button disabled={loading} type="submit" className="bg-teal-500 text-white px-12 py-4 rounded-2xl font-bold text-lg hover:bg-teal-600 transition-all shadow-xl shadow-teal-500/20">
+                {loading ? "Wird gespeichert..." : "Spot veröffentlichen"}
+              </button>
           </div>
         </div>
       </form>

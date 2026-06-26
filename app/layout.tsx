@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
-import Header from "@/src/components/Header"; // Header importieren
+import Header from "@/src/components/Header"; 
+import Script from "next/script";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -50,11 +51,25 @@ export default function RootLayout({
   return (
     <html lang="de" className="h-full antialiased">
       <body className={`${poppins.className} min-h-full flex flex-col`}>
-        <Header /> {/* Header hier hinzugefügt */}
+        <Header /> 
         <main className="flex-grow">
           {children}
         </main>
         <Analytics />
+        <Script
+          id="travelpayouts-script"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function () {
+                  var script = document.createElement("script");
+                  script.async = 1;
+                  script.src = 'https://emrld.ltd/NTQzNTY3.js?t=543567';
+                  document.head.appendChild(script);
+              })();
+            `,
+          }}
+        />
       </body>
     </html>
   );

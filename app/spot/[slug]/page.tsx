@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/src/lib/supabase";
 import MapBoxMini from "@/src/components/MapBoxMini";
-import { MapPin, Tag, Navigation, DollarSign, Clock, Car, Play } from "lucide-react"; 
+import { MapPin, Tag, Navigation, DollarSign, Clock, Car, Play, AlertCircle } from "lucide-react"; 
 import { iconMap } from "@/src/components/IconLibrary";
 import Link from "next/link";
 import Lightbox from "yet-another-react-lightbox";
@@ -230,6 +230,13 @@ const hLng = profileData?.hotel_id ? hotelData?.lng : profileData?.custom_hotel_
   style={{ width: "100%", padding: "14px", background: "#0f172a", color: "#fff", borderRadius: 14, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, textDecoration: "none" }}
 >
   <Navigation size={16} /> Route starten
+</a>
+
+<a 
+  href={`mailto:info@khaolak.app?subject=Änderungsvorschlag für ${spot.title}`}
+  style={{ marginTop: "12px", width: "100%", padding: "14px", background: "#f1f5f9", color: "#475569", borderRadius: 14, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, textDecoration: "none" }}
+>
+  <AlertCircle size={16} /> Änderung melden
 </a>
 
               {spot.youtube_url && (

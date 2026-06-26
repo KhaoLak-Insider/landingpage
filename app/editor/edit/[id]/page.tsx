@@ -11,7 +11,8 @@ import { MapPin } from "lucide-react";
 // HELPER: Text zu JSON konvertieren
 function convertTextToJson(text: string) {
   if (!text) return [];
-  return text.split('\n').map(line => {
+  const lines = text.split('\n').filter(line => line.trim() !== '');
+  return lines.map(line => {
     // Erkennt ### am Anfang (mit oder ohne Leerzeichen)
     if (line.trim().startsWith('###')) {
       return { 
@@ -140,8 +141,6 @@ export default function EditSpotPage() {
           <div className="grid grid-cols-2 gap-4">
               <input className="w-full p-3 border rounded-xl" placeholder="YouTube URL" value={formData.youtube_url} onChange={(e) => setFormData({...formData, youtube_url: e.target.value})} />
               <input className="w-full p-3 border rounded-xl" placeholder="Startzeit (Sekunden)" type="number" value={formData.youtube_timestamp} onChange={(e) => setFormData({...formData, youtube_timestamp: e.target.value})} />
-              <input className="w-full p-3 border rounded-xl" placeholder="Preis-Level" value={formData.price_level} onChange={(e) => setFormData({...formData, price_level: e.target.value})} />
-              <input className="w-full p-3 border rounded-xl" placeholder="Öffnungszeiten" value={formData.opening_hours} onChange={(e) => setFormData({...formData, opening_hours: e.target.value})} />
           </div>
           <div>
             <label className="block text-sm font-bold mb-3 text-slate-700">Kategorie:</label>
@@ -216,6 +215,7 @@ export default function EditSpotPage() {
 
         <div className="fixed bottom-0 left-0 w-full bg-white border-t p-4 shadow-lg z-50">
           <div className="max-w-4xl mx-auto flex justify-end gap-4">
+             <button type="button" onClick={() => setShowPreview(true)} className="bg-slate-100 text-slate-700 px-8 py-4 rounded-2xl font-bold text-lg hover:bg-slate-200 transition-all">Vorschau</button>
              <button disabled={loading} type="submit" className="bg-teal-500 text-white px-12 py-4 rounded-2xl font-bold text-lg hover:bg-teal-600 transition-all shadow-xl shadow-teal-500/20">
                {loading ? "Wird gespeichert..." : "Änderungen speichern"}
              </button>
