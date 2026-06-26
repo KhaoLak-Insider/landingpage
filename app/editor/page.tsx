@@ -113,13 +113,10 @@ export default function SpotEditorPage() {
 
           <div>
             <label className="block text-sm font-bold mb-3 text-slate-700">Kategorie:</label>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {categories.map((cat) => (
-                <label key={cat} className={`flex items-center p-3 border rounded-xl cursor-pointer transition-all ${formData.category === cat ? "bg-teal-50 border-teal-500 text-teal-700" : "hover:bg-slate-50"}`}>
-                  <input type="radio" value={cat} checked={formData.category === cat} onChange={(e) => setFormData({...formData, category: e.target.value})} className="mr-2" /> {cat}
-                </label>
-              ))}
-            </div>
+            <select className="w-full p-4 border rounded-xl bg-white" value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})}>
+              <option value="">Kategorie wählen...</option>
+              {categories.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
+            </select>
           </div>
         </section>
 
