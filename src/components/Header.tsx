@@ -106,6 +106,7 @@ export default function Header() {
           <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
             <div className="p-2">
               <Link href="/profil" className="block px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 rounded-lg">Profil</Link>
+              <Link href="/favorites" className="block px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 rounded-lg">Favoriten</Link>
               
               {/* Sichtbarkeit nur für Admins/Editoren */}
               {(profile?.role === 'admin' || profile?.role === 'editor') && (

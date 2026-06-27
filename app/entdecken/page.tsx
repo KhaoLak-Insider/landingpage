@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/src/lib/supabase";
 import Link from "next/link";
 import * as LucideIcons from "lucide-react";
+import { Heart } from "lucide-react";
 
 export default function EntdeckenPage() {
   const [spots, setSpots] = useState<any[]>([]);
@@ -11,6 +12,7 @@ export default function EntdeckenPage() {
   const [category, setCategory] = useState("Alle");
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([{ name: "Alle", icon: "LayoutGrid" }]);
+  const [favorites, setFavorites] = useState<string[]>([]);
 
   // Hilfsfunktion für Icons
   const IconComponent = ({ name }: { name: string }) => {
@@ -19,13 +21,17 @@ export default function EntdeckenPage() {
   };
 
   useEffect(() => {
-    async function loadCategories() {
-      const { data } = await supabase.from("categories").select("name, icon").order("name");
-      if (data) {
-        setCategories([{ name: "Alle", icon: "LayoutGrid" }, ...data]);
+    async function loadInitialData() {
+      const { data: catData } = await supabase.from("categories").select("name, icon").order("name");
+      if (catData) setCategories([{ name: "Alle", icon: "LayoutGrid" }, ...catData]);
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: favData } = await supabase.from("favorites").select("spot_id").eq("user_id", user.id);
+        if (favData) setFavorites(favData.map(f => f.spot_id));
       }
     }
-    loadCategories();
+    loadInitialData();
   }, []);
 
   useEffect(() => {
@@ -50,7 +56,6 @@ export default function EntdeckenPage() {
     setSpots(data || []);
   }
 
-  // Hilfsfunktion, um das Icon anhand des Kategorienamens zu finden
   function getIconForCategory(catName: string) {
     const found = categories.find((c) => c.name === catName);
     return found ? found.icon : "MapPin";
@@ -58,37 +63,29 @@ export default function EntdeckenPage() {
 
   async function handleSearch(value: string) {
     setSearch(value);
-
     if (value.length < 2) {
       setSuggestions([]);
       return;
     }
-
     const { data } = await supabase
       .from("spots")
       .select("id, title, slug, image_url")
       .ilike("title", `${value}%`)
       .limit(5);
-
     setSuggestions(data || []);
   }
 
-  function toggleFav(id: string) {
-    const favs = JSON.parse(localStorage.getItem("favs") || "[]");
+  async function toggleFav(id: string) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return alert("Bitte logge dich ein.");
 
-    if (favs.includes(id)) {
-      const updated = favs.filter((f: string) => f !== id);
-      localStorage.setItem("favs", JSON.stringify(updated));
+    if (favorites.includes(id)) {
+      await supabase.from("favorites").delete().eq("spot_id", id).eq("user_id", user.id);
+      setFavorites(favorites.filter(f => f !== id));
     } else {
-      localStorage.setItem("favs", JSON.stringify([...favs, id]));
+      await supabase.from("favorites").insert([{ spot_id: id, user_id: user.id }]);
+      setFavorites([...favorites, id]);
     }
-    window.dispatchEvent(new Event("storage"));
-  }
-
-  function isFav(id: string) {
-    if (typeof window === "undefined") return false;
-    const favs = JSON.parse(localStorage.getItem("favs") || "[]");
-    return favs.includes(id);
   }
 
   return (
@@ -263,11 +260,11 @@ export default function EntdeckenPage() {
                   style={{
                     border: "none",
                     background: "transparent",
-                    fontSize: 20,
                     cursor: "pointer",
+                    color: favorites.includes(spot.id) ? "#ef4444" : "#cbd5e1"
                   }}
                 >
-                  {isFav(spot.id) ? "❤️" : "🤍"}
+                  <Heart size={24} fill={favorites.includes(spot.id) ? "#ef4444" : "none"} />
                 </button>
               </div>
 

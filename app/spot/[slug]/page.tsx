@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/src/lib/supabase";
 import MapBoxMini from "@/src/components/MapBoxMini";
-import { MapPin, Tag, Navigation, DollarSign, Clock, Car, Play, AlertCircle, Sparkles, Sun } from "lucide-react"; 
+import { MapPin, Tag, Navigation, DollarSign, Clock, Car, Play, AlertCircle, Sparkles, Sun, Heart } from "lucide-react"; 
 import { iconMap } from "@/src/components/IconLibrary";
 import Link from "next/link";
 import Lightbox from "yet-another-react-lightbox";
@@ -20,6 +20,7 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
   const [isRouting, setIsRouting] = useState(false);
   const [routeGeoJSON, setRouteGeoJSON] = useState<any>(null);
   const [tours, setTours] = useState<any[]>([]);
+  const [isFavorite, setIsFavorite] = useState(false);
 
   // Distanz berechnen (Haversine-Formel)
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -66,6 +67,13 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
       if (spotData) {
         setSpot(spotData);
         
+        // Favoriten checken
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: fav } = await supabase.from("favorites").select("id").eq("spot_id", spotData.id).eq("user_id", user.id).maybeSingle();
+          if (fav) setIsFavorite(true);
+        }
+        
         // Touren via API laden
         fetch(`/api/tours?location=${spotData.title}`)
           .then(res => res.json())
@@ -81,7 +89,6 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
         setGallery(parsedGallery);
 
         // 2. Profil laden
-        const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           const { data: profileData } = await supabase
             .from("profiles")
@@ -106,6 +113,17 @@ const hLng = profileData?.hotel_id ? hotelData?.lng : profileData?.custom_hotel_
     }
     initPage();
   }, [params]);
+
+  const toggleFavorite = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return alert("Bitte logge dich ein.");
+    if (isFavorite) {
+      await supabase.from("favorites").delete().eq("spot_id", spot.id).eq("user_id", user.id);
+    } else {
+      await supabase.from("favorites").insert([{ spot_id: spot.id, user_id: user.id }]);
+    }
+    setIsFavorite(!isFavorite);
+  };
 
   if (!spot) return <main style={{ padding: 40, textAlign: "center", minHeight: "100vh" }}>Spot wird geladen....</main>;
 
@@ -224,7 +242,12 @@ const hLng = profileData?.hotel_id ? hotelData?.lng : profileData?.custom_hotel_
           {/* SIDEBAR (Sticky) */}
           <aside style={{ width: 320, position: "sticky", top: "20px", marginTop: "-430px", alignSelf: "start" }}>
             <div style={{ background: "#ffffff", borderRadius: 24, padding: "32px", boxShadow: "0 10px 25px -5px rgba(0,0,0,0.05)", border: "1px solid #f1f5f9" }}>
-              <h3 style={{ fontSize: "11px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", marginBottom: 32 }}>Spot Informationen</h3>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
+                <h3 style={{ fontSize: "11px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", margin: 0 }}>Spot Informationen</h3>
+                <button onClick={toggleFavorite} style={{ background: "none", border: "none", cursor: "pointer", color: isFavorite ? "#ef4444" : "#cbd5e1" }}>
+                  <Heart size={24} fill={isFavorite ? "#ef4444" : "none"} />
+                </button>
+              </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 24, marginBottom: 40 }}>
                 {spot.category && <InfoItem icon={<Tag size={16} />} label="Kategorie" value={spot.category} />}
                 <InfoItem icon={<Navigation size={16} />} label="Fahrtweg" value={isRouting ? "..." : routeDist ? `${routeDist} km (${routeTime} Min.)` : "Eintragen"} />
