@@ -42,7 +42,7 @@ export default function SpotEditorPage() {
     try {
       // Statt: const apiKey = "DEIN_GOOGLE_API_KEY";
       const apiKey = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY;
-      const searchUrl = `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(searchQuery)}&inputtype=textquery&fields=place_id&key=${apiKey}`;
+      const searchUrl = `/api/places?input=${encodeURIComponent(searchQuery)}`;
       const searchRes = await fetch(searchUrl);
       const searchData = await searchRes.json();
       const placeId = searchData.candidates?.[0]?.place_id;
