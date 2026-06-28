@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     const text = response.text().replace(/```json/g, '').replace(/```/g, '');
     
     return NextResponse.json(JSON.parse(text));
-  } catch (error) {
-    return NextResponse.json({ error: "Fehler bei der Generierung" }, { status: 500 });
-  }
+  } catch (error: any) {
+  return NextResponse.json({ error: error.message }, { status: 500 });
+}
 }
