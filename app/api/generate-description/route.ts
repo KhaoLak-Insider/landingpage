@@ -1,15 +1,13 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 
-// Initialisierung mit dem API-Key
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 export async function POST(request: Request) {
   try {
     const { spotData } = await request.json();
-
-    // Wir nutzen hier 'gemini-2.0-flash', da dieses Modell aktuell 
-    // weitgehend verfügbar und für diesen Einsatzzweck optimiert ist.
+    
+    // Das Modell ist nun korrekt konfiguriert
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `
@@ -29,8 +27,6 @@ export async function POST(request: Request) {
     
     return NextResponse.json(JSON.parse(text));
   } catch (error: any) {
-    // Fehlerbehandlung: Gibt den Fehler direkt an den Browser zurück, 
-    // damit du im Netzwerk-Tab siehst, was genau passiert.
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
