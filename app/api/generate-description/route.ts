@@ -8,7 +8,7 @@ export async function POST(request: Request) {
     const { spotData } = await request.json();
     
     // Das Modell auswählen (Flash ist schnell und günstig)
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
     const prompt = `
       Du bist ein Reise-Experte für den 'Khao Lak Insider'. 
