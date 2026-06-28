@@ -1,14 +1,17 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+// Initialisierung mit dem API-Key
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 export async function POST(request: Request) {
   try {
     const { spotData } = await request.json();
-    
-    // Das Modell auswählen (Flash ist schnell und günstig)
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+    // Wir nutzen hier den expliziten Modellnamen. 
+    // Sollte dies wieder einen 404 werfen, ist dein Key in deinem Google-Account 
+    // für dieses spezifische Modell nicht freigeschaltet.
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `
       Du bist ein Reise-Experte für den 'Khao Lak Insider'. 
@@ -18,15 +21,16 @@ export async function POST(request: Request) {
       Features: ${JSON.stringify(spotData.features)}.
       
       Antworte strikt im JSON-Format: 
-      { "description": "...", "long_description": "..." }
+      { "description": "Kurze Einleitung", "long_description": "Lange Beschreibung" }
     `;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    const text = response.text().replace(/```json/g, '').replace(/```/g, '');
+    const text = response.text().replace(/```json/g, '').replace(/```/g, '').trim();
     
     return NextResponse.json(JSON.parse(text));
   } catch (error: any) {
-  return NextResponse.json({ error: error.message }, { status: 500 });
-}
+    console.error("KI Fehler:", error); // Loggt den Fehler in den Vercel-Logs
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 }
