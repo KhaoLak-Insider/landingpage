@@ -40,13 +40,11 @@ export default function SpotEditorPage() {
   const searchGooglePlace = async () => {
     if (!searchQuery) return;
     try {
-      // 1. Suche nach dem Ort via Proxy
       const searchRes = await fetch(`/api/places?input=${encodeURIComponent(searchQuery)}`);
       const searchData = await searchRes.json();
       const placeId = searchData.candidates?.[0]?.place_id;
 
       if (placeId) {
-        // 2. Details abrufen via Proxy
         const detailsRes = await fetch(`/api/place-details?place_id=${placeId}`);
         const detailsData = await detailsRes.json();
         const p = detailsData.result;
@@ -62,6 +60,28 @@ export default function SpotEditorPage() {
         }));
       }
     } catch (e) { console.error("Google Import Fehler:", e); }
+  };
+
+  // NEUE FUNKTION: KI Beschreibung generieren
+  const generateDescription = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/generate-description", {
+        method: "POST",
+        body: JSON.stringify({ spotData: formData }),
+      });
+      const data = await res.json();
+      
+      setFormData(prev => ({
+        ...prev,
+        description: data.description || prev.description,
+        long_description: data.long_description || prev.long_description
+      }));
+    } catch (e) {
+      alert("Fehler bei der KI-Generierung");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -175,6 +195,9 @@ export default function SpotEditorPage() {
           <h2 className="text-lg font-bold text-slate-800 border-b pb-2">Beschreibungen</h2>
           <textarea className="w-full p-4 border rounded-xl" placeholder="Kurze Beschreibung" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} />
           <textarea className="w-full p-4 border rounded-xl" rows={4} placeholder="Lange Beschreibung (Nutze ### für Überschriften)" value={formData.long_description} onChange={(e) => setFormData({...formData, long_description: e.target.value})} />
+          <button type="button" onClick={generateDescription} className="text-teal-600 font-bold hover:underline">
+            {loading ? "Schreibe Text..." : "KI-Beschreibung generieren"}
+          </button>
         </section>
 
         <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
