@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     // Wir nutzen hier den expliziten Modellnamen. 
     // Sollte dies wieder einen 404 werfen, ist dein Key in deinem Google-Account 
     // für dieses spezifische Modell nicht freigeschaltet.
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "models/gemini-1.5-flash" });
 
     const prompt = `
       Du bist ein Reise-Experte für den 'Khao Lak Insider'. 
