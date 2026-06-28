@@ -10,7 +10,7 @@ export async function POST(request: Request) {
 
     // Wir nutzen hier 'gemini-2.0-flash', da dieses Modell aktuell 
     // weitgehend verfügbar und für diesen Einsatzzweck optimiert ist.
-    const model = genAI.getGenerativeModel({ model: "gemini-3.0-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `
       Du bist ein Reise-Experte für den 'Khao Lak Insider'. 
