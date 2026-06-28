@@ -36,20 +36,18 @@ export default function SpotEditorPage() {
   const [loading, setLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
-  // NEUE FUNKTION: Google Places Suche
+  // ANGEPASSTE FUNKTION: Google Places Suche via Proxy
   const searchGooglePlace = async () => {
     if (!searchQuery) return;
     try {
-      // Statt: const apiKey = "DEIN_GOOGLE_API_KEY";
-      const apiKey = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY;
-      const searchUrl = `/api/places?input=${encodeURIComponent(searchQuery)}`;
-      const searchRes = await fetch(searchUrl);
+      // 1. Suche nach dem Ort via Proxy
+      const searchRes = await fetch(`/api/places?input=${encodeURIComponent(searchQuery)}`);
       const searchData = await searchRes.json();
       const placeId = searchData.candidates?.[0]?.place_id;
 
       if (placeId) {
-        const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=name,geometry,formatted_address,photos,opening_hours&key=${apiKey}`;
-        const detailsRes = await fetch(detailsUrl);
+        // 2. Details abrufen via Proxy
+        const detailsRes = await fetch(`/api/place-details?place_id=${placeId}`);
         const detailsData = await detailsRes.json();
         const p = detailsData.result;
 
@@ -60,7 +58,7 @@ export default function SpotEditorPage() {
           longitude: p.geometry?.location?.lng?.toString() || prev.longitude,
           description: p.formatted_address || prev.description,
           opening_hours: p.opening_hours?.weekday_text?.join('\n') || prev.opening_hours,
-          image_url: p.photos ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photo_reference=${p.photos[0].photo_reference}&key=${apiKey}` : prev.image_url
+          image_url: p.photos ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photo_reference=${p.photos[0].photo_reference}&key=${process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY}` : prev.image_url
         }));
       }
     } catch (e) { console.error("Google Import Fehler:", e); }
@@ -131,7 +129,6 @@ export default function SpotEditorPage() {
 
       <form onSubmit={handleSubmit} className="space-y-8 pb-24">
         
-        {/* NEUE GOOGLE SUCHE SEKTION */}
         <section className="bg-teal-50 p-6 rounded-2xl border-2 border-teal-200">
           <h2 className="text-lg font-bold text-teal-800 mb-4">Google Places Import</h2>
           <div className="flex gap-2">
