@@ -301,16 +301,16 @@ const hLng = profileData?.hotel_id ? hotelData?.lng : profileData?.custom_hotel_
               )}
 
               {/* Booking.com Button */}
-              {spot.booking_link && (
-                <a 
-                  href={spot.booking_link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ marginTop: "12px", width: "100%", padding: "14px", background: "#003580", color: "#fff", borderRadius: 14, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, textDecoration: "none" }}
-                >
-                  <MapPin size={16} /> Unterkunft buchen
-                </a>
-              )}
+{spot.booking_link && (
+  <a 
+    href={spot.booking_link.startsWith('http') ? spot.booking_link : `https://${spot.booking_link}`}
+    target="_blank"
+    rel="noopener noreferrer"
+    style={{ marginTop: "12px", width: "100%", padding: "14px", background: "#003580", color: "#fff", borderRadius: 14, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, textDecoration: "none" }}
+  >
+    <MapPin size={16} /> Unterkunft buchen*
+  </a>
+)}
 
               <a 
                 href={`mailto:admin@khaolak.app?subject=Änderungsvorschlag für ${spot.title}`}
