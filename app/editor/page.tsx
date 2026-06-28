@@ -26,7 +26,7 @@ export default function SpotEditorPage() {
   const [formData, setFormData] = useState({
     title: "", image_url: "", category: "", description: "", long_description: "",
     latitude: "", longitude: "", price_level: "", opening_hours: "", youtube_url: "",
-    youtube_timestamp: "", tour_link: "",
+    youtube_timestamp: "", tour_link: "", booking_link: "",
     features: [{ label: "", value: "", icon: "Sparkles" as keyof typeof iconMap }],
     best_months: [] as number[],
     galleryUrlsText: "",
@@ -70,6 +70,7 @@ export default function SpotEditorPage() {
       youtube_url: formData.youtube_url,
       youtube_timestamp: formData.youtube_timestamp,
       tour_link: formData.tour_link,
+      booking_link: formData.booking_link,
       best_months: formData.best_months,
       details_config: { features: formData.features.filter(f => f.label !== "") },
       gallery_urls: formData.galleryUrlsText.split("\n").filter(u => u.trim() !== ""),
@@ -83,7 +84,8 @@ export default function SpotEditorPage() {
       setFormData({
         title: "", image_url: "", category: "", description: "", long_description: "",
         latitude: "", longitude: "", price_level: "", opening_hours: "", 
-        youtube_url: "", youtube_timestamp: "", tour_link: "", features: [{ label: "", value: "", icon: "Sparkles" }], 
+        youtube_url: "", youtube_timestamp: "", tour_link: "", booking_link: "",
+        features: [{ label: "", value: "", icon: "Sparkles" }], 
         best_months: [], galleryUrlsText: "", parking_info: { name: "", price: "", details: "", lat: "", lng: "" }
       });
     }
@@ -104,12 +106,13 @@ export default function SpotEditorPage() {
           <ImageUpload slug={formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') || "temp"} onUpload={(url) => setFormData({...formData, image_url: url})} />
           
           <div className="grid grid-cols-2 gap-4">
-             <input className="w-full p-3 border rounded-xl" placeholder="YouTube URL" value={formData.youtube_url} onChange={(e) => setFormData({...formData, youtube_url: e.target.value})} />
-             <input className="w-full p-3 border rounded-xl" placeholder="Startzeit (Sekunden)" value={formData.youtube_timestamp} onChange={(e) => setFormData({...formData, youtube_timestamp: e.target.value})} />
-             <input className="w-full p-3 border rounded-xl" placeholder="Preis-Level" value={formData.price_level} onChange={(e) => setFormData({...formData, price_level: e.target.value})} />
-             <input className="w-full p-3 border rounded-xl" placeholder="Öffnungszeiten" value={formData.opening_hours} onChange={(e) => setFormData({...formData, opening_hours: e.target.value})} />
+              <input className="w-full p-3 border rounded-xl" placeholder="YouTube URL" value={formData.youtube_url} onChange={(e) => setFormData({...formData, youtube_url: e.target.value})} />
+              <input className="w-full p-3 border rounded-xl" placeholder="Startzeit (Sekunden)" value={formData.youtube_timestamp} onChange={(e) => setFormData({...formData, youtube_timestamp: e.target.value})} />
+              <input className="w-full p-3 border rounded-xl" placeholder="Preis-Level" value={formData.price_level} onChange={(e) => setFormData({...formData, price_level: e.target.value})} />
+              <input className="w-full p-3 border rounded-xl" placeholder="Öffnungszeiten" value={formData.opening_hours} onChange={(e) => setFormData({...formData, opening_hours: e.target.value})} />
           </div>
           <input className="w-full p-3 border rounded-xl" placeholder="GetYourGuide Tour-Link" value={formData.tour_link} onChange={(e) => setFormData({...formData, tour_link: e.target.value})} />
+          <input className="w-full p-3 border rounded-xl" placeholder="Booking.com Affiliate-Link" value={formData.booking_link} onChange={(e) => setFormData({...formData, booking_link: e.target.value})} />
 
           <div>
             <label className="block text-sm font-bold mb-3 text-slate-700">Kategorie:</label>

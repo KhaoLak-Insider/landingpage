@@ -33,7 +33,7 @@ export default function EditSpotPage() {
   const [formData, setFormData] = useState({
     title: "", image_url: "", category: "", description: "", long_description: "",
     latitude: "", longitude: "", price_level: "", opening_hours: "", youtube_url: "",
-    youtube_timestamp: "", tour_link: "", features: [{ label: "", value: "", icon: "Sparkles" as keyof typeof iconMap }],
+    youtube_timestamp: "", tour_link: "", booking_link: "", features: [{ label: "", value: "", icon: "Sparkles" as keyof typeof iconMap }],
     best_months: [] as number[], galleryUrlsText: "",
     parking_info: { name: "", price: "", details: "", lat: "", lng: "" },
   });
@@ -72,6 +72,7 @@ export default function EditSpotPage() {
             youtube_url: data.youtube_url || "",
             youtube_timestamp: data.youtube_timestamp?.toString() || "",
             tour_link: data.tour_link || "",
+            booking_link: data.booking_link || "",
             features: data.details_config?.features || [{ label: "", value: "", icon: "Sparkles" }],
             best_months: data.best_months || [],
             galleryUrlsText: data.gallery_urls?.join("\n") || "",
@@ -117,6 +118,7 @@ export default function EditSpotPage() {
       youtube_url: formData.youtube_url && formData.youtube_url.trim() !== "" ? formData.youtube_url : null,
       youtube_timestamp: toIntForce(formData.youtube_timestamp),
       tour_link: formData.tour_link || null,
+      booking_link: formData.booking_link || null,
       best_months: formData.best_months || [],
       details_config: { features: formData.features.filter(f => f.label !== "") },
       gallery_urls: formData.galleryUrlsText ? formData.galleryUrlsText.split("\n").filter(u => u.trim() !== "") : [],
@@ -150,6 +152,7 @@ export default function EditSpotPage() {
               <input className="w-full p-3 border rounded-xl" placeholder="Startzeit (Sekunden)" type="number" value={formData.youtube_timestamp} onChange={(e) => setFormData({...formData, youtube_timestamp: e.target.value})} />
           </div>
           <input className="w-full p-3 border rounded-xl" placeholder="GetYourGuide Tour-Link" value={formData.tour_link} onChange={(e) => setFormData({...formData, tour_link: e.target.value})} />
+          <input className="w-full p-3 border rounded-xl" placeholder="Booking.com Affiliate-Link" value={formData.booking_link} onChange={(e) => setFormData({...formData, booking_link: e.target.value})} />
           <div>
             <label className="block text-sm font-bold mb-3 text-slate-700">Kategorie:</label>
             <select className="w-full p-3 border rounded-xl bg-white" value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})}>
@@ -220,10 +223,10 @@ export default function EditSpotPage() {
 
         <div className="fixed bottom-0 left-0 w-full bg-white border-t p-4 shadow-lg z-50">
           <div className="max-w-4xl mx-auto flex justify-end gap-4">
-             <button type="button" onClick={() => setShowPreview(true)} className="bg-slate-100 text-slate-700 px-8 py-4 rounded-2xl font-bold text-lg hover:bg-slate-200 transition-all">Vorschau</button>
-             <button disabled={loading} type="submit" className="bg-teal-500 text-white px-12 py-4 rounded-2xl font-bold text-lg hover:bg-teal-600 transition-all shadow-xl shadow-teal-500/20">
-               {loading ? "Wird gespeichert..." : "Änderungen speichern"}
-             </button>
+              <button type="button" onClick={() => setShowPreview(true)} className="bg-slate-100 text-slate-700 px-8 py-4 rounded-2xl font-bold text-lg hover:bg-slate-200 transition-all">Vorschau</button>
+              <button disabled={loading} type="submit" className="bg-teal-500 text-white px-12 py-4 rounded-2xl font-bold text-lg hover:bg-teal-600 transition-all shadow-xl shadow-teal-500/20">
+                {loading ? "Wird gespeichert..." : "Änderungen speichern"}
+              </button>
           </div>
         </div>
       </form>

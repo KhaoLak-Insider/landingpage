@@ -266,47 +266,13 @@ const hLng = profileData?.hotel_id ? hotelData?.lng : profileData?.custom_hotel_
               </div>
 
               <a 
-  href={`https://www.google.com/maps/dir/?api=1&origin=${userProfile?.custom_hotel_lat || userProfile?.hotels?.lat},${userProfile?.custom_hotel_lng || userProfile?.hotels?.lng}&destination=${spot.parking_info?.lat || spot.latitude},${spot.parking_info?.lng || spot.longitude}&travelmode=driving`}
-  target="_blank"
-  rel="noopener noreferrer"
-  style={{ width: "100%", padding: "14px", background: "#0f172a", color: "#fff", borderRadius: 14, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, textDecoration: "none" }}
->
-  <Navigation size={16} /> Route starten
-</a>
-
-{/* Tourempfehlungen Button (nur anzeigen, wenn ein Link hinterlegt ist) */}
-{spot.tour_link && (
-  <>
-    <a 
-      href={`${spot.tour_link}${spot.tour_link.includes('?') ? '&' : '?'}partner_id=JAPXTFH`}
-      target="_blank"
-      rel="noopener noreferrer"
-      style={{ marginTop: "12px", width: "100%", padding: "14px", background: "#ff7b00", color: "#fff", borderRadius: 14, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, textDecoration: "none" }}
-    >
-      <Sparkles size={16} /> Tourempfehlungen
-    </a>
-    <p style={{ fontSize: "10px", color: "#94a3b8", marginTop: "8px", textAlign: "center" }}>*enthält Affiliate-Link</p>
-  </>
-)}
-
-<a 
-  href={`mailto:admin@khaolak.app?subject=Änderungsvorschlag für ${spot.title}`}
-  style={{ marginTop: "12px", width: "100%", padding: "14px", background: "#f1f5f9", color: "#475569", borderRadius: 14, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, textDecoration: "none" }}
->
-  <AlertCircle size={16} /> Änderung melden
-</a>
-
-{tours.length > 0 && (
-  <div style={{ marginTop: "24px" }}>
-    <h3 style={{ fontSize: "11px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", marginBottom: 12 }}>Ausflüge & Aktivitäten</h3>
-    {tours.slice(0, 3).map((tour: any, i: number) => (
-      <div key={i} style={{ marginBottom: "10px", padding: "10px", border: "1px solid #e5e5e5", borderRadius: "10px" }}>
-        <p style={{ fontSize: "13px", fontWeight: 600 }}>{tour.title}</p>
-        <p style={{ fontSize: "12px", color: "#14b8a6" }}>{tour.price} {tour.currency}</p>
-      </div>
-    ))}
-  </div>
-)}
+                href={`https://www.google.com/maps/dir/?api=1&origin=${userProfile?.custom_hotel_lat || userProfile?.hotels?.lat},${userProfile?.custom_hotel_lng || userProfile?.hotels?.lng}&destination=${spot.parking_info?.lat || spot.latitude},${spot.parking_info?.lng || spot.longitude}&travelmode=driving`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ width: "100%", padding: "14px", background: "#0f172a", color: "#fff", borderRadius: 14, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, textDecoration: "none" }}
+              >
+                <Navigation size={16} /> Route starten
+              </a>
 
               {spot.youtube_url && (
                 <a 
@@ -320,6 +286,56 @@ const hLng = profileData?.hotel_id ? hotelData?.lng : profileData?.custom_hotel_
                 >
                   <Play size={16} /> YouTube Video
                 </a>
+              )}
+
+              {/* Tourempfehlungen Button */}
+              {spot.tour_link && (
+                <a 
+                  href={`${spot.tour_link}${spot.tour_link.includes('?') ? '&' : '?'}partner_id=JAPXTFH`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ marginTop: "12px", width: "100%", padding: "14px", background: "#ff7b00", color: "#fff", borderRadius: 14, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, textDecoration: "none" }}
+                >
+                  <Sparkles size={16} /> Tourempfehlungen
+                </a>
+              )}
+
+              {/* Booking.com Button */}
+              {spot.booking_link && (
+                <a 
+                  href={spot.booking_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ marginTop: "12px", width: "100%", padding: "14px", background: "#003580", color: "#fff", borderRadius: 14, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, textDecoration: "none" }}
+                >
+                  <MapPin size={16} /> Unterkunft buchen
+                </a>
+              )}
+
+              <a 
+                href={`mailto:admin@khaolak.app?subject=Änderungsvorschlag für ${spot.title}`}
+                style={{ marginTop: "12px", width: "100%", padding: "14px", background: "#f1f5f9", color: "#475569", borderRadius: 14, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, textDecoration: "none" }}
+              >
+                <AlertCircle size={16} /> Änderung melden
+              </a>
+
+              {/* Affiliate Hinweise GANZ UNTEN */}
+              {(spot.tour_link || spot.booking_link) && (
+                <p style={{ fontSize: "10px", color: "#94a3b8", marginTop: "16px", textAlign: "center" }}>
+                  *enthält Affiliate-Links
+                </p>
+              )}
+
+              {tours.length > 0 && (
+                <div style={{ marginTop: "24px" }}>
+                  <h3 style={{ fontSize: "11px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", marginBottom: 12 }}>Ausflüge & Aktivitäten</h3>
+                  {tours.slice(0, 3).map((tour: any, i: number) => (
+                    <div key={i} style={{ marginBottom: "10px", padding: "10px", border: "1px solid #e5e5e5", borderRadius: "10px" }}>
+                      <p style={{ fontSize: "13px", fontWeight: 600 }}>{tour.title}</p>
+                      <p style={{ fontSize: "12px", color: "#14b8a6" }}>{tour.price} {tour.currency}</p>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           </aside>
