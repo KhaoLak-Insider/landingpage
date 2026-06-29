@@ -26,7 +26,7 @@ export default function SpotEditorPage() {
   
   const [formData, setFormData] = useState({
     title: "", image_url: "", category: "", description: "", long_description: "",
-    latitude: "", longitude: "", price_level: "", opening_hours: "", youtube_url: "",
+    latitude: "", longitude: "", price_level: "", stars: "", opening_hours: "", youtube_url: "",
     youtube_timestamp: "", tour_link: "", booking_link: "",
     features: [{ label: "", value: "", icon: "Sparkles" as keyof typeof iconMap }],
     best_months: [] as number[],
@@ -56,6 +56,7 @@ export default function SpotEditorPage() {
           longitude: p.geometry?.location?.lng?.toString() || prev.longitude,
           description: p.formatted_address || prev.description,
           opening_hours: p.opening_hours?.weekday_text?.join('\n') || prev.opening_hours,
+          price_level: p.price_level?.toString() || prev.price_level,
           image_url: p.photos ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photo_reference=${p.photos[0].photo_reference}&key=${process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY}` : prev.image_url
         }));
       }
@@ -75,7 +76,9 @@ export default function SpotEditorPage() {
       setFormData(prev => ({
         ...prev,
         description: data.description || prev.description,
-        long_description: data.long_description || prev.long_description
+        long_description: data.long_description || prev.long_description,
+        stars: data.stars || prev.stars,
+        features: data.features && data.features.length > 0 ? data.features : prev.features
       }));
     } catch (e) {
       alert("Fehler bei der KI-Generierung");
@@ -115,7 +118,9 @@ export default function SpotEditorPage() {
       parking_info: formData.parking_info,
       latitude: parseFloat(formData.latitude) || null,
       longitude: parseFloat(formData.longitude) || null,
-      price_level: formData.price_level, opening_hours: formData.opening_hours,
+      price_level: parseInt(formData.price_level) || null,
+      stars: parseInt(formData.stars) || null,
+      opening_hours: formData.opening_hours,
       youtube_url: formData.youtube_url,
       youtube_timestamp: formData.youtube_timestamp,
       tour_link: formData.tour_link,
@@ -132,7 +137,7 @@ export default function SpotEditorPage() {
       alert("Spot erfolgreich angelegt!");
       setFormData({
         title: "", image_url: "", category: "", description: "", long_description: "",
-        latitude: "", longitude: "", price_level: "", opening_hours: "", 
+        latitude: "", longitude: "", price_level: "", stars: "", opening_hours: "", 
         youtube_url: "", youtube_timestamp: "", tour_link: "", booking_link: "",
         features: [{ label: "", value: "", icon: "Sparkles" }], 
         best_months: [], galleryUrlsText: "", parking_info: { name: "", price: "", details: "", lat: "", lng: "" }
@@ -166,6 +171,7 @@ export default function SpotEditorPage() {
               <input className="w-full p-3 border rounded-xl" placeholder="YouTube URL" value={formData.youtube_url} onChange={(e) => setFormData({...formData, youtube_url: e.target.value})} />
               <input className="w-full p-3 border rounded-xl" placeholder="Startzeit (Sekunden)" value={formData.youtube_timestamp} onChange={(e) => setFormData({...formData, youtube_timestamp: e.target.value})} />
               <input className="w-full p-3 border rounded-xl" placeholder="Preis-Level" value={formData.price_level} onChange={(e) => setFormData({...formData, price_level: e.target.value})} />
+              <input className="w-full p-3 border rounded-xl" placeholder="Sterne (0-5)" value={formData.stars} onChange={(e) => setFormData({...formData, stars: e.target.value})} />
               <input className="w-full p-3 border rounded-xl" placeholder="Öffnungszeiten" value={formData.opening_hours} onChange={(e) => setFormData({...formData, opening_hours: e.target.value})} />
           </div>
           <input className="w-full p-3 border rounded-xl" placeholder="GetYourGuide Tour-Link" value={formData.tour_link} onChange={(e) => setFormData({...formData, tour_link: e.target.value})} />

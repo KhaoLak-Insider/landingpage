@@ -7,18 +7,32 @@ export async function POST(request: Request) {
   try {
     const { spotData } = await request.json();
     
-    // Das Modell ist nun korrekt konfiguriert
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `
       Du bist ein Reise-Experte für den 'Khao Lak Insider'. 
-      Schreibe eine kurze Einleitung (max. 200 Zeichen) und eine ausführliche Beschreibung (mit ### Überschriften) 
-      für den Ort: ${spotData.title}.
-      Kategorie: ${spotData.category}.
-      Features: ${JSON.stringify(spotData.features)}.
+      Analysiere den Ort: ${spotData.title} (Kategorie: ${spotData.category}).
       
-      Antworte strikt im JSON-Format: 
-      { "description": "Kurze Einleitung", "long_description": "Lange Beschreibung" }
+      1. Schreibe eine kurze Einleitung (max. 150 Zeichen).
+      2. Schreibe eine ausführliche Beschreibung mit ### Überschriften.
+      3. Recherchiere/Schätze die offizielle Hotel-Kategorie oder Sterne (0 bis 5). Wenn es kein Hotel ist, setze 0.
+      4. Erstelle genau 6 nützliche Features für diesen Ort. Nutze für das Feld "icon" ausschließlich diese Namen, da sie in der Icon-Library existieren: 
+         ['Sparkles', 'Wifi', 'Coffee', 'Car', 'Camera', 'Music', 'Map', 'Sun', 'Waves', 'Utensils', 'Mountain', 'Umbrella', 'Bike'].
+      
+      Antworte strikt im JSON-Format ohne erklärenden Text: 
+      { 
+        "description": "Kurze Einleitung", 
+        "long_description": "Lange Beschreibung",
+        "stars": "4",
+        "features": [
+          {"label": "Beispiel", "value": "Beispiel", "icon": "Sparkles"},
+          {"label": "Beispiel", "value": "Beispiel", "icon": "Wifi"},
+          {"label": "Beispiel", "value": "Beispiel", "icon": "Coffee"},
+          {"label": "Beispiel", "value": "Beispiel", "icon": "Car"},
+          {"label": "Beispiel", "value": "Beispiel", "icon": "Camera"},
+          {"label": "Beispiel", "value": "Beispiel", "icon": "Sun"}
+        ]
+      }
     `;
 
     const result = await model.generateContent(prompt);
