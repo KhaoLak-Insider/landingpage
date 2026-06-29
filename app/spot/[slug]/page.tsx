@@ -137,6 +137,9 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
         {/* HERO */}
         <div style={{ position: "relative", width: "100%", height: "450px" }}>
           <img src={spot.image_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          {spot.image_url?.includes("google") && (
+            <div style={{ position: "absolute", bottom: "10px", left: "10px", fontSize: "10px", color: "rgba(255,255,255,0.7)", background: "rgba(0,0,0,0.3)", padding: "2px 6px", borderRadius: "4px", zIndex: 10 }}>Powered by Google</div>
+          )}
           
           <Link href="/entdecken" style={{ position: "absolute", top: "30px", left: "30px", zIndex: 20, display: "flex", alignItems: "center", gap: "8px", background: "rgba(255,255,255,0.9)", padding: "10px 20px", borderRadius: "50px", fontSize: "14px", fontWeight: 600, color: "#333", textDecoration: "none", boxShadow: "0 4px 10px rgba(0,0,0,0.1)" }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
@@ -166,8 +169,11 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
             {gallery.length > 0 && (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "10px", marginBottom: "40px" }}>
                 {gallery.slice(0, 3).map((url: string, i: number) => (
-                  <div key={i} onClick={() => { setIndex(i); setOpen(true); }} style={{ height: "120px", borderRadius: "12px", overflow: "hidden", cursor: "pointer" }}>
+                  <div key={i} onClick={() => { setIndex(i); setOpen(true); }} style={{ height: "120px", borderRadius: "12px", overflow: "hidden", cursor: "pointer", position: "relative" }}>
                     <img src={url} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    {url.includes("google") && (
+                      <div style={{ position: "absolute", bottom: "4px", right: "4px", fontSize: "8px", color: "white", background: "rgba(0,0,0,0.5)", padding: "1px 4px", borderRadius: "2px" }}>Google</div>
+                    )}
                   </div>
                 ))}
                 <div onClick={() => { setIndex(3); setOpen(true); }} style={{ height: "120px", borderRadius: "12px", background: "#1f2937", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "white", cursor: "pointer" }}>
@@ -326,7 +332,7 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
                 style={{ marginTop: "12px", width: "100%", padding: "14px", background: "#f1f5f9", color: "#475569", borderRadius: 14, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, textDecoration: "none" }}
               >
                 <AlertCircle size={16} /> Änderung melden
-              </a>
+            </a>
 
               {/* Affiliate Hinweise GANZ UNTEN */}
               {(spot.tour_link || spot.booking_link) && (
