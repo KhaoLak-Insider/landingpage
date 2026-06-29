@@ -305,7 +305,7 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
                   rel="noopener noreferrer"
                   style={{ marginTop: "12px", width: "100%", padding: "14px", background: "#ff7b00", color: "#fff", borderRadius: 14, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, textDecoration: "none" }}
                 >
-                  <Sparkles size={16} /> Tourempfehlungen
+                  <Sparkles size={16} /> Tourempfehlungen*
                 </a>
               )}
 
