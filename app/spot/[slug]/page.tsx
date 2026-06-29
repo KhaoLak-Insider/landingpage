@@ -89,21 +89,22 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
         setGallery(parsedGallery);
 
         // 2. Profil laden
-        if (user) {
+        const { data: { user: userData } } = await supabase.auth.getUser();
+        if (userData) {
           const { data: profileData } = await supabase
             .from("profiles")
-            .select("hotel_id, custom_hotel_lat, custom_hotel_lng, hotels(lat, lng)")
-            .eq("id", user.id)
+            .select("role, hotel_id, custom_hotel_lat, custom_hotel_lng, hotels(lat, lng)")
+            .eq("id", userData.id)
             .maybeSingle();
           
           setUserProfile(profileData);
 
           // Wir behandeln 'hotels' explizit als Array, um TypeScript zufrieden zu stellen,
-// aber wir prüfen zur Laufzeit auf das erste Element, um die Daten zu erhalten.
-const hotelData = Array.isArray(profileData?.hotels) ? profileData.hotels[0] : (profileData?.hotels as any);
+          // aber wir prüfen zur Laufzeit auf das erste Element, um die Daten zu erhalten.
+          const hotelData = Array.isArray(profileData?.hotels) ? profileData.hotels[0] : (profileData?.hotels as any);
 
-const hLat = profileData?.hotel_id ? hotelData?.lat : profileData?.custom_hotel_lat;
-const hLng = profileData?.hotel_id ? hotelData?.lng : profileData?.custom_hotel_lng;
+          const hLat = profileData?.hotel_id ? hotelData?.lat : profileData?.custom_hotel_lat;
+          const hLng = profileData?.hotel_id ? hotelData?.lng : profileData?.custom_hotel_lng;
           
           if (hLat && hLng) {
             fetchDrivingDistance({lat: hLat, lng: hLng}, {lat: spotData.latitude, lng: spotData.longitude});
@@ -242,6 +243,14 @@ const hLng = profileData?.hotel_id ? hotelData?.lng : profileData?.custom_hotel_
           {/* SIDEBAR (Sticky) */}
           <aside style={{ width: 320, position: "sticky", top: "20px", marginTop: "-430px", alignSelf: "start" }}>
             <div style={{ background: "#ffffff", borderRadius: 24, padding: "32px", boxShadow: "0 10px 25px -5px rgba(0,0,0,0.05)", border: "1px solid #f1f5f9" }}>
+              
+              {/* Bearbeiten-Button oben in der Sidebar */}
+              {(userProfile?.role === 'admin' || userProfile?.role === 'editor') && (
+                <Link href={`/editor/edit/${spot.id}`} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", width: "100%", marginBottom: 32, padding: "12px", background: "#f1f5f9", borderRadius: 14, fontWeight: 700, color: "#e11d48", textDecoration: "none", border: "1px solid #e11d48" }}>
+                  ✏️ Spot bearbeiten
+                </Link>
+              )}
+
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
                 <h3 style={{ fontSize: "11px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", margin: 0 }}>Spot Informationen</h3>
                 <button onClick={toggleFavorite} style={{ background: "none", border: "none", cursor: "pointer", color: isFavorite ? "#ef4444" : "#cbd5e1" }}>
@@ -301,16 +310,16 @@ const hLng = profileData?.hotel_id ? hotelData?.lng : profileData?.custom_hotel_
               )}
 
               {/* Booking.com Button */}
-{spot.booking_link && (
-  <a 
-    href={spot.booking_link.startsWith('http') ? spot.booking_link : `https://${spot.booking_link}`}
-    target="_blank"
-    rel="noopener noreferrer"
-    style={{ marginTop: "12px", width: "100%", padding: "14px", background: "#003580", color: "#fff", borderRadius: 14, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, textDecoration: "none" }}
-  >
-    <MapPin size={16} /> Unterkunft buchen*
-  </a>
-)}
+              {spot.booking_link && (
+                <a 
+                  href={spot.booking_link.startsWith('http') ? spot.booking_link : `https://${spot.booking_link}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ marginTop: "12px", width: "100%", padding: "14px", background: "#003580", color: "#fff", borderRadius: 14, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, textDecoration: "none" }}
+                >
+                  <MapPin size={16} /> Unterkunft buchen*
+                </a>
+              )}
 
               <a 
                 href={`mailto:admin@khaolak.app?subject=Änderungsvorschlag für ${spot.title}`}
