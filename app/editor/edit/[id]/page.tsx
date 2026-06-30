@@ -69,7 +69,6 @@ export default function EditSpotPage() {
 
   // KI BESCHREIBUNG GENERIEREN
   const generateDescription = async () => {
-    textText = true;
     setLoading(true);
     try {
       const res = await fetch("/api/generate-description", {
