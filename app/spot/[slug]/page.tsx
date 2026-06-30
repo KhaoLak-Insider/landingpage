@@ -344,7 +344,12 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
                   </div>
                 )}
 
-                <InfoItem icon={<Navigation size={16} />} label="Fahrtweg" value={isRouting ? "..." : routeDist ? `${routeDist} km (${routeTime} Min.)` : "Eintragen"} />
+                <InfoItem 
+                    icon={<Navigation size={16} />} 
+                    label="Fahrtweg" 
+                    value={isRouting ? "..." : routeDist ? `${routeDist} km (${routeTime} Min.)` : <Link href="/profil" className="text-teal-600 underline font-bold">Hotel festlegen</Link>} 
+                />
+
                 {spot.price_level && spot.price_level.trim() !== "" && <InfoItem icon={<DollarSign size={16} />} label="Budget" value={spot.price_level} />}
                 {spot.opening_hours && spot.opening_hours.trim() !== "" && <InfoItem icon={<Clock size={16} />} label="Öffnungszeiten" value={spot.opening_hours} />}
                 {spot.best_time && spot.best_time.trim() !== "" && <InfoItem icon={<Sun size={16} />} label="Beste Besuchszeit" value={spot.best_time} />}
@@ -440,7 +445,7 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
   );
 }
 
-function InfoItem({ icon, label, value }: { icon: React.ReactNode, label: string, value: string }) {
+function InfoItem({ icon, label, value }: { icon: React.ReactNode, label: string, value: React.ReactNode }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
       <div style={{ color: "#14b8a6", background: "#f0fdfa", padding: "8px", borderRadius: "8px" }}>{icon}</div>
