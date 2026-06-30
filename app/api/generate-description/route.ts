@@ -10,24 +10,28 @@ export async function POST(request: Request) {
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `
-      Du bist ein Reise-Experte für den 'Khao Lak Insider'. 
+      Du bist ein erfahrener Reise-Journalist und SEO-Experte für den 'Khao Lak Insider'.
       Analysiere den Ort: ${spotData.title} (Kategorie: ${spotData.category}).
       
-      1. Schreibe eine kurze Einleitung (max. 150 Zeichen).
-      2. Schreibe eine ausführliche Beschreibung mit ### Überschriften.
-      3. Recherchiere/Schätze die offizielle Hotel-Kategorie oder Sterne (0 bis 5). Wenn es kein Hotel ist, setze 0.
-      4. Erstelle genau 6 nützliche Features für diesen Ort. Nutze für das Feld "icon" ausschließlich diese Namen, da sie in der Icon-Library existieren: 
-         ['Sparkles', 'Wifi', 'Coffee', 'Car', 'Camera', 'Music', 'Map', 'Sun', 'Waves', 'Utensils', 'Mountain', 'Umbrella', 'Bike'].
-      
+      AUFGABE:
+      1. Kurze Einleitung (Meta-Description Stil): Max. 100 Zeichen. Muss den Leser neugierig machen und das Keyword enthalten.
+      2. Ausführliche Beschreibung (SEO-optimiert): 
+         - Schreibe in einem professionellen, inspirierenden Reise-Stil.
+         - Nutze hochwertige, aussagekräftige Inhalte, die Mehrwert bieten.
+         - Strukturiere den Text unbedingt mit mehreren ### Überschriften (z.B. "Warum sich der Besuch lohnt", "Tipps für den perfekten Tag", "Anreise & Lage").
+         - Integriere Begriffe, nach denen Reisende suchen (z.B. "Khao Lak", "Urlaub", "Geheimtipp").
+      3. Recherchiere/Schätze die offizielle Hotel-Kategorie/Sterne (0-5). Bei Nicht-Hotels setze 0. (Die Kategorie für Hotels ist bei mir Unterkunft)
+      4. Erstelle genau 6 nützliche Features für diesen Ort. Nutze ausschließlich diese Icon-Namen: ['Sparkles', 'Wifi', 'Coffee', 'Car', 'Camera', 'Music', 'Map', 'Sun', 'Waves', 'Utensils', 'Mountain', 'Umbrella', 'Bike'].
+
       Antworte strikt im JSON-Format ohne erklärenden Text: 
       { 
-        "description": "Kurze Einleitung", 
-        "long_description": "Lange Beschreibung",
+        "description": "Hier die Einleitung (max 100 Zeichen)", 
+        "long_description": "Hier die lange, professionelle Beschreibung mit ### Überschriften",
         "stars": "4",
         "features": [
-          {"label": "Beispiel", "value": "Beispiel", "icon": "Sparkles"},
-          {"label": "Beispiel", "value": "Beispiel", "icon": "Wifi"},
-          {"label": "Beispiel", "value": "Beispiel", "icon": "Coffee"},
+          {"label": "Label", "value": "Wert", "icon": "Sparkles"},
+          {"label": "Label", "value": "Wert", "icon": "Wifi"},
+          {"label": "Label", "value": "Wert", "icon": "Coffee"},
           {"label": "Beispiel", "value": "Beispiel", "icon": "Car"},
           {"label": "Beispiel", "value": "Beispiel", "icon": "Camera"},
           {"label": "Beispiel", "value": "Beispiel", "icon": "Sun"}

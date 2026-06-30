@@ -34,7 +34,7 @@ export default function EditSpotPage() {
 
   const [formData, setFormData] = useState({
     title: "", image_url: "", category: "", description: "", long_description: "",
-    latitude: "", longitude: "", price_level: "", opening_hours: "", youtube_url: "",
+    latitude: "", longitude: "", price_level: "", stars: "", opening_hours: "", youtube_url: "",
     youtube_timestamp: "", tour_link: "", booking_link: "", features: [{ label: "", value: "", icon: "Sparkles" as keyof typeof iconMap }],
     best_months: [] as number[], galleryUrlsText: "",
     parking_info: { name: "", price: "", details: "", lat: "", lng: "" },
@@ -60,6 +60,7 @@ export default function EditSpotPage() {
           longitude: p.geometry?.location?.lng?.toString() || prev.longitude,
           description: p.formatted_address || prev.description,
           opening_hours: p.opening_hours?.weekday_text?.join('\n') || prev.opening_hours,
+          price_level: p.price_level?.toString() || prev.price_level,
           image_url: p.photos ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photo_reference=${p.photos[0].photo_reference}&key=${process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY}` : prev.image_url
         }));
       }
@@ -78,7 +79,9 @@ export default function EditSpotPage() {
       setFormData(prev => ({
         ...prev,
         description: data.description || prev.description,
-        long_description: data.long_description || prev.long_description
+        long_description: data.long_description || prev.long_description,
+        stars: data.stars || prev.stars,
+        features: data.features && data.features.length > 0 ? data.features : prev.features
       }));
     } catch (e) { alert("Fehler bei der KI-Generierung"); }
     finally { setLoading(false); }
@@ -109,7 +112,8 @@ export default function EditSpotPage() {
             long_description: textDesc,
             latitude: data.latitude?.toString() || "",
             longitude: data.longitude?.toString() || "",
-            price_level: data.price_level || "",
+            price_level: data.price_level?.toString() || "",
+            stars: data.stars?.toString() || "",
             opening_hours: data.opening_hours || "",
             youtube_url: data.youtube_url || "",
             youtube_timestamp: data.youtube_timestamp?.toString() || "",
@@ -155,7 +159,8 @@ export default function EditSpotPage() {
       parking_info: formData.parking_info || null,
       latitude: toNum(formData.latitude),
       longitude: toNum(formData.longitude),
-      price_level: formData.price_level || null,
+      price_level: formData.price_level ? parseInt(formData.price_level) : null,
+      stars: formData.stars ? parseInt(formData.stars) : null,
       opening_hours: formData.opening_hours || null,
       youtube_url: formData.youtube_url && formData.youtube_url.trim() !== "" ? formData.youtube_url : null,
       youtube_timestamp: toIntForce(formData.youtube_timestamp),
@@ -180,7 +185,6 @@ export default function EditSpotPage() {
       </header>
 
       <form onSubmit={handleSubmit} className="space-y-8 pb-24">
-        {/* NEU: Google Import */}
         <section className="bg-teal-50 p-6 rounded-2xl border-2 border-teal-200">
           <h2 className="text-lg font-bold text-teal-800 mb-4">Google Places Import</h2>
           <div className="flex gap-2">
@@ -196,6 +200,9 @@ export default function EditSpotPage() {
           <div className="grid grid-cols-2 gap-4">
               <input className="w-full p-3 border rounded-xl" placeholder="YouTube URL" value={formData.youtube_url} onChange={(e) => setFormData({...formData, youtube_url: e.target.value})} />
               <input className="w-full p-3 border rounded-xl" placeholder="Startzeit (Sekunden)" type="number" value={formData.youtube_timestamp} onChange={(e) => setFormData({...formData, youtube_timestamp: e.target.value})} />
+              <input className="w-full p-3 border rounded-xl" placeholder="Preis-Level" value={formData.price_level} onChange={(e) => setFormData({...formData, price_level: e.target.value})} />
+              <input className="w-full p-3 border rounded-xl" placeholder="Sterne (0-5)" value={formData.stars} onChange={(e) => setFormData({...formData, stars: e.target.value})} />
+              <input className="w-full p-3 border rounded-xl" placeholder="Öffnungszeiten" value={formData.opening_hours} onChange={(e) => setFormData({...formData, opening_hours: e.target.value})} />
           </div>
           <input className="w-full p-3 border rounded-xl" placeholder="GetYourGuide Tour-Link" value={formData.tour_link} onChange={(e) => setFormData({...formData, tour_link: e.target.value})} />
           <input className="w-full p-3 border rounded-xl" placeholder="Booking.com Affiliate-Link" value={formData.booking_link} onChange={(e) => setFormData({...formData, booking_link: e.target.value})} />
@@ -223,7 +230,6 @@ export default function EditSpotPage() {
           <h2 className="text-lg font-bold text-slate-800 border-b pb-2">Beschreibungen</h2>
           <textarea className="w-full p-4 border rounded-xl" placeholder="Kurze Beschreibung" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} />
           <textarea className="w-full p-4 border rounded-xl" rows={4} placeholder="Lange Beschreibung (### für Überschriften)" value={formData.long_description} onChange={(e) => setFormData({...formData, long_description: e.target.value})} />
-          {/* NEU: KI Button */}
           <button type="button" onClick={generateDescription} className="text-teal-600 font-bold hover:underline">
             {loading ? "Schreibe Text..." : "KI-Beschreibung generieren"}
           </button>

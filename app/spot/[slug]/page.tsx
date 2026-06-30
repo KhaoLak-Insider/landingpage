@@ -21,6 +21,7 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
   const [routeGeoJSON, setRouteGeoJSON] = useState<any>(null);
   const [tours, setTours] = useState<any[]>([]);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false); // NEU
 
   // Distanz berechnen (Haversine-Formel)
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -130,6 +131,11 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
 
   const slides = gallery.map((url: string) => ({ src: url }));
 
+  // Aufklapp-Logik
+  const descArray = Array.isArray(spot.long_description) ? spot.long_description : [];
+  const visibleBlocks = descArray.slice(0, 2);
+  const hiddenBlocks = descArray.slice(2);
+
   return (
     <main style={{ background: "#f6f7fb", minHeight: "100vh", fontFamily: "'Poppins', sans-serif", paddingBottom: 60, color: "#1e293b" }}>
       <div style={{ maxWidth: "1280px", margin: "0 auto", background: "#ffffff", minHeight: "100vh", boxShadow: "0 0 20px rgba(0,0,0,0.05)", overflow: "visible" }}>
@@ -221,27 +227,23 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
               {/* BESCHREIBUNG */}
               <div>
                 <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: "20px" }}>Über {spot.title}</h2>
-                {(() => {
-                  let descriptionData = spot.long_description;
-                  if (typeof descriptionData === 'string' && descriptionData.startsWith('[')) {
-                    try { descriptionData = JSON.parse(descriptionData); } catch (e) { }
-                  }
-                  if (Array.isArray(descriptionData)) {
-                    return descriptionData.map((block: any, i: number) => {
-                      if (block.type === 'heading') return <h3 key={i} style={{ fontSize: 20, fontWeight: 700, marginTop: "24px", marginBottom: "12px" }}>{block.content}</h3>;
-                      if (block.type === 'paragraph') return <p key={i} style={{ color: "#475569", lineHeight: 1.8, fontSize: "15px", marginBottom: "16px" }}>{block.content}</p>;
-                      return null;
-                    });
-                  }
-                  return (descriptionData || "").split('\n').map((line: string, i: number) => {
-                    if (line.trim().startsWith('###')) {
-                      const cleanHeading = line.trim().replace(/###\s?/, '');
-                      return <h3 key={i} style={{ fontSize: 20, fontWeight: 700, marginTop: "24px", marginBottom: "12px" }}>{cleanHeading}</h3>;
-                    }
-                    if (line.trim() === '') return null;
-                    return <p key={i} style={{ color: "#475569", lineHeight: 1.8, fontSize: "15px", marginBottom: "16px" }}>{line}</p>;
-                  });
-                })()}
+                {visibleBlocks.map((block: any, i: number) => (
+                  <div key={i}>
+                    {block.type === 'heading' ? <h3 style={{ fontSize: 20, fontWeight: 700, marginTop: "24px", marginBottom: "12px" }}>{block.content}</h3> : <p style={{ color: "#475569", lineHeight: 1.8, fontSize: "15px", marginBottom: "16px" }}>{block.content}</p>}
+                  </div>
+                ))}
+                
+                {isExpanded && hiddenBlocks.map((block: any, i: number) => (
+                  <div key={`extra-${i}`}>
+                    {block.type === 'heading' ? <h3 style={{ fontSize: 20, fontWeight: 700, marginTop: "24px", marginBottom: "12px" }}>{block.content}</h3> : <p style={{ color: "#475569", lineHeight: 1.8, fontSize: "15px", marginBottom: "16px" }}>{block.content}</p>}
+                  </div>
+                ))}
+                
+                {hiddenBlocks.length > 0 && (
+                  <button onClick={() => setIsExpanded(!isExpanded)} style={{ color: "#14b8a6", fontWeight: 700, fontSize: "15px", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>
+                    {isExpanded ? "Weniger erfahren" : "Mehr erfahren..."}
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -332,7 +334,7 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
                 style={{ marginTop: "12px", width: "100%", padding: "14px", background: "#f1f5f9", color: "#475569", borderRadius: 14, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, textDecoration: "none" }}
               >
                 <AlertCircle size={16} /> Änderung melden
-            </a>
+              </a>
 
               {/* Affiliate Hinweise GANZ UNTEN */}
               {(spot.tour_link || spot.booking_link) && (
