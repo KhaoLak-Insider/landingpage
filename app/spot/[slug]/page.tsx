@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/src/lib/supabase";
 import MapBoxMini from "@/src/components/MapBoxMini";
-import { MapPin, Tag, Navigation, DollarSign, Clock, Car, Play, AlertCircle, Sparkles, Sun, Heart } from "lucide-react"; 
+import { MapPin, Tag, Navigation, DollarSign, Clock, Car, Play, AlertCircle, Sparkles, Sun, Heart, ChevronLeft, ChevronRight } from "lucide-react"; 
 import { iconMap } from "@/src/components/IconLibrary";
 import Link from "next/link";
 import Lightbox from "yet-another-react-lightbox";
@@ -22,6 +22,8 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
   const [tours, setTours] = useState<any[]>([]);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false); // NEU
+  const [randomSpots, setRandomSpots] = useState<any[]>([]); // NEU
+  const scrollRef = useRef<HTMLDivElement>(null); // NEU
 
   // Distanz berechnen (Haversine-Formel)
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -55,6 +57,7 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
 
   useEffect(() => {
     async function initPage() {
+      window.scrollTo(0, 0); // Scroll zum Seitenanfang beim Laden
       const resolvedParams = await params;
       const decodedSlug = decodeURIComponent(resolvedParams.slug.trim());
       
@@ -68,6 +71,13 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
       if (spotData) {
         setSpot(spotData);
         
+        // Zufällige Spots (10 Stück, keine Unterkunft)
+        const { data: randomData } = await supabase.from("spots").select("*").neq("category", "Unterkunft");
+        if (randomData) {
+            const filtered = randomData.filter((s: any) => s.id !== spotData.id);
+            setRandomSpots(filtered.sort(() => 0.5 - Math.random()).slice(0, 10));
+        }
+
         // Favoriten checken
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
@@ -127,6 +137,13 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
     setIsFavorite(!isFavorite);
   };
 
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+        const amount = 300;
+        scrollRef.current.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' });
+    }
+  };
+
   if (!spot) return <main style={{ padding: 40, textAlign: "center", minHeight: "100vh" }}>Spot wird geladen....</main>;
 
   const slides = gallery.map((url: string) => ({ src: url }));
@@ -169,7 +186,7 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
         <div style={{ display: "flex", gap: "40px", padding: "40px", alignItems: "start" }}>
           
           {/* MAIN COLUMN */}
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
             
             {/* GALERIE */}
             {gallery.length > 0 && (
@@ -245,6 +262,46 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
                   </button>
                 )}
               </div>
+
+              {/* WEITERE ENTDECKUNGEN KARUSELL (Mit zwei Entfernungsangaben) */}
+              <div style={{ marginTop: 40, width: "100%", position: "relative" }}>
+                <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 20 }}>Weitere Entdeckungen</h2>
+                <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                    <button onClick={() => scroll('left')} style={{ position: "absolute", left: -20, zIndex: 10, background: "white", padding: 10, borderRadius: "50%", boxShadow: "0 2px 5px rgba(0,0,0,0.2)", cursor: "pointer" }}><ChevronLeft /></button>
+                    <div ref={scrollRef} style={{ display: "flex", gap: 20, overflowX: "hidden", scrollBehavior: "smooth", width: "100%" }}>
+                        {randomSpots.map((s, i) => {
+                            // Unterkunftskoordinaten bestimmen
+                            const hotelData = Array.isArray(userProfile?.hotels) ? userProfile.hotels[0] : (userProfile?.hotels as any);
+                            const hLat = userProfile?.hotel_id ? hotelData?.lat : userProfile?.custom_hotel_lat;
+                            const hLng = userProfile?.hotel_id ? hotelData?.lng : userProfile?.custom_hotel_lng;
+                            
+                            const distToSpot = calculateDistance(spot.latitude, spot.longitude, s.latitude, s.longitude);
+                            const distToHotel = hLat && hLng ? calculateDistance(hLat, hLng, s.latitude, s.longitude) : null;
+
+                            return (
+                                <Link key={i} href={`/spot/${s.slug}`} style={{ textDecoration: "none", flex: "0 0 calc(33.333% - 14px)", minWidth: "calc(33.333% - 14px)" }}>
+                                    <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden", border: "1px solid #e5e5e5" }}>
+                                        <div style={{ height: 160, position: "relative" }}>
+                                            <img src={s.image_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                            <div style={{ position: "absolute", top: 10, left: 10, background: "rgba(20, 184, 166, 0.9)", color: "white", padding: "4px 10px", borderRadius: 20, fontSize: 10, fontWeight: 700, textTransform: "uppercase" }}>{s.category}</div>
+                                        </div>
+                                        <div style={{ padding: 16 }}>
+                                            <h3 style={{ fontSize: 16, fontWeight: 700, color: "#1e293b", margin: "0 0 8px 0" }}>{s.title}</h3>
+                                            <p style={{ fontSize: 12, color: "#64748b", margin: "0 0 12px 0", height: 36, overflow: "hidden" }}>{s.description}</p>
+                                            <div style={{ fontSize: 11, fontWeight: 600, color: "#14b8a6", display: "flex", flexDirection: "column", gap: 2 }}>
+                                                <span>{distToSpot} km von hier</span>
+                                                {distToHotel && <span>{distToHotel} km von Deiner Unterkunft </span>}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Link>
+                            );
+                        })}
+                    </div>
+                    <button onClick={() => scroll('right')} style={{ position: "absolute", right: -20, zIndex: 10, background: "white", padding: 10, borderRadius: "50%", boxShadow: "0 2px 5px rgba(0,0,0,0.2)", cursor: "pointer" }}><ChevronRight /></button>
+                </div>
+              </div>
+
             </div>
           </div>
 

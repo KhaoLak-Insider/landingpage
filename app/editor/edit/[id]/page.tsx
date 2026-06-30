@@ -69,6 +69,7 @@ export default function EditSpotPage() {
 
   // KI BESCHREIBUNG GENERIEREN
   const generateDescription = async () => {
+    textText = true;
     setLoading(true);
     try {
       const res = await fetch("/api/generate-description", {
@@ -175,7 +176,7 @@ export default function EditSpotPage() {
 
     setLoading(false);
     if (error) { alert("Fehler bei der Übertragung: " + error.message); }
-    else { alert("Spot erfolgreich aktualisiert!"); router.push("/editor/list"); }
+    else { alert("Spot erfolgreich aktualisiert!"); router.push(`/spot/${slug}`); }
   };
 
   return (
