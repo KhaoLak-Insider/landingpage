@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/src/lib/supabase";
 import MapBoxMini from "@/src/components/MapBoxMini";
-import { MapPin, Tag, Navigation, DollarSign, Clock, Car, Play, AlertCircle, Sparkles, Sun, Heart, ChevronLeft, ChevronRight } from "lucide-react"; 
+import { MapPin, Tag, Navigation, DollarSign, Clock, Car, Play, AlertCircle, Sparkles, Sun, Heart, ChevronLeft, ChevronRight, HelpCircle } from "lucide-react"; 
 import { iconMap } from "@/src/components/IconLibrary";
 import Link from "next/link";
 import Lightbox from "yet-another-react-lightbox";
@@ -324,6 +324,26 @@ export default function SpotPage({ params }: { params: Promise<{ slug: string }>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 24, marginBottom: 40 }}>
                 {spot.category && <InfoItem icon={<Tag size={16} />} label="Kategorie" value={spot.category} />}
+                
+                {/* Landeskategorie mit interaktivem Check24-Hover-Menü */}
+                {spot.stars && (
+                  <div className="group relative flex items-center gap-[12px]">
+                    <div style={{ color: "#14b8a6", background: "#f0fdfa", padding: "8px", borderRadius: "8px" }}><Sparkles size={16} /></div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                      <span className="flex items-center gap-1" style={{ fontSize: "10px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase" }}>
+                        Landeskategorie 
+                        <HelpCircle size={12} className="text-slate-400 cursor-help" />
+                      </span>
+                      <span style={{ fontSize: "13px", fontWeight: 600, color: "#334155" }}>{spot.stars} Sterne</span>
+                    </div>
+                    {/* Das schwebende Hover-Menü */}
+                    <div className="invisible group-hover:visible absolute bottom-full left-0 mb-2 w-64 p-3 bg-slate-900 text-white text-xs rounded-xl shadow-xl z-50 transition-all opacity-0 group-hover:opacity-100 font-medium leading-relaxed">
+                      Diese Sternebewertung basiert auf der offiziellen Landeskategorie vor Ort und kann von der deutschen Hotelklassifizierung abweichen.
+                      <div className="absolute top-full left-6 w-3 height-3 bg-slate-900 rotate-45 transform -translate-y-1.5 shadow-md"></div>
+                    </div>
+                  </div>
+                )}
+
                 <InfoItem icon={<Navigation size={16} />} label="Fahrtweg" value={isRouting ? "..." : routeDist ? `${routeDist} km (${routeTime} Min.)` : "Eintragen"} />
                 {spot.price_level && spot.price_level.trim() !== "" && <InfoItem icon={<DollarSign size={16} />} label="Budget" value={spot.price_level} />}
                 {spot.opening_hours && spot.opening_hours.trim() !== "" && <InfoItem icon={<Clock size={16} />} label="Öffnungszeiten" value={spot.opening_hours} />}
