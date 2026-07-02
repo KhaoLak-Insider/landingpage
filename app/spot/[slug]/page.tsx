@@ -14,15 +14,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const { data: spot } = await supabase
     .from("spots")
-    .select("title, description")
+    .select("title, description, seo_title, seo_description")
     .ilike("slug", decodedSlug)
     .maybeSingle();
 
   if (!spot) return { title: "Spot nicht gefunden | Khao Lak App" };
 
+  const finalTitle = spot.seo_title || `${spot.title} Khao Lak | Highlights & Insider Tipps`;
+  const finalDescription = spot.seo_description || (spot.description 
+    ? `${spot.description.substring(0, 150)}...` 
+    : `Entdecke ${spot.title} in Khao Lak. Infos, Öffnungszeiten, Anfahrt und echte Insider-Tipps auf KhaoLak.app.`);
+
   return {
-    title: `${spot.title} Khao Lak | Highlights & Insider Tipps`,
-    description: spot.description || `Entdecke ${spot.title} in Khao Lak. Infos, Öffnungszeiten, Anfahrt und echte Insider-Tipps auf KhaoLak.app.`,
+    title: finalTitle,
+    description: finalDescription,
     robots: "index, follow",
   };
 }

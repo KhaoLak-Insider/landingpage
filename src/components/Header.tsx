@@ -72,6 +72,7 @@ export default function Header() {
           <Link href="/entdecken" className="hover:text-teal-500 transition">Entdecken</Link>
           <a href="#" className="hover:text-teal-500 transition">Planen</a>
           <a href="#" className="hover:text-teal-500 transition">Erleben</a>
+          <Link href="/blog" className="hover:text-teal-500 transition">Blog</Link>
         </div>
       </div>
 
