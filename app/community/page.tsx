@@ -17,7 +17,7 @@ const COMMUNITY_CHANNELS = [
     title: "Instagram Updates",
     description: "Folge unseren täglichen Eindrücken, Live-Updates und Storys direkt aus Thailand.",
     buttonText: "Folgen",
-    url: "#", // Hier euren Insta-Link einfügen
+    url: "https://www.instagram.com/reise.dich.frei",
     icon: (
       <svg className="w-7 h-7 text-[#E1306C] stroke-current fill-none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
         <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
@@ -122,7 +122,7 @@ export default function CommunityPage() {
                 <span className="text-[11px] text-teal-400 font-bold block">Jederzeit kündbar</span>
               </div>
               <a
-                href="#" // Hier euren Discord-Einladungslink/Steady/Patreon-Link einfügen
+                href="https://buymeacoffee.com/reisedichfrei/membership" // <-- Setze hier den echten Link ein
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex w-full justify-center items-center px-6 py-3.5 rounded-full text-sm font-black bg-teal-500 text-white hover:bg-teal-400 transition-all shadow-[0_4px_20px_rgba(20,158,148,0.3)] text-center scale-100 hover:scale-[1.02] active:scale-[0.98]"
