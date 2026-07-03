@@ -26,13 +26,15 @@ const CATEGORIES = [
   )},
 ];
 
-export default async function BlogPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ category?: string }>;
-}) {
+// Next.js 15 konformer Page-Typ für reibungslosen Build-Vorgang
+interface BlogPageProps {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export default async function BlogPage({ searchParams }: BlogPageProps) {
   const resolvedParams = await searchParams;
-  const activeCategory = resolvedParams.category || "Alle Beiträge";
+  const categoryParam = resolvedParams.category;
+  const activeCategory = typeof categoryParam === "string" ? categoryParam : "Alle Beiträge";
 
   let query = supabase
     .from("blog_posts")
@@ -122,7 +124,7 @@ export default async function BlogPage({
                       <span className="text-5xl">🏝️</span>
                     </div>
                   )}
-                  {/* UPDATE: Dunkles Badge unten links mit 75% Deckkraft und starkem Weichzeichner */}
+                  {/* KORREKTUR: Jetzt unten links und elegant semitransparent */}
                   <span className="absolute bottom-6 left-6 bg-slate-900/75 backdrop-blur-md text-white text-[11px] font-bold uppercase tracking-wider px-3.5 py-2 rounded-lg shadow-sm border border-white/10">
                     {featuredPost.category}
                   </span>
@@ -189,7 +191,7 @@ export default async function BlogPage({
                           <span className="text-3xl">🏝️</span>
                         </div>
                       )}
-                      {/* UPDATE: Helles Grid-Badge unten links mit 75% Deckkraft und feinem weißem Rahmen */}
+                      {/* KORREKTUR: Jetzt unten links und elegant semitransparent */}
                       <span className="absolute bottom-4 left-4 bg-white/75 backdrop-blur-md text-slate-900 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1.5 rounded-md shadow-sm border border-white/20">
                         {post.category}
                       </span>
