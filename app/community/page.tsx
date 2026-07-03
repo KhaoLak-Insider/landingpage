@@ -59,7 +59,7 @@ export default function CommunityPage() {
           </h1>
 
           <p className="text-slate-500 text-base md:text-lg max-w-xl mx-auto font-medium leading-relaxed">
-            Teile deine Erfahrungen, stelle Fragen an Gleichgesinnte und plane deine Reise gemeinsam mit tausenden Insidern.
+            Teile deine Erfahrungen, stelle Fragen an Gleichgesinnte und plane deine Reise gemeinsam mit vielen Insidern.
           </p>
         </div>
       </section>
