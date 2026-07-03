@@ -140,8 +140,8 @@ export default function SpotEditorPage() {
     if (error) {
       alert("Fehler: " + error.message);
     } else {
-      // WENN SPEICHERN KLAPPT -> Wir nutzen die formData für Discord, das wirft nie Fehler!
-      if (DISCORD_WEBHOOK_URL && DISCORD_WEBHOOK_URL !== "https://discord.com/api/webhooks/1522536803595456615/DVI0Ar8jKcadKF_7W4QJblKQ5g89Z96Z3nwd_4fVqtaHtstMgBtvhiz78KdWIKoGWzFG") {
+      // KORRIGIERT: Wir prüfen jetzt nur noch, ob überhaupt eine Webhook-URL vorhanden ist!
+      if (DISCORD_WEBHOOK_URL) {
         try {
           await fetch(DISCORD_WEBHOOK_URL, {
             method: "POST",
