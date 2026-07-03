@@ -11,15 +11,18 @@ export default function ImpressumPage() {
             <h2 className="mb-3 text-xl font-bold">
               Angaben gemäß § 5 DDG
             </h2>
-
             <p>
-              Martin Gilde
+              <strong>REISE DICH FREI WEB CONTENT PUBLISHING</strong>
               <br />
-              Horather Straße 159
+              Sole Proprietorship (Philippinisches Einzelunternehmen)
               <br />
-              42111 Wuppertal
+              Inhaberin: Melody Claire Lopez Wegner
               <br />
-              Deutschland
+              Purok 2, Barangay 28 - Victory Village North
+              <br />
+              4500 City of Legazpi, Albay
+              <br />
+              Philippinen
             </p>
           </section>
 
@@ -27,23 +30,44 @@ export default function ImpressumPage() {
             <h2 className="mb-3 text-xl font-bold">
               Kontakt
             </h2>
-
             <p>
-              E-Mail: admin@khaolak.app
+              E-Mail: reisedichfrei@gmail.com
             </p>
           </section>
 
           <section>
             <h2 className="mb-3 text-xl font-bold">
-              Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV
+              Register und Steuernummern
             </h2>
-
             <p>
-              Martin Gilde
+              DTI-Registrierung (Department of Trade and Industry)
               <br />
-              Horather Straße 159
+              Registrierungsnummer (Certificate No.): 7027389
               <br />
-              42111 Wuppertal
+              Steuernummer (Tax Identification Number - TIN): 672-251-796-00000
+              <br />
+              Registriert beim Bureau of Internal Revenue (BIR), Philippinen.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="mb-3 text-xl font-bold">
+              EU-Streitschlichtung
+            </h2>
+            <p>
+              Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:{" "}
+              <a 
+                href="https://ec.europa.eu/consumers/odr/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-teal-500 hover:underline"
+              >
+                https://ec.europa.eu/consumers/odr/
+              </a>.
+              Unsere E-Mail-Adresse finden Sie oben im Impressum.
+            </p>
+            <p className="mt-3">
+              Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.
             </p>
           </section>
 
@@ -51,7 +75,6 @@ export default function ImpressumPage() {
             <h2 className="mb-3 text-xl font-bold">
               Haftung für Inhalte
             </h2>
-
             <p>
               Als Diensteanbieter sind wir gemäß den allgemeinen Gesetzen
               für eigene Inhalte auf diesen Seiten verantwortlich. Wir sind
@@ -65,7 +88,6 @@ export default function ImpressumPage() {
             <h2 className="mb-3 text-xl font-bold">
               Haftung für Links
             </h2>
-
             <p>
               Unser Angebot enthält Links zu externen Websites Dritter, auf
               deren Inhalte wir keinen Einfluss haben. Deshalb können wir für
@@ -77,7 +99,6 @@ export default function ImpressumPage() {
             <h2 className="mb-3 text-xl font-bold">
               Urheberrecht
             </h2>
-
             <p>
               Die durch den Seitenbetreiber erstellten Inhalte und Werke auf
               diesen Seiten unterliegen dem deutschen Urheberrecht.
