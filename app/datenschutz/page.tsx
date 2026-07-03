@@ -11,16 +11,20 @@ export default function DatenschutzPage() {
               Verantwortlich für die Datenverarbeitung auf dieser Website ist:
               <br />
               <br />
-              Martin Gilde
+              <strong>REISE DICH FREI WEB CONTENT PUBLISHING</strong>
               <br />
-              Horather Straße 159
+              Sole Proprietorship (Philippinisches Einzelunternehmen)
               <br />
-              42111 Wuppertal
+              Inhaberin: Melody Claire Lopez Wegner
               <br />
-              Deutschland
+              Purok 2, Barangay 28 - Victory Village North
+              <br />
+              4500 City of Legazpi, Albay
+              <br />
+              Philippinen
               <br />
               <br />
-              E-Mail: admin@khaolak.app
+              E-Mail: reisedichfrei@gmail.com
             </p>
           </section>
 
@@ -29,8 +33,8 @@ export default function DatenschutzPage() {
             <p>
               Wir nehmen den Schutz personenbezogener Daten sehr ernst.
               Personenbezogene Daten werden nur verarbeitet, soweit dies zur
-              Bereitstellung dieser Website, zur Bearbeitung von Anfragen oder
-              zum Betrieb der Warteliste erforderlich ist.
+              Bereitstellung dieser Website, zur Bearbeitung von Anfragen, zur 
+              Verwaltung von Nutzerkonten oder zum Betrieb der Warteliste erforderlich ist.
             </p>
           </section>
 
@@ -39,9 +43,9 @@ export default function DatenschutzPage() {
               3. Zugriffsdaten und Hosting
             </h2>
             <p>
-              Diese Website wird voraussichtlich bei Vercel gehostet. Beim
-              Aufruf der Website können technisch notwendige Zugriffsdaten
-              verarbeitet werden, zum Beispiel IP-Adresse, Datum und Uhrzeit des
+              Diese Website wird bei Vercel gehostet. Beim
+              Aufruf der Website werden technisch notwendige Zugriffsdaten
+              verarbeitet, zum Beispiel IP-Adresse, Datum und Uhrzeit des
               Zugriffs, Browsertyp, Betriebssystem und aufgerufene Seiten.
             </p>
             <p className="mt-3">
@@ -51,91 +55,87 @@ export default function DatenschutzPage() {
           </section>
 
           <section>
-            <h2 className="mb-3 text-xl font-bold">4. Warteliste</h2>
+            <h2 className="mb-3 text-xl font-bold">4. Warteliste und Nutzerkonten</h2>
             <p>
-              Wenn du dich in die Warteliste einträgst, verarbeiten wir deine
-              E-Mail-Adresse, um dich über den Start der Khao Lak Insider App zu
-              informieren.
+              Wenn du dich in die Warteliste einträgst oder ein Nutzerkonto erstellst, 
+              verarbeiten wir deine E-Mail-Adresse sowie Profildaten, um dich über den 
+              Start der Khao Lak Insider App zu informieren oder dir die personalisierten 
+              Funktionen der Plattform zur Verfügung zu stellen.
             </p>
             <p className="mt-3">
               Rechtsgrundlage ist deine Einwilligung nach Art. 6 Abs. 1 lit. a
-              DSGVO. Du kannst deine Einwilligung jederzeit widerrufen, indem du
-              uns eine E-Mail an admin@khaolak.app sendest.
+              DSGVO bzw. die Bereitstellung des Dienstes nach Art. 6 Abs. 1 lit. b DSGVO. 
+              Du kannst deine Einwilligung jederzeit mit Wirkung für die Zukunft widerrufen, 
+              indem du uns eine E-Mail an reisedichfrei@gmail.com sendest.
             </p>
           </section>
 
           <section>
             <h2 className="mb-3 text-xl font-bold">5. Supabase</h2>
             <p>
-              Für die Speicherung von Wartelisten-Einträgen kann Supabase
-              eingesetzt werden. Dabei können insbesondere E-Mail-Adresse,
-              Zeitpunkt der Anmeldung und technische Metadaten verarbeitet
-              werden.
+              Für die Authentifizierung, Speicherung von Profilen, Wartelisten-Einträgen 
+              und Anwendungsdaten wird der Backend-Dienst Supabase eingesetzt. Dabei werden 
+              insbesondere E-Mail-Adressen, Passwörter (verschlüsselt), Avatare, Zeitpunkte 
+              der Anmeldung und technische Metadaten verarbeitet.
             </p>
             <p className="mt-3">
-              Die Verarbeitung erfolgt zur Verwaltung der Warteliste auf
-              Grundlage von Art. 6 Abs. 1 lit. a DSGVO.
+              Die Verarbeitung erfolgt zur sicheren Bereitstellung und Verwaltung der Nutzerkonten 
+              auf Grundlage von Art. 6 Abs. 1 lit. b und lit. f DSGVO.
             </p>
           </section>
 
           <section>
-  <h2 className="mb-3 text-xl font-bold">6. Webanalyse mit Vercel Analytics</h2>
-
-  <p>
-    Diese Website nutzt den Webanalyse-Dienst Vercel Analytics der Vercel Inc.,
-    440 N Barranca Ave #4133, Covina, CA 91723, USA.
-  </p>
-
-  <p className="mt-3">
-    Vercel Analytics ermöglicht eine anonyme Analyse der Nutzung dieser Website.
-    Es werden keine Cookies gesetzt und keine personenbezogenen Profile erstellt.
-  </p>
-
-  <p className="mt-3">
-    Erfasst werden unter anderem Seitenaufrufe, Gerätetyp, Browsertyp,
-    ungefährer Standort (Land) sowie Referrer-Informationen.
-  </p>
-
-  <p className="mt-3">
-    Die Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO
-    (berechtigtes Interesse an der Optimierung und Analyse unseres Webangebots).
-  </p>
-
-  <p className="mt-3">
-    Weitere Informationen findest du hier:{" "}
-    <a
-      href="https://vercel.com/legal/privacy-policy"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-teal-600 underline hover:text-teal-700"
-    >
-      Vercel Datenschutzerklärung
-    </a>
-  </p>
-</section>
+            <h2 className="mb-3 text-xl font-bold">6. Webanalyse mit Vercel Analytics</h2>
+            <p>
+              Diese Website nutzt den Webanalyse-Dienst Vercel Analytics der Vercel Inc.,
+              440 N Barranca Ave #4133, Covina, CA 91723, USA.
+            </p>
+            <p className="mt-3">
+              Vercel Analytics ermöglicht eine anonyme Analyse der Nutzung dieser Website.
+              Es werden keine Cookies gesetzt und keine personenbezogenen Profile erstellt.
+            </p>
+            <p className="mt-3">
+              Erfasst werden unter anderem Seitenaufrufe, Gerätetyp, Browsertyp,
+              ungefährer Standort (Land) sowie Referrer-Informationen.
+            </p>
+            <p className="mt-3">
+              Die Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO
+              (berechtigtes Interesse an der Optimierung und Analyse unseres Webangebots).
+            </p>
+            <p className="mt-3">
+              Weitere Informationen findest du hier:{" "}
+              <a
+                href="https://vercel.com/legal/privacy-policy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-teal-600 underline hover:text-teal-700"
+              >
+                Vercel Datenschutzerklärung
+              </a>
+            </p>
+          </section>
 
           <section>
-  <h2 className="mb-3 text-xl font-bold">7. Cookies</h2>
-
-  <p>
-    Diese Website verwendet derzeit keine Cookies zu Analyse- oder
-    Marketingzwecken.
-  </p>
-
-  <p className="mt-3">
-    Sofern künftig zusätzliche Dienste eingesetzt werden, die Cookies
-    verwenden, werden wir hierüber gesondert informieren und erforderliche
-    Einwilligungen einholen.
-  </p>
-</section>
+            <h2 className="mb-3 text-xl font-bold">7. Cookies</h2>
+            <p>
+              Diese Website verwendet derzeit keine Cookies zu Analyse- oder
+              Marketingzwecken. Technische Cookies, die für den Login-Status (Supabase Session) 
+              zwingend erforderlich sind, werden auf Grundlage von Art. 6 Abs. 1 lit. b DSGVO gesetzt.
+            </p>
+            <p className="mt-3">
+              Sofern künftig zusätzliche Dienste eingesetzt werden, die optionale Cookies
+              verwenden, werden wir hierüber gesondert informieren und erforderliche
+              Einwilligungen einholen.
+            </p>
+          </section>
 
           <section>
             <h2 className="mb-3 text-xl font-bold">8. Speicherdauer</h2>
             <p>
               Personenbezogene Daten werden nur so lange gespeichert, wie es für
               den jeweiligen Zweck erforderlich ist oder gesetzliche
-              Aufbewahrungspflichten bestehen. Wartelisten-Daten werden gelöscht,
-              wenn du deine Einwilligung widerrufst oder der Zweck entfällt.
+              Aufbewahrungspflichten bestehen. Wartelisten- und Kontodaten werden gelöscht,
+              wenn du dein Konto löschst, deine Einwilligung widerrufst oder der Zweck entfällt.
             </p>
           </section>
 
