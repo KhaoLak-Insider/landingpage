@@ -7,6 +7,9 @@ import GalleryUpload from "@/src/components/GalleryUpload";
 import { iconNames, iconMap } from "@/src/components/IconLibrary";
 import { MapPin } from "lucide-react"; 
 
+// HIER DEINEN ECHTEN DISCORD WEBHOOK LINK REINKLEBEN:
+const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1522536803595456615/DVI0Ar8jKcadKF_7W4QJblKQ5g89Z96Z3nwd_4fVqtaHtstMgBtvhiz78KdWIKoGWzFG";
+
 // HELPER: Text zu JSON konvertieren
 function convertTextToJson(text: string) {
   if (!text) return [];
@@ -36,7 +39,7 @@ export default function SpotEditorPage() {
   const [loading, setLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
-  // ANGEPASSTE FUNKTION: Google Places Suche via Proxy
+  // Google Places Suche via Proxy
   const searchGooglePlace = async () => {
     if (!searchQuery) return;
     try {
@@ -63,7 +66,7 @@ export default function SpotEditorPage() {
     } catch (e) { console.error("Google Import Fehler:", e); }
   };
 
-  // NEUE FUNKTION: KI Beschreibung generieren
+  // KI Beschreibung generieren
   const generateDescription = async () => {
     setLoading(true);
     try {
@@ -111,6 +114,7 @@ export default function SpotEditorPage() {
     const slug = formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
     const jsonDescription = convertTextToJson(formData.long_description);
 
+    // Zurück zum alten, funktionierenden Insert ohne zickiges .select().single()
     const { error } = await supabase.from("spots").insert([{
       title: formData.title, image_url: formData.image_url, slug: slug,
       category: formData.category, description: formData.description,
@@ -132,8 +136,28 @@ export default function SpotEditorPage() {
     }]);
 
     setLoading(false);
-    if (error) alert("Fehler: " + error.message);
-    else {
+
+    if (error) {
+      alert("Fehler: " + error.message);
+    } else {
+      // WENN SPEICHERN KLAPPT -> Wir nutzen die formData für Discord, das wirft nie Fehler!
+      if (DISCORD_WEBHOOK_URL && DISCORD_WEBHOOK_URL !== "https://discord.com/api/webhooks/1522536803595456615/DVI0Ar8jKcadKF_7W4QJblKQ5g89Z96Z3nwd_4fVqtaHtstMgBtvhiz78KdWIKoGWzFG") {
+        try {
+          await fetch(DISCORD_WEBHOOK_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              // ACHTUNG: Hier nutzen wir /spot/ (Singular), weil dein Ordner im Projekt laut VS-Code im Singular liegt!
+              content: `🌴 **Neuer Insider-Tipp!** Es wurde *${formData.title}* als neuer Spot auf Khaolak.app hinzugefügt. Schaue Dir jetzt den Spot unter https://khaolak.app/spot/${slug} an!`
+            }),
+          });
+        } catch (discordError) {
+          console.error("Discord Benachrichtigung fehlgeschlagen:", discordError);
+        }
+      }
+
       alert("Spot erfolgreich angelegt!");
       setFormData({
         title: "", image_url: "", category: "", description: "", long_description: "",
@@ -233,7 +257,7 @@ export default function SpotEditorPage() {
                     <input className="p-2 border rounded-lg w-1/4" placeholder="Label" value={f.label} onChange={(e) => { const n = [...formData.features]; n[i].label = e.target.value; setFormData({...formData, features: n}); }} />
                     <input className="p-2 border rounded-lg w-1/4" placeholder="Wert" value={f.value} onChange={(e) => { const n = [...formData.features]; n[i].value = e.target.value; setFormData({...formData, features: n}); }} />
                     <div className="flex items-center gap-2 w-1/2">
-                      <div className="p-2 bg-white border rounded-lg shrink-0"><IconComponent size={20} className="text-teal-600" /></div>
+                      <div className="p-2 bg-white border rounded-lg shrink-0">{IconComponent ? <IconComponent size={20} className="text-teal-600" /> : null}</div>
                       <select className="p-2 border rounded-lg w-full bg-white text-sm truncate" value={f.icon} onChange={(e) => { const n = [...formData.features]; n[i].icon = e.target.value as keyof typeof iconMap; setFormData({...formData, features: n}); }}>
                         {iconNames.map(name => <option key={name} value={name}>{name}</option>)}
                       </select>
@@ -284,7 +308,7 @@ export default function SpotEditorPage() {
                 <div className="grid grid-cols-2 gap-4 mb-8">
                   {formData.features.map((f, i) => f.label && (
                     <div key={i} className="flex gap-3 items-center bg-slate-50 p-3 rounded-xl border">
-                      {(() => { const Icon = iconMap[f.icon]; return Icon ? <Icon size={20} className="text-[#14b8a6]" /> : null; })()}
+                      {(() => { const Icon = iconMap[f.icon]; return Icon ? <Icon size={20} className="text-teal-600" /> : null; })()}
                       <div><div className="text-[10px] font-bold text-slate-400 uppercase">{f.label}</div><div className="text-sm font-bold">{f.value}</div></div>
                     </div>
                   ))}

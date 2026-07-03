@@ -632,7 +632,7 @@ export default function SpotClientPage({
                             lineHeight: 1.8,
                             fontSize: "15px",
                             marginBottom: "16px",
-                          }}
+                        }}
                         >
                           {block.content}
                         </p>
@@ -756,6 +756,7 @@ export default function SpotClientPage({
                                   fontSize: 10,
                                   fontWeight: 700,
                                   textTransform: "uppercase",
+                                  letterSpacing: "1px",
                                 }}
                               >
                                 {s.category}
@@ -976,11 +977,12 @@ export default function SpotClientPage({
                   }
                 />
 
-                {spot.price_level && spot.price_level.trim() !== "" && (
+                {/* HIER DIE REINE ABSICHERUNG: Wir wandeln spot.price_level vor dem Check in einen String um */}
+                {spot.price_level !== undefined && spot.price_level !== null && spot.price_level.toString().trim() !== "" && (
                   <InfoItem
                     icon={<DollarSign size={16} />}
                     label="Budget"
-                    value={spot.price_level}
+                    value={spot.price_level.toString()}
                   />
                 )}
 
