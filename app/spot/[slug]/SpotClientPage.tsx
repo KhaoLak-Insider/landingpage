@@ -49,6 +49,10 @@ export default function SpotClientPage({
   const [randomSpots, setRandomSpots] = useState<any[]>(initialRandomSpots);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // NEUE STATES FÜR DIE UMGEBUNGS-SPOTS (NUR FÜR STRÄNDE)
+  const [nearbySpots, setNearbySpots] = useState<any[]>([]);
+  const nearbyScrollRef = useRef<HTMLDivElement>(null);
+
   const calculateDistance = (
     lat1: number,
     lon1: number,
@@ -67,6 +71,16 @@ export default function SpotClientPage({
         Math.sin(dLon / 2);
 
     return (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))).toFixed(1);
+  };
+
+  // HELPER: Gibt die Distanz als reine Zahl für mathematische Filter zurück
+  const getRawDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    if (!lat1 || !lon1 || !lat2 || !lon2) return 999;
+    const R = 6371;
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   };
 
   const fetchDrivingDistance = async (
@@ -116,6 +130,24 @@ export default function SpotClientPage({
           .then((res) => res.json())
           .then((data) => setTours(data.result || []))
           .catch((e) => console.error("Tour Ladefehler:", e));
+
+        // NEU: Wenn es ein Strand ist, laden wir Gastro, Strandbars & Hotels im Umkreis
+        if (spot.category && spot.category.toLowerCase() === "strand" && spot.latitude && spot.longitude) {
+          const { data: candidates } = await supabase
+            .from("spots")
+            .select("*")
+            .in("category", ["Restaurants", "Strandbars", "Hotel", "Hotels", "Restaurant"]) // deckt eventuelle Schreibweisen ab
+            .not("id", "eq", spot.id);
+
+          if (candidates) {
+            const filtered = candidates.filter((c) => {
+              if (!c.latitude || !c.longitude) return false;
+              const dist = getRawDistance(spot.latitude, spot.longitude, c.latitude, c.longitude);
+              return dist <= 1.5; // Weniger oder gleich 500 Meter (0.5 km)
+            });
+            setNearbySpots(filtered);
+          }
+        }
 
         const {
           data: { user: userData },
@@ -190,6 +222,17 @@ export default function SpotClientPage({
     if (scrollRef.current) {
       const amount = 300;
       scrollRef.current.scrollBy({
+        left: direction === "left" ? -amount : amount,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  // NEUE SCROLL-FUNKTION FÜR DAS GENERIERTE UMGEBUNGS-KARUSELL
+  const scrollNearby = (direction: "left" | "right") => {
+    if (nearbyScrollRef.current) {
+      const amount = 300;
+      nearbyScrollRef.current.scrollBy({
         left: direction === "left" ? -amount : amount,
         behavior: "smooth",
       });
@@ -632,7 +675,7 @@ export default function SpotClientPage({
                             lineHeight: 1.8,
                             fontSize: "15px",
                             marginBottom: "16px",
-                        }}
+                          }}
                         >
                           {block.content}
                         </p>
@@ -657,6 +700,159 @@ export default function SpotClientPage({
                   </button>
                 )}
               </div>
+
+              {/* NEU: DIREKTE UMGEBUNGS-EMPFEHLUNGEN (WENN DER SPOT EIN STRAND IST) */}
+              {spot.category && spot.category.toLowerCase() === "strand" && nearbySpots.length > 0 && (
+                <div style={{ marginTop: 20, width: "100%", position: "relative" }}>
+                  <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 4 }}>In der Nähe (Umkreis 500m)</h2>
+                  <p style={{ fontSize: 13, color: "#64748b", margin: "0 0 20px 0" }}>Entdecke passende Strandbars, Restaurants und Hotels direkt an diesem Strand.</p>
+
+                  <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                    <button
+                      onClick={() => scrollNearby("left")}
+                      style={{
+                        position: "absolute",
+                        left: -20,
+                        zIndex: 10,
+                        background: "white",
+                        padding: 10,
+                        borderRadius: "50%",
+                        boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
+                        cursor: "pointer",
+                        border: "none"
+                      }}
+                    >
+                      <ChevronLeft />
+                    </button>
+
+                    <div
+                      ref={nearbyScrollRef}
+                      style={{
+                        display: "flex",
+                        gap: 20,
+                        overflowX: "hidden",
+                        scrollBehavior: "smooth",
+                        width: "100%",
+                      }}
+                    >
+                      {nearbySpots.map((s, i) => {
+                        const distToSpot = calculateDistance(
+                          spot.latitude,
+                          spot.longitude,
+                          s.latitude,
+                          s.longitude
+                        );
+
+                        return (
+                          <Link
+                            key={i}
+                            href={`/spot/${s.slug}`}
+                            style={{
+                              textDecoration: "none",
+                              flex: "0 0 calc(33.333% - 14px)",
+                              minWidth: "calc(33.333% - 14px)",
+                            }}
+                          >
+                            <div
+                              style={{
+                                background: "#fff",
+                                borderRadius: 16,
+                                overflow: "hidden",
+                                border: "1px solid #e5e5e5",
+                              }}
+                            >
+                              <div style={{ height: 160, position: "relative" }}>
+                                <img
+                                  src={s.image_url}
+                                  style={{
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "cover",
+                                  }}
+                                />
+
+                                <div
+                                  style={{
+                                    position: "absolute",
+                                    top: 10,
+                                    left: 10,
+                                    background: "rgba(20, 184, 166, 0.9)",
+                                    color: "white",
+                                    padding: "4px 10px",
+                                    borderRadius: 20,
+                                    fontSize: 10,
+                                    fontWeight: 700,
+                                    textTransform: "uppercase",
+                                    letterSpacing: "1px",
+                                  }}
+                                >
+                                  {s.category}
+                                </div>
+                              </div>
+
+                              <div style={{ padding: 16 }}>
+                                <h3
+                                  style={{
+                                    fontSize: 16,
+                                    fontWeight: 700,
+                                    color: "#1e293b",
+                                    margin: "0 0 8px 0",
+                                  }}
+                                >
+                                  {s.title}
+                                </h3>
+
+                                <p
+                                  style={{
+                                    fontSize: 12,
+                                    color: "#64748b",
+                                    margin: "0 0 12px 0",
+                                    height: 36,
+                                    overflow: "hidden",
+                                  }}
+                                >
+                                  {s.description}
+                                </p>
+
+                                <div
+                                  style={{
+                                    fontSize: 11,
+                                    fontWeight: 600,
+                                    color: "#14b8a6",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 4,
+                                  }}
+                                >
+                                  <MapPin size={12} />
+                                  <span>Nur {Math.round(parseFloat(distToSpot || "0") * 1000)} Meter entfernt</span>
+                                </div>
+                              </div>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+
+                    <button
+                      onClick={() => scrollNearby("right")}
+                      style={{
+                        position: "absolute",
+                        right: -20,
+                        zIndex: 10,
+                        background: "white",
+                        padding: 10,
+                        borderRadius: "50%",
+                        boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
+                        cursor: "pointer",
+                        border: "none"
+                      }}
+                    >
+                      <ChevronRight />
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* WEITERE ENTDECKUNGEN */}
               <div style={{ marginTop: 40, width: "100%", position: "relative" }}>
@@ -977,7 +1173,6 @@ export default function SpotClientPage({
                   }
                 />
 
-                {/* HIER DIE REINE ABSICHERUNG: Wir wandeln spot.price_level vor dem Check in einen String um */}
                 {spot.price_level !== undefined && spot.price_level !== null && spot.price_level.toString().trim() !== "" && (
                   <InfoItem
                     icon={<DollarSign size={16} />}
