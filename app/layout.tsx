@@ -56,25 +56,13 @@ export default function RootLayout({
           {children}
         </main>
         <Analytics />
+        
+        {/* GetYourGuide Analytics Widget */}
         <Script
           id="gyg-analytics"
           src="https://widget.getyourguide.com/dist/pa.umd.production.min.js"
           strategy="afterInteractive"
           data-gyg-partner-id="JAPXTFH"
-        />
-        <Script
-          id="travelpayouts-script"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function () {
-                  var script = document.createElement("script");
-                  script.async = 1;
-                  script.src = 'https://emrld.ltd/NTQzNTY3.js?t=543567';
-                  document.head.appendChild(script);
-              })();
-            `,
-          }}
         />
       </body>
     </html>
