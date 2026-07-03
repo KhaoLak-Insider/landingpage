@@ -47,8 +47,14 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
 
   const { data: posts } = await query;
 
-  const featuredPost = activeCategory === "Alle Beiträge" && posts && posts.length > 0 ? posts[0] : null;
-  const displayPosts = featuredPost ? posts.slice(1) : (posts || []);
+  // 1. Wir sichern posts ab: Wenn posts null ist, nehmen wir ein leeres Array []
+const safePosts = posts || [];
+
+// 2. Jetzt prüfen wir auf dem sicheren Array, ob es Einträge gibt
+const featuredPost = activeCategory === "Alle Beiträge" && safePosts.length > 0 ? safePosts[0] : null;
+
+// 3. Hier können wir nun völlig fehlerfrei slicen
+const displayPosts = featuredPost ? safePosts.slice(1) : safePosts;
 
   return (
     <main className="min-h-screen bg-[#F7F9FA] text-slate-900 font-sans selection:bg-teal-500 selection:text-white antialiased">
