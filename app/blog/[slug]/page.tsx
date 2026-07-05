@@ -102,27 +102,39 @@ export default async function BlogPostDetailPage({ params }: PostPageProps) {
       {/* ARTICLE HERO SECTION */}
       <header className="container mx-auto px-4 max-w-5xl mb-12">
         <div className="bg-white rounded-3xl border border-slate-200/60 p-6 md:p-12 shadow-sm relative overflow-hidden">
-          <div className="max-w-3xl">
-            <span className="bg-teal-50 text-teal-700 border border-teal-100 text-xs font-bold tracking-wider uppercase px-3 py-1.5 rounded-md">
-              {post.category}
-            </span>
-            
-            <h1 className="text-3xl md:text-5xl font-extrabold text-slate-950 tracking-tight leading-[1.15] mt-6 mb-6">
-              {post.title}
-            </h1>
+          <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-6">
+            <div className="max-w-3xl">
+              <span className="bg-teal-50 text-teal-700 border border-teal-100 text-xs font-bold tracking-wider uppercase px-3 py-1.5 rounded-md">
+                {post.category}
+              </span>
+              
+              <h1 className="text-3xl md:text-5xl font-extrabold text-slate-950 tracking-tight leading-[1.15] mt-6 mb-6">
+                {post.title}
+              </h1>
 
-            <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-400 border-t border-slate-100 pt-6">
-              <div className="flex items-center gap-2">
-                <span className="text-base">📅</span>
-                <span>{new Date(post.created_at).toLocaleDateString("de-DE", { day: '2-digit', month: 'long', year: 'numeric' })}</span>
+              <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-400 border-t border-slate-100 pt-6">
+                <div className="flex items-center gap-2">
+                  <span>📅</span>
+                  <span>{new Date(post.created_at).toLocaleDateString("de-DE", { day: '2-digit', month: 'long', year: 'numeric' })}</span>
+                </div>
+                <span>•</span>
+                <div className="flex items-center gap-2">
+                  <span>⏱️</span>
+                  <span>{post.reading_time || 5} Minuten Lesezeit</span>
+                </div>
+                <span>•</span>
+                <span className="text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-100">Verified Insider-Content</span>
               </div>
-              <span>•</span>
-              <div className="flex items-center gap-2">
-                <span>⏱️</span>
-                <span>{post.reading_time || 5} Minuten Lesezeit</span>
-              </div>
-              <span>•</span>
-              <span className="text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-100">Verified Insider-Content</span>
+            </div>
+
+            {/* NEUER BEARBEITEN BUTTON FÜR ADMINS / EDITORS */}
+            <div className="shrink-0">
+              <Link
+                href={`/editor/blog/${post.id}`}
+                className="inline-flex items-center gap-2 text-sm font-bold text-rose-600 hover:text-white bg-rose-50 hover:bg-rose-600 border border-rose-200 hover:border-rose-600 px-5 py-3 rounded-xl shadow-sm transition-all duration-200"
+              >
+                ✏️ Beitrag bearbeiten
+              </Link>
             </div>
           </div>
         </div>
@@ -133,17 +145,16 @@ export default async function BlogPostDetailPage({ params }: PostPageProps) {
         
         {/* MAIN TEXT CONTENT */}
         <article className="lg:col-span-8 bg-white rounded-3xl border border-slate-200/60 p-6 md:p-10 shadow-sm prose prose-slate max-w-none">
-          {post.image_url && (
-            <div className="relative aspect-[16/9] rounded-2xl overflow-hidden mb-8 shadow-sm">
-              <Image 
-                src={post.image_url} 
-                alt={post.title} 
-                fill 
-                className="object-cover"
-                priority
-              />
-            </div>
-          )}
+          {/* NACHHER */}
+{post.image_url && (
+  <div className="relative w-full rounded-2xl overflow-hidden border border-slate-200/60 mb-8 shadow-sm">
+    <img 
+      src={post.image_url} 
+      alt={post.title} 
+      className="w-full h-auto object-contain rounded-2xl"
+    />
+  </div>
+)}
 
           {/* Der formatierte Haupttext via react-markdown */}
           <div className="focus:outline-none">

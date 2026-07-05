@@ -45,7 +45,7 @@ export default function Header() {
       if (session?.user) {
         fetchUserData();
       } else {
-        setProfile(null);
+        profile && setProfile(null);
       }
     });
 
@@ -113,8 +113,13 @@ export default function Header() {
               {/* Sichtbarkeit nur für Admins/Editoren */}
               {(profile?.role === 'admin' || profile?.role === 'editor') && (
                 <>
+                  <div className="border-t border-slate-100 my-1"></div>
                   <Link href="/editor" className="block px-4 py-2 text-sm font-bold text-teal-600 hover:bg-teal-50 rounded-lg">
                     Spot einpflegen
+                  </Link>
+                  {/* NEU: Blogbeitrag erstellen */}
+                  <Link href="/editor/blog" className="block px-4 py-2 text-sm font-bold text-teal-600 hover:bg-teal-50 rounded-lg">
+                    Blogbeitrag schreiben
                   </Link>
                   <Link href="/editor/list" className="block px-4 py-2 text-sm font-bold text-teal-600 hover:bg-teal-50 rounded-lg">
                     Spots bearbeiten
