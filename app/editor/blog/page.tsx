@@ -59,9 +59,9 @@ export default function BlogEditorPage() {
       }
 
       // Flexibles Mapping fängt alle Keys (auch von älteren Versionen) sauber ab
-      const excerpt = data.excerpt || data.description || prev.excerpt;
-      const content = data.content || data.long_description || prev.content;
-      const category = data.category || prev.category;
+      const excerpt = data.excerpt || data.description || formData.excerpt;
+const content = data.content || data.long_description || formData.content;
+const category = data.category || formData.category;
       
       setFormData(prev => ({
         ...prev,
