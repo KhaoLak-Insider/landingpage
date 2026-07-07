@@ -3,6 +3,8 @@ import Link from "next/link";
 import { supabase } from "@/src/lib/supabase";
 import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
+// Importiere die neue Lupen-Komponente (Pfade ggf. anpassen)
+import BlogImageMagnifier from "@/src/components/BlogImageMagnifier";
 
 interface PostPageProps {
   params: Promise<{ slug: string }>;
@@ -25,36 +27,26 @@ export default async function BlogPostDetailPage({ params }: PostPageProps) {
 
   // Erweiterte Komponenten-Konfiguration für ReactMarkdown
   const markdownComponents = {
-    // Überschriften stylen
     h3: ({ ...props }) => (
       <h3 className="text-2xl font-bold text-slate-900 mt-8 mb-4 tracking-tight" {...props} />
     ),
     h4: ({ ...props }) => (
       <h4 className="text-xl font-bold text-slate-900 mt-6 mb-3 tracking-tight" {...props} />
     ),
-    
-    // Absätze ganz normal als Fließtext ausgeben (ohne riskante Emoji-Abfragen im String)
     p: ({ ...props }) => (
       <p className="text-slate-600 text-base md:text-lg leading-relaxed mb-5 font-normal" {...props} />
     ),
-    
-    // Listen stylen
     li: ({ ...props }) => (
       <li className="ml-6 list-disc text-slate-600 mb-2 leading-relaxed" {...props} />
     ),
-    
-    // Horizontale Trenner stylen
     hr: ({ ...props }) => (
       <hr className="my-8 border-slate-200" {...props} />
     ),
-
-    // Wir fangen gezielt die nativen Markdown-Links ab
     a: ({ href, children, ...props }: any) => {
       const url = href || "";
       const isSailyLink = url.includes("saily") || url.includes("xKbnW9ID");
       const isYesimLink = url.includes("yesim") || url.includes("CTkfUgOu");
 
-      // Wenn es einer deiner eSIM-Affiliate-Links ist, rendern wir den Premium-Button
       if (isSailyLink || isYesimLink) {
         return (
           <div className="my-6 block">
@@ -72,7 +64,6 @@ export default async function BlogPostDetailPage({ params }: PostPageProps) {
         );
       }
 
-      // Alle anderen normalen Text-Links (z.B. interne Verlinkungen zwischen Beiträgen)
       return (
         <a 
           href={url} 
@@ -127,7 +118,6 @@ export default async function BlogPostDetailPage({ params }: PostPageProps) {
               </div>
             </div>
 
-            {/* NEUER BEARBEITEN BUTTON FÜR ADMINS / EDITORS */}
             <div className="shrink-0">
               <Link
                 href={`/editor/blog/${post.id}`}
@@ -140,21 +130,16 @@ export default async function BlogPostDetailPage({ params }: PostPageProps) {
         </div>
       </header>
 
-      {/* TWO-COLUMN LAYOUT (Content vs. Sidebar) */}
+      {/* TWO-COLUMN LAYOUT */}
       <div className="container mx-auto px-4 max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
         {/* MAIN TEXT CONTENT */}
         <article className="lg:col-span-8 bg-white rounded-3xl border border-slate-200/60 p-6 md:p-10 shadow-sm prose prose-slate max-w-none">
-          {/* NACHHER */}
-{post.image_url && (
-  <div className="relative w-full rounded-2xl overflow-hidden border border-slate-200/60 mb-8 shadow-sm">
-    <img 
-      src={post.image_url} 
-      alt={post.title} 
-      className="w-full h-auto object-contain rounded-2xl"
-    />
-  </div>
-)}
+          
+          {/* Geändert: Nutzt jetzt die neue interaktive Lupe-Komponente */}
+          {post.image_url && (
+            <BlogImageMagnifier src={post.image_url} alt={post.title} />
+          )}
 
           {/* Der formatierte Haupttext via react-markdown */}
           <div className="focus:outline-none">
@@ -167,7 +152,6 @@ export default async function BlogPostDetailPage({ params }: PostPageProps) {
         {/* HIGH-CONVERSION MARKETING SIDEBAR */}
         <aside className="lg:col-span-4 space-y-6 sticky top-24">
           
-          {/* Saily vs Yesim Quick-CTA Box */}
           <div className="bg-gradient-to-b from-slate-900 to-slate-950 text-white rounded-2xl p-6 border border-slate-800 shadow-md relative overflow-hidden">
             <div className="absolute inset-0 bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:16px_16px] opacity-20 pointer-events-none" />
             
@@ -202,7 +186,6 @@ export default async function BlogPostDetailPage({ params }: PostPageProps) {
             </div>
           </div>
 
-          {/* Kleine Vertrauens-Box darunter */}
           <div className="bg-white rounded-2xl p-5 border border-slate-200/60 text-center shadow-sm">
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Transparenz-Hinweis</p>
             <p className="text-slate-500 text-[11px] leading-relaxed">

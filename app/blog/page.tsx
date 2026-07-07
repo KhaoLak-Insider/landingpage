@@ -26,7 +26,6 @@ const CATEGORIES = [
   )},
 ];
 
-// Next.js 15 konformer Page-Typ für reibungslosen Build-Vorgang
 interface BlogPageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
@@ -47,14 +46,9 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
 
   const { data: posts } = await query;
 
-  // 1. Wir sichern posts ab: Wenn posts null ist, nehmen wir ein leeres Array []
-const safePosts = posts || [];
-
-// 2. Jetzt prüfen wir auf dem sicheren Array, ob es Einträge gibt
-const featuredPost = activeCategory === "Alle Beiträge" && safePosts.length > 0 ? safePosts[0] : null;
-
-// 3. Hier können wir nun völlig fehlerfrei slicen
-const displayPosts = featuredPost ? safePosts.slice(1) : safePosts;
+  const safePosts = posts || [];
+  const featuredPost = activeCategory === "Alle Beiträge" && safePosts.length > 0 ? safePosts[0] : null;
+  const displayPosts = featuredPost ? safePosts.slice(1) : safePosts;
 
   return (
     <main className="min-h-screen bg-[#F7F9FA] text-slate-900 font-sans selection:bg-teal-500 selection:text-white antialiased">
@@ -115,23 +109,34 @@ const displayPosts = featuredPost ? safePosts.slice(1) : safePosts;
             </div>
             <Link href={`/blog/${featuredPost.slug}`} className="group block">
               <article className="bg-white rounded-3xl overflow-hidden border border-slate-200/60 shadow-sm group-hover:shadow-xl group-hover:border-slate-300/80 transition-all duration-500 grid grid-cols-1 lg:grid-cols-12 gap-0">
-                <div className="relative aspect-[16/10] lg:aspect-auto lg:col-span-7 bg-slate-100 overflow-hidden min-h-[350px]">
+                
+                {/* Hier ist der exklusive Blur-Effekt für das obere Bild eingebaut */}
+                <div className="relative aspect-[16/10] lg:aspect-auto lg:col-span-7 bg-slate-900 flex items-center justify-center min-h-[350px] overflow-hidden">
                   {featuredPost.image_url ? (
-                    <Image
-                      src={featuredPost.image_url}
-                      alt={featuredPost.title}
-                      fill
-                      priority
-                      sizes="(max-width: 1024px) 100vw, 60vw"
-                      className="object-cover group-hover:scale-[1.02] transition-transform duration-700 ease-out"
-                    />
+                    <>
+                      {/* Weichgezeichneter Hintergrund füllt eventuelle Freiräume aus */}
+                      <Image
+                        src={featuredPost.image_url}
+                        alt=""
+                        fill
+                        className="object-cover blur-xl opacity-50 scale-110 pointer-events-none"
+                      />
+                      {/* Scharfes Bild im object-contain Modus davor gelagert */}
+                      <Image
+                        src={featuredPost.image_url}
+                        alt={featuredPost.title}
+                        fill
+                        priority
+                        sizes="(max-width: 1024px) 100vw, 60vw"
+                        className="object-contain group-hover:scale-[1.02] transition-transform duration-500 ease-out relative z-10"
+                      />
+                    </>
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-teal-50 to-slate-100 flex items-center justify-center">
                       <span className="text-5xl">🏝️</span>
                     </div>
                   )}
-                  {/* KORREKTUR: Jetzt unten links und elegant semitransparent */}
-                  <span className="absolute bottom-6 left-6 bg-slate-900/75 backdrop-blur-md text-white text-[11px] font-bold uppercase tracking-wider px-3.5 py-2 rounded-lg shadow-sm border border-white/10">
+                  <span className="absolute bottom-6 left-6 bg-slate-900/75 backdrop-blur-md text-white text-[11px] font-bold uppercase tracking-wider px-3.5 py-2 rounded-lg shadow-sm border border-white/10 z-20">
                     {featuredPost.category}
                   </span>
                 </div>
@@ -178,11 +183,11 @@ const displayPosts = featuredPost ? safePosts.slice(1) : safePosts;
             )}
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {displayPosts.map((post, index) => (
+              {displayPosts.map((post) => (
                 <Link href={`/blog/${post.slug}`} key={post.id} className="group block h-full">
                   <article className="bg-white rounded-2xl overflow-hidden border border-slate-200/50 shadow-sm group-hover:shadow-xl group-hover:border-slate-300/70 transition-all duration-300 flex flex-col h-full bg-white">
                     
-                    {/* Bild */}
+                    {/* Unverändert: Die kleinen Karten bleiben im vollflächigen, perfekten aspect-[16/10] Modul */}
                     <div className="relative aspect-[16/10] bg-slate-100 overflow-hidden">
                       {post.image_url ? (
                         <Image
@@ -197,8 +202,7 @@ const displayPosts = featuredPost ? safePosts.slice(1) : safePosts;
                           <span className="text-3xl">🏝️</span>
                         </div>
                       )}
-                      {/* KORREKTUR: Jetzt unten links und elegant semitransparent */}
-                      <span className="absolute bottom-4 left-4 bg-white/75 backdrop-blur-md text-slate-900 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1.5 rounded-md shadow-sm border border-white/20">
+                      <span className="absolute bottom-4 left-4 bg-slate-900/75 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1.5 rounded-md shadow-sm border border-white/10">
                         {post.category}
                       </span>
                     </div>
