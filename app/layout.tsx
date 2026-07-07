@@ -3,6 +3,7 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import Header from "@/src/components/Header"; 
+import Footer from "@/src/components/Footer"; // 1. HIER IMPORTIERT
 import Script from "next/script";
 
 const poppins = Poppins({
@@ -52,9 +53,14 @@ export default function RootLayout({
     <html lang="de" className="h-full antialiased">
       <body className={`${poppins.className} min-h-full flex flex-col`}>
         <Header /> 
+        
         <main className="flex-grow">
           {children}
         </main>
+        
+        {/* 2. HIER EINGEFÜGT: Der Footer wird nun global geladen */}
+        <Footer /> 
+
         <Analytics />
         
         {/* GetYourGuide Analytics Widget */}

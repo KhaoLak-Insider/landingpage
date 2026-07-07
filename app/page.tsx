@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { FormEvent, useState } from "react";
-import { supabase } from "@/src/lib/supabase";
 import Link from "next/link";
 
 const features = [
@@ -34,7 +33,6 @@ export default function Home() {
 
   const joinWaitlist = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
     const normalizedEmail = email.trim().toLowerCase();
 
     if (!normalizedEmail) {
@@ -77,19 +75,9 @@ export default function Home() {
     setLoading(false);
   };
 
-  
-  // exit intent (simple)
-  if (typeof window !== "undefined") {
-    window.onbeforeunload = () => {
-      // soft signal only
-      return null;
-    };
-  }
-
   return (
     <main className="min-h-screen bg-white text-slate-900">
       <section
-        // HIER ANGEPASST: min-h auf 550px und 850px reduziert
         className="relative min-h-[550px] overflow-hidden bg-cover bg-center md:min-h-[850px]"
         style={{ backgroundImage: "url('/images/hero.png')" }}
       >
@@ -152,7 +140,6 @@ export default function Home() {
         </div>
 
         <svg
-          // HIER ANGEPASST: -bottom-20 zieht die Welle weiter nach oben
           className="absolute -bottom-9 left-0 w-full"
           viewBox="0 0 1440 90"
           preserveAspectRatio="none"
@@ -164,7 +151,6 @@ export default function Home() {
         </svg>
       </section>
 
-      {/* Alles unterhalb dieses Kommentars bleibt von mir völlig unberührt */}
       <section className="relative z-20 mx-auto -mt-6 grid max-w-7xl grid-cols-2 gap-6 px-8 pb-24 md:grid-cols-6">
         {features.map(([icon, title, text]) => (
           <div
@@ -180,8 +166,6 @@ export default function Home() {
         ))}
       </section>
       
-      {/* ... [dein restlicher, originaler Code wurde hier nicht weiter gekürzt] ... */}
-      
       <section className="mx-auto grid max-w-7xl gap-10 px-8 py-0 md:grid-cols-[0.8fr_1.2fr]">
         <div className="flex flex-col justify-center">
           <h2 className="text-4xl font-black tracking-tight md:text-5xl">
@@ -191,9 +175,9 @@ export default function Home() {
             Von traumhaften Stränden über lokale Märkte bis hin zu versteckten
             Wasserfällen – Khao Lak hat so viel zu bieten.
           </p>
-          <button className="mt-8 w-fit rounded-full border border-teal-500 px-7 py-3 font-bold text-teal-600 transition hover:bg-teal-50">
+          <Link href="/entdecken" className="mt-8 w-fit rounded-full border border-teal-500 px-7 py-3 font-bold text-teal-600 transition hover:bg-teal-50 text-center decoration-transparent">
             Alle Orte entdecken
-          </button>
+          </Link>
         </div>
 
         <div className="grid gap-5 sm:grid-cols-2">
@@ -319,9 +303,7 @@ export default function Home() {
             Trage dich unverbindlich in die Warteliste ein und erfahre als Erster, wenn die Khao Lak Insider App startet.
           </p>
           <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-sm font-semibold backdrop-blur">
-            🔥 {/* Vorher: <span>{liveCount}</span> */}
-{/* Nachher: */}
-<span>{typeof window !== "undefined" ? liveCount : "..."}</span>
+            🔥 <span>{typeof window !== "undefined" ? liveCount : "..."}</span>
           </div>
           <form onSubmit={joinWaitlist} className="mx-auto mt-9 max-w-xl rounded-3xl bg-white/95 p-6 shadow-2xl ring-1 ring-black/5 backdrop-blur">
             <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Deine E-Mail-Adresse" className="h-12 w-full rounded-full px-5 text-slate-900 outline-none shadow-inner bg-white ring-1 ring-slate-200 focus:ring-2 focus:ring-teal-400 transition" />
@@ -343,50 +325,6 @@ export default function Home() {
           <p className="mt-4 text-sm text-white/75">Kein Spam. Nur Informationen zum App-Start.</p>
         </div>
       </section>
-
-      <footer className="border-t border-slate-200 bg-white">
-        <div className="mx-auto max-w-7xl px-8 py-16">
-          <div className="grid gap-12 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
-            <div>
-              <Image src="/images/logo-footer.svg" alt="Khao Lak Insider" width={260} height={260} className="h-auto w-[220px]" />
-              <p className="mt-6 max-w-sm text-sm leading-relaxed text-slate-600">Der smarte Reiseführer für Khao Lak. Entdecke Strände, Restaurants, Märkte, Tempel und echte Geheimtipps in einer App.</p>
-              <p className="mt-6 text-sm font-semibold text-teal-600">App-Start 2026</p>
-            </div>
-            <div>
-              <h4 className="mb-4 font-bold text-slate-900">App</h4>
-              <ul className="space-y-3 text-sm text-slate-600">
-                <li><a href="#">Features</a></li>
-                <li><a href="#">Interaktive Karte</a></li>
-                <li><a href="#">Reiseplaner</a></li>
-                <li><a href="#">Favoriten</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="mb-4 font-bold text-slate-900">Unternehmen</h4>
-              <ul className="space-y-3 text-sm text-slate-600">
-                <li><a href="#">Über uns</a></li>
-                <li><a href="#">Warteliste</a></li>
-                <li><a href="#">Kontakt</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="mb-4 font-bold text-slate-900">Rechtliches</h4>
-              <ul className="space-y-3 text-sm text-slate-600">
-                <li><a href="/impressum">Impressum</a></li>
-                <li><a href="/datenschutz">Datenschutz</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-slate-200 pt-8 text-sm text-slate-500 md:flex-row">
-            <p>© 2026 Khao Lak Insider. Alle Rechte vorbehalten.</p>
-            <div className="flex gap-6">
-              <a href="#" className="hover:text-teal-500 transition">Instagram</a>
-              <a href="#" className="hover:text-teal-500 transition">YouTube</a>
-              <a href="#" className="hover:text-teal-500 transition">Facebook</a>
-            </div>
-          </div>
-        </div>
-      </footer>
     </main>
   );
 }
