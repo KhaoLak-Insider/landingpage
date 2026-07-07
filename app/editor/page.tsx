@@ -8,6 +8,7 @@ import { iconNames, iconMap } from "@/src/components/IconLibrary";
 import { MapPin } from "lucide-react"; 
 
 // HIER DEINEN ECHTEN DISCORD WEBHOOK LINK REINKLEBEN:
+
 const DISCORD_WEBHOOK_URL = process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_URL;
 
 // HELPER: Text zu JSON konvertieren
