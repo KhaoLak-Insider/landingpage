@@ -136,14 +136,14 @@ export default function SpotClientPage({
           const { data: candidates } = await supabase
             .from("spots")
             .select("*")
-            .in("category", ["Restaurants", "Strandbars", "Hotel", "Hotels", "Restaurant"]) // deckt eventuelle Schreibweisen ab
+            .in("category", ["Restaurants", "Strandbars", "Hotel", "Hotels", "Restaurant"])
             .not("id", "eq", spot.id);
 
           if (candidates) {
             const filtered = candidates.filter((c) => {
               if (!c.latitude || !c.longitude) return false;
               const dist = getRawDistance(spot.latitude, spot.longitude, c.latitude, c.longitude);
-              return dist <= 1.5; // Weniger oder gleich 500 Meter (0.5 km)
+              return dist <= 1.5;
             });
             setNearbySpots(filtered);
           }
@@ -228,7 +228,6 @@ export default function SpotClientPage({
     }
   };
 
-  // NEUE SCROLL-FUNKTION FÜR DAS GENERIERTE UMGEBUNGS-KARUSELL
   const scrollNearby = (direction: "left" | "right") => {
     if (nearbyScrollRef.current) {
       const amount = 300;
@@ -267,6 +266,13 @@ export default function SpotClientPage({
     (Array.isArray(userProfile?.hotels)
       ? userProfile?.hotels?.[0]?.lng
       : userProfile?.hotels?.lng);
+
+  // HELPER: Prüft, ob es sich um Gastronomie handelt
+  const isFoodCategory = 
+    spot.category?.toLowerCase() === "restaurants" || 
+    spot.category?.toLowerCase() === "restaurant" || 
+    spot.category?.toLowerCase() === "strandbars" ||
+    spot.category?.toLowerCase() === "strandbar";
 
   return (
     <main
@@ -664,7 +670,7 @@ export default function SpotClientPage({
                             fontWeight: 700,
                             marginTop: "24px",
                             marginBottom: "12px",
-                          }}
+                        }}
                         >
                           {block.content}
                         </h3>
@@ -1084,7 +1090,7 @@ export default function SpotClientPage({
                     margin: 0,
                   }}
                 >
-                  Spot Informationen
+                  Spot Information
                 </h3>
 
                 <button
@@ -1173,12 +1179,81 @@ export default function SpotClientPage({
                   }
                 />
 
+                {/* MODIFIZIERTER PREIS- / CHANG-INDEX BEREICH MIT HELP-TOOLTIP */}
                 {spot.price_level !== undefined && spot.price_level !== null && spot.price_level.toString().trim() !== "" && (
-                  <InfoItem
-                    icon={<DollarSign size={16} />}
-                    label="Budget"
-                    value={spot.price_level.toString()}
-                  />
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <div
+                      style={{
+                        color: "#14b8a6",
+                        background: "#f0fdfa",
+                        padding: "8px",
+                        borderRadius: "8px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center"
+                      }}
+                    >
+                      {isFoodCategory ? (
+                        <img src="/icons/bottle.svg" alt="Chang" style={{ width: 16, height: 16, objectFit: "contain" }} />
+                      ) : (
+                        <DollarSign size={16} />
+                      )}
+                    </div>
+
+                    <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                      <span
+                        className="flex items-center gap-1 group relative"
+                        style={{
+                          fontSize: "10px",
+                          fontWeight: 700,
+                          color: "#94a3b8",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        {isFoodCategory ? "Chang Index" : "Budget"}
+                        <HelpCircle size={12} className="text-slate-400 cursor-help ml-0.5" />
+                        
+                        {/* TOOLTIP ON HOVER */}
+                        <div className="invisible group-hover:visible absolute bottom-full left-0 mb-2 w-64 p-3 bg-slate-900 text-white text-xs rounded-xl shadow-xl z-50 transition-all opacity-0 group-hover:opacity-100 font-medium normal-case tracking-normal leading-relaxed">
+                          {isFoodCategory 
+                            ? "Der Chang-Index zeigt das Preisniveau basierend auf dem Preis für eine große Flasche Chang Bier vor Ort (1 = sehr günstig, 5 = teuer)." 
+                            : "Gibt das allgemeine Preisniveau des Spots von 1 (günstig) bis 5 (exklusiv) an."
+                          }
+                        </div>
+                      </span>
+
+                      {isFoodCategory ? (
+                        <div style={{ display: "flex", gap: "4px", alignItems: "center", marginTop: "2px" }}>
+                          {Array.from({ length: 5 }).map((_, index) => {
+                            const currentLevel = parseInt(spot.price_level) || 0;
+                            const isFilled = index < currentLevel;
+
+                            return (
+                              <img
+                                key={index}
+                                src="/icons/bottle.svg"
+                                alt="Flasche"
+                                style={{ 
+                                  width: 10, 
+                                  height: 22, 
+                                  objectFit: "contain",
+                                  filter: isFilled ? "none" : "grayscale(100%)",
+                                  opacity: isFilled ? 1 : 0.25
+                                }}
+                              />
+                            );
+                          })}
+                          <span style={{ fontSize: "11px", color: "#64748b", marginLeft: "4px", fontWeight: 600 }}>
+                            ({spot.price_level}/5)
+                          </span>
+                        </div>
+                      ) : (
+                        <span style={{ fontSize: "13px", fontWeight: 600, color: "#334155" }}>
+                          {spot.price_level} / 5
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 )}
 
                 {spot.opening_hours && spot.opening_hours.trim() !== "" && (
