@@ -8,7 +8,7 @@ import { iconNames, iconMap } from "@/src/components/IconLibrary";
 import { MapPin } from "lucide-react"; 
 
 // HIER DEINEN ECHTEN DISCORD WEBHOOK LINK REINKLEBEN:
-const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1522536803595456615/DVI0Ar8jKcadKF_7W4QJblKQ5g89Z96Z3nwd_4fVqtaHtstMgBtvhiz78KdWIKoGWzFG";
+const DISCORD_WEBHOOK_URL = process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_URL;
 
 // HELPER: Text zu JSON konvertieren
 function convertTextToJson(text: string) {
