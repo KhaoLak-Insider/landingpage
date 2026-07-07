@@ -13,8 +13,8 @@ export default function PlanenPage() {
   const [spots, setSpots] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // Filter-States
-  const [selectedCategory, setSelectedCategory] = useState<string>("Alle");
+  // Filter-States (Jetzt als Array für die Mehrfachauswahl initialisiert)
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(["Alle"]);
   const [maxBudget, setMaxBudget] = useState<number>(5);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
@@ -35,16 +35,36 @@ export default function PlanenPage() {
     return ["Alle", ...Array.from(cats)];
   }, [spots]);
 
+  // Funktion zur Steuerung der Mehrfachauswahl
+  const handleCategoryClick = (category: string) => {
+    setSelectedCategories((prev) => {
+      if (category === "Alle") {
+        return ["Alle"];
+      }
+      
+      // "Alle" entfernen, wenn eine spezifische Kategorie gewählt wird
+      const ohneAlle = prev.filter((c) => c !== "Alle");
+      
+      if (ohneAlle.includes(category)) {
+        const neuesArray = ohneAlle.filter((c) => c !== category);
+        // Falls danach leer, wieder auf "Alle" zurückfallen
+        return neuesArray.length === 0 ? ["Alle"] : neuesArray;
+      } else {
+        return [...ohneAlle, category];
+      }
+    });
+  };
+
   // 3. Spots filtern (wird an die Map-Marker übergeben)
   const filteredSpots = useMemo(() => {
     return spots.filter((spot) => {
-      const matchCategory = selectedCategory === "Alle" || spot.category === selectedCategory;
+      const matchCategory = selectedCategories.includes("Alle") || selectedCategories.includes(spot.category);
       const spotPrice = parseInt(spot.price_level) || 0;
       const matchPrice = spotPrice === 0 || spotPrice <= maxBudget; 
       
       return matchCategory && matchPrice;
     });
-  }, [spots, selectedCategory, maxBudget]);
+  }, [spots, selectedCategories, maxBudget]);
 
   // 4. Mapbox-Lebenszyklus steuern
   useEffect(() => {
@@ -175,35 +195,38 @@ export default function PlanenPage() {
 
           <hr style={{ border: 0, borderTop: "1px solid #e2e8f0", margin: 0 }} />
 
-          {/* KATEGORIEN-WÄHLER */}
+          {/* KATEGORIEN-WÄHLER (Jetzt als funktionierendes Multi-Select) */}
           <div>
-            <label style={{ fontSize: "11px", fontWeight: 800, color: "#94a3b8", textTransform: "uppercase", display: "block", marginBottom: "10px" }}>Kategorie filtern</label>
+            <label style={{ fontSize: "11px", fontWeight: 800, color: "#94a3b8", textTransform: "uppercase", display: "block", marginBottom: "10px" }}>Kategorien filtern</label>
             <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  style={{
-                    width: "100%",
-                    textAlign: "left",
-                    padding: "10px 14px",
-                    borderRadius: "12px",
-                    border: "1px solid",
-                    borderColor: selectedCategory === cat ? "#14b8a6" : "#e2e8f0",
-                    background: selectedCategory === cat ? "#f0fdfa" : "#fff",
-                    color: selectedCategory === cat ? "#0d9488" : "#475569",
-                    fontWeight: 600,
-                    fontSize: "13px",
-                    cursor: "pointer",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center"
-                  }}
-                >
-                  <span>{cat}</span>
-                  {selectedCategory === cat && <MapPin size={14} />}
-                </button>
-              ))}
+              {categories.map((cat) => {
+                const isSelected = selectedCategories.includes(cat);
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => handleCategoryClick(cat)}
+                    style={{
+                      width: "100%",
+                      textAlign: "left",
+                      padding: "10px 14px",
+                      borderRadius: "12px",
+                      border: "1px solid",
+                      borderColor: isSelected ? "#14b8a6" : "#e2e8f0",
+                      background: isSelected ? "#f0fdfa" : "#fff",
+                      color: isSelected ? "#0d9488" : "#475569",
+                      fontWeight: 600,
+                      fontSize: "13px",
+                      cursor: "pointer",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center"
+                    }}
+                  >
+                    <span>{cat}</span>
+                    {isSelected && <MapPin size={14} />}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
