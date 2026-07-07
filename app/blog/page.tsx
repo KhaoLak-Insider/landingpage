@@ -32,23 +32,115 @@ interface BlogPageProps {
 
 export default async function BlogPage({ searchParams }: BlogPageProps) {
   const resolvedParams = await searchParams;
+  
   const categoryParam = resolvedParams.category;
   const activeCategory = typeof categoryParam === "string" ? categoryParam : "Alle Beiträge";
+  
+  const pageParam = resolvedParams.page;
+  const currentPage = typeof pageParam === "string" ? Math.max(1, parseInt(pageParam) || 1) : 1;
+
+  // Change this value to 3 or 6 for testing. Set back to 9 for production.
+  const ITEMS_PER_PAGE = 9; 
+
+  let countQuery = supabase
+    .from("blog_posts")
+    .select("*", { count: "exact", head: true });
+
+  if (activeCategory !== "Alle Beiträge") {
+    countQuery = countQuery.eq("category", activeCategory);
+  }
+  const { count } = await countQuery;
+  const totalItems = count || 0;
+
+  let from = 0;
+  let to = ITEMS_PER_PAGE - 1;
+
+  if (activeCategory === "Alle Beiträge") {
+    if (currentPage === 1) {
+      from = 0;
+      to = ITEMS_PER_PAGE; 
+    } else {
+      from = (currentPage - 1) * ITEMS_PER_PAGE + 1;
+      to = currentPage * ITEMS_PER_PAGE;
+    }
+  } else {
+    from = (currentPage - 1) * ITEMS_PER_PAGE;
+    to = currentPage * ITEMS_PER_PAGE - 1;
+  }
 
   let query = supabase
     .from("blog_posts")
     .select("*")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
   if (activeCategory !== "Alle Beiträge") {
     query = query.eq("category", activeCategory);
   }
-
   const { data: posts } = await query;
-
   const safePosts = posts || [];
-  const featuredPost = activeCategory === "Alle Beiträge" && safePosts.length > 0 ? safePosts[0] : null;
+
+  const featuredPost = activeCategory === "Alle Beiträge" && currentPage === 1 && safePosts.length > 0 ? safePosts[0] : null;
   const displayPosts = featuredPost ? safePosts.slice(1) : safePosts;
+
+  const totalPages = activeCategory === "Alle Beiträge"
+    ? Math.ceil(Math.max(0, totalItems - 1) / ITEMS_PER_PAGE)
+    : Math.ceil(totalItems / ITEMS_PER_PAGE);
+
+  const createPageLink = (pageNumber: number) => {
+    const params = new URLSearchParams();
+    if (activeCategory !== "Alle Beiträge") params.set("category", activeCategory);
+    params.set("page", pageNumber.toString());
+    return `/blog?${params.toString()}`;
+  };
+
+  // SX for the pagination bar stored in a reusable variable
+  const paginationComponent = totalPages > 1 ? (
+    <div className="flex items-center justify-center gap-2">
+      {/* Back Button */}
+      <Link
+        href={createPageLink(currentPage - 1)}
+        className={`flex items-center justify-center px-4 py-2.5 rounded-xl text-sm font-semibold border bg-white transition-all ${
+          currentPage === 1
+            ? "pointer-events-none opacity-40 border-slate-100 text-slate-300"
+            : "border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-900 hover:shadow-sm"
+        }`}
+      >
+        ← Zurück
+      </Link>
+
+      {/* Page Numbers */}
+      {Array.from({ length: totalPages }, (_, i) => {
+        const pageNum = i + 1;
+        const isCurrent = pageNum === currentPage;
+        return (
+          <Link
+            key={pageNum}
+            href={createPageLink(pageNum)}
+            className={`flex items-center justify-center w-11 h-11 rounded-xl text-sm font-bold transition-all ${
+              isCurrent
+                ? "bg-slate-900 text-white shadow-md shadow-slate-900/10 scale-[1.02]"
+                : "bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:text-slate-900 hover:shadow-sm"
+            }`}
+          >
+            {pageNum}
+          </Link>
+        );
+      })}
+
+      {/* Next Button */}
+      <Link
+        href={createPageLink(currentPage + 1)}
+        className={`flex items-center justify-center px-4 py-2.5 rounded-xl text-sm font-semibold border bg-white transition-all ${
+          currentPage === totalPages
+            ? "pointer-events-none opacity-40 border-slate-100 text-slate-300"
+            : "border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-900 hover:shadow-sm"
+        }`}
+      >
+        Weiter →
+      </Link>
+    </div>
+  ) : null;
 
   return (
     <main className="min-h-screen bg-[#F7F9FA] text-slate-900 font-sans selection:bg-teal-500 selection:text-white antialiased">
@@ -56,7 +148,6 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
       {/* HERO SECTION */}
       <section className="relative bg-white pt-20 pb-16 overflow-hidden border-b border-slate-100">
         <div className="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:16px_16px] opacity-40 pointer-events-none" />
-        
         <div className="container mx-auto px-4 max-w-7xl relative">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 bg-teal-50 text-teal-700 text-xs font-bold tracking-wider uppercase px-3 py-1.5 rounded-full mb-6 border border-teal-100/60">
@@ -108,29 +199,17 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
               <span className="w-4 h-[2px] bg-teal-500" /> Aktuelles Highlight
             </div>
             <Link href={`/blog/${featuredPost.slug}`} className="group block">
-              <article className="bg-white rounded-3xl overflow-hidden border border-slate-200/60 shadow-sm group-hover:shadow-xl group-hover:border-slate-300/80 transition-all duration-500 grid grid-cols-1 lg:grid-cols-12 gap-0">
-                
-                {/* Hier ist der exklusive Blur-Effekt für das obere Bild eingebaut */}
-                <div className="relative aspect-[16/10] lg:aspect-auto lg:col-span-7 bg-slate-900 flex items-center justify-center min-h-[350px] overflow-hidden">
+              <article className="bg-white rounded-3xl overflow-hidden border border-slate-200/60 shadow-sm group-hover:shadow-xl group-hover:border-slate-300/80 transition-all duration-500 grid grid-cols-1 lg:grid-cols-16 gap-0">
+                <div className="relative aspect-[16/10] lg:aspect-auto lg:col-span-7 bg-white flex items-center justify-start min-h-[350px] overflow-hidden">
                   {featuredPost.image_url ? (
-                    <>
-                      {/* Weichgezeichneter Hintergrund füllt eventuelle Freiräume aus */}
-                      <Image
-                        src={featuredPost.image_url}
-                        alt=""
-                        fill
-                        className="object-cover blur-xl opacity-50 scale-110 pointer-events-none"
-                      />
-                      {/* Scharfes Bild im object-contain Modus davor gelagert */}
-                      <Image
-                        src={featuredPost.image_url}
-                        alt={featuredPost.title}
-                        fill
-                        priority
-                        sizes="(max-width: 1024px) 100vw, 60vw"
-                        className="object-contain group-hover:scale-[1.02] transition-transform duration-500 ease-out relative z-10"
-                      />
-                    </>
+                    <Image
+                      src={featuredPost.image_url}
+                      alt={featuredPost.title}
+                      fill
+                      priority
+                      sizes="(max-width: 1024px) 100vw, 60vw"
+                      className="object-contain object-left group-hover:scale-[1.01] transition-transform duration-500 ease-out relative z-10"
+                    />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-teal-50 to-slate-100 flex items-center justify-center">
                       <span className="text-5xl">🏝️</span>
@@ -141,8 +220,8 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                   </span>
                 </div>
                 
-                <div className="p-8 lg:p-12 lg:col-span-5 flex flex-col justify-between bg-white">
-                  <div className="space-y-4">
+                <div className="p-8 lg:p-12 lg:pl-4 lg:col-span-9 flex flex-col justify-between bg-white">
+                  <div className="space-y-4 max-w-xl">
                     <div className="flex items-center gap-3 text-xs font-semibold text-slate-400">
                       <span>{new Date(featuredPost.created_at).toLocaleDateString("de-DE", { day: '2-digit', month: 'long', year: 'numeric' })}</span>
                       <span>•</span>
@@ -155,7 +234,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                       {featuredPost.excerpt}
                     </p>
                   </div>
-                  <div className="pt-6 border-t border-slate-100 flex items-center text-sm font-bold text-teal-600 group-hover:text-teal-700">
+                  <div className="pt-6 border-t border-slate-100 flex items-center text-sm font-bold text-teal-600 group-hover:text-teal-700 max-w-xl">
                     <span>Beitrag lesen</span>
                     <span className="transform group-hover:translate-x-1.5 transition-transform duration-300 ml-2">→</span>
                   </div>
@@ -176,18 +255,25 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
           </div>
         ) : (
           <div>
-            {featuredPost && (
-              <div className="inline-flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-slate-400 mb-6">
-                <span className="w-4 h-[2px] bg-slate-300" /> Weitere Insider-Berichte
-              </div>
-            )}
             
+            {/* TOP PAGINATION: Rendered above the grid on every page */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 pb-4 border-b border-slate-200/60">
+              <div className="inline-flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-slate-400">
+                <span className="w-4 h-[2px] bg-slate-300" /> 
+                {currentPage === 1 ? "Weitere Insider-Berichte" : `Insider-Berichte • Seite ${currentPage}`}
+              </div>
+              
+              {/* Upper page selector */}
+              {totalPages > 1 && (
+                <div className="scale-90 origin-right">{paginationComponent}</div>
+              )}
+            </div>
+            
+            {/* The blog grid itself */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {displayPosts.map((post) => (
                 <Link href={`/blog/${post.slug}`} key={post.id} className="group block h-full">
                   <article className="bg-white rounded-2xl overflow-hidden border border-slate-200/50 shadow-sm group-hover:shadow-xl group-hover:border-slate-300/70 transition-all duration-300 flex flex-col h-full bg-white">
-                    
-                    {/* Unverändert: Die kleinen Karten bleiben im vollflächigen, perfekten aspect-[16/10] Modul */}
                     <div className="relative aspect-[16/10] bg-slate-100 overflow-hidden">
                       {post.image_url ? (
                         <Image
@@ -207,7 +293,6 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                       </span>
                     </div>
 
-                    {/* Inhalt */}
                     <div className="p-6 flex flex-col flex-grow justify-between">
                       <div className="space-y-3">
                         <div className="flex items-center gap-2.5 text-[11px] font-semibold text-slate-400">
@@ -233,31 +318,39 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
               ))}
 
               {/* HIGH-CONVERTING AFFILIATE BANNER */}
-              <article className="bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl overflow-hidden shadow-lg p-8 flex flex-col justify-between text-white border border-slate-800 h-full relative min-h-[340px]">
-                <div className="absolute inset-0 bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:20px_20px] opacity-20" />
-                <div className="relative space-y-4">
-                  <span className="bg-teal-500/10 text-teal-400 border border-teal-500/20 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1.5 rounded-md">
-                    Insider-Deal 🏨
-                  </span>
-                  <h3 className="text-2xl font-bold tracking-tight leading-tight pt-2">
-                    Bereit für Thailand? Die besten Hotel-Angebote
-                  </h3>
-                  <p className="text-slate-400 text-sm leading-relaxed">
-                    Wir vergleichen täglich die Preise auf den größten Plattformen. Sichere dir die besten Konditionen für deinen Aufenthalt in Khao Lak mit kostenloser Stornierung.
-                  </p>
-                </div>
-                
-                <a 
-                  href="https://www.booking.com/index.html?aid=DEINE_AFFILIATE_ID" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="relative w-full bg-teal-500 hover:bg-teal-400 text-slate-950 text-center font-bold text-sm py-3.5 rounded-xl transition-all duration-300 block shadow-lg shadow-teal-500/10 hover:shadow-teal-500/20 active:scale-[0.99]"
-                >
-                  Hotels in Khao Lak finden
-                </a>
-              </article>
-
+              {currentPage === 1 && (
+                <article className="bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl overflow-hidden shadow-lg p-8 flex flex-col justify-between text-white border border-slate-800 h-full relative min-h-[340px]">
+                  <div className="absolute inset-0 bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:20px_20px] opacity-20" />
+                  <div className="relative space-y-4">
+                    <span className="bg-teal-500/10 text-teal-400 border border-teal-500/20 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1.5 rounded-md">
+                      Insider-Deal 🏨
+                    </span>
+                    <h3 className="text-2xl font-bold tracking-tight leading-tight pt-2">
+                      Bereit für Thailand? Die besten Hotel-Angebote
+                    </h3>
+                    <p className="text-slate-400 text-sm leading-relaxed">
+                      Wir vergleichen täglich die Preise auf den größten Plattformen. Sichere dir die besten Konditionen für deinen Aufenthalt in Khao Lak mit kostenloser Stornierung.
+                    </p>
+                  </div>
+                  <a 
+                    href="https://www.booking.com/index.html?aid=DEINE_AFFILIATE_ID" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="relative w-full bg-teal-500 hover:bg-teal-400 text-slate-950 text-center font-bold text-sm py-3.5 rounded-xl transition-all duration-300 block shadow-lg shadow-teal-500/10 hover:shadow-teal-500/20 active:scale-[0.99]"
+                  >
+                    Hotels in Khao Lak finden
+                  </a>
+                </article>
+              )}
             </div>
+
+            {/* BOTTOM PAGINATION: Remains centered at the bottom of the page */}
+            {totalPages > 1 && (
+              <div className="mt-16 border-t border-slate-200/60 pt-8">
+                {paginationComponent}
+              </div>
+            )}
+
           </div>
         )}
 
