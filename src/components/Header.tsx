@@ -70,7 +70,7 @@ export default function Header() {
         </Link>
         <div className="hidden gap-8 text-sm font-semibold md:flex text-slate-600">
           <Link href="/entdecken" className="hover:text-teal-500 transition">Entdecken</Link>
-          <a href="#" className="hover:text-teal-500 transition">Planen</a>
+          <a href="/planen" className="hover:text-teal-500 transition">Planen</a>
           <a href="#" className="hover:text-teal-500 transition">Erleben</a>
           <Link href="/blog" className="hover:text-teal-500 transition">Blog</Link>
           <Link href="/community" className="hover:text-teal-500 transition">Community</Link>
