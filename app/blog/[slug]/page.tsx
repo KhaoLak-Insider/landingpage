@@ -1,28 +1,75 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { supabase } from "@/src/lib/supabase";
-import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
-// Importiere die neue Lupen-Komponente (Pfade ggf. anpassen)
 import BlogImageMagnifier from "@/src/components/BlogImageMagnifier";
 
 interface PostPageProps {
-  params: Promise<{ slug: string }>;
+  params: any; // Da use client, handhaben wir params flexibel
 }
 
-export default async function BlogPostDetailPage({ params }: PostPageProps) {
-  const resolvedParams = await params;
-  const { slug } = resolvedParams;
+export default function BlogPostDetailPage({ params }: PostPageProps) {
+  const [slug, setSlug] = useState<string | null>(null);
+  const [post, setPost] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [userProfile, setUserProfile] = useState<any>(null);
 
-  // Post aus Supabase laden
-  const { data: post, error } = await supabase
-    .from("blog_posts")
-    .select("*")
-    .eq("slug", slug)
-    .single();
+  // 1. Params auflösen und Blogpost laden
+  useEffect(() => {
+    async function initPage() {
+      try {
+        const resolvedParams = await params;
+        if (!resolvedParams?.slug) return;
+        setSlug(resolvedParams.slug);
 
-  if (error || !post) {
-    notFound();
+        // Post aus Supabase laden
+        const { data, error } = await supabase
+          .from("blog_posts")
+          .select("*")
+          .eq("slug", resolvedParams.slug)
+          .single();
+
+        if (data) setPost(data);
+
+        // Exakt deine Logik von der Spot-Seite: User holen & Rolle aus 'profiles' abfragen
+        const { data: { user: userData } } = await supabase.auth.getUser();
+
+        if (userData) {
+          const { data: profileData } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", userData.id)
+            .maybeSingle();
+
+          setUserProfile(profileData);
+        }
+      } catch (e) {
+        console.error("Fehler beim Laden:", e);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    initPage();
+  }, [params]);
+
+  if (loading) {
+    return (
+      <main style={{ padding: 40, textAlign: "center", minHeight: "100vh", background: "#F7F9FA" }}>
+        Beitrag wird geladen....
+      </main>
+    );
+  }
+
+  if (!post) {
+    return (
+      <main style={{ padding: 40, textAlign: "center", minHeight: "100vh", background: "#F7F9FA" }}>
+        Beitrag nicht gefunden.
+      </main>
+    );
   }
 
   // Erweiterte Komponenten-Konfiguration für ReactMarkdown
@@ -118,14 +165,17 @@ export default async function BlogPostDetailPage({ params }: PostPageProps) {
               </div>
             </div>
 
-            <div className="shrink-0">
-              <Link
-                href={`/editor/blog/${post.id}`}
-                className="inline-flex items-center gap-2 text-sm font-bold text-rose-600 hover:text-white bg-rose-50 hover:bg-rose-600 border border-rose-200 hover:border-rose-600 px-5 py-3 rounded-xl shadow-sm transition-all duration-200"
-              >
-                ✏️ Beitrag bearbeiten
-              </Link>
-            </div>
+            {/* EXAKT DEINE GEWÜNSCHTE LOGIK: Zeigt den Button nur bei passender Rolle aus profiles an */}
+            {(userProfile?.role === "admin" || userProfile?.role === "editor") && (
+              <div className="shrink-0">
+                <Link
+                  href={`/editor/blog/${post.id}`}
+                  className="inline-flex items-center gap-2 text-sm font-bold text-rose-600 hover:text-white bg-rose-50 hover:bg-rose-600 border border-rose-200 hover:border-rose-600 px-5 py-3 rounded-xl shadow-sm transition-all duration-200"
+                >
+                  ✏️ Beitrag bearbeiten
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -136,7 +186,6 @@ export default async function BlogPostDetailPage({ params }: PostPageProps) {
         {/* MAIN TEXT CONTENT */}
         <article className="lg:col-span-8 bg-white rounded-3xl border border-slate-200/60 p-6 md:p-10 shadow-sm prose prose-slate max-w-none">
           
-          {/* Geändert: Nutzt jetzt die neue interaktive Lupe-Komponente */}
           {post.image_url && (
             <BlogImageMagnifier src={post.image_url} alt={post.title} />
           )}
