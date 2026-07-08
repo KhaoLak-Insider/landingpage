@@ -49,31 +49,37 @@ export default function BlogEditPage() {
   const [showPreview, setShowPreview] = useState(false);
   const [aiPrompt, setAiPrompt] = useState("");
 
-  // Authentifizierung, Rollenprüfung und Blogbeitrag beim Laden abrufen
+  // Authentifizierung, Rollenprüfung (aus der profiles-Tabelle) und Blogbeitrag beim Laden abrufen
   useEffect(() => {
     async function checkAuthAndFetchBlogPost() {
       try {
-        // 1. Serverseitige Validierung des Users holen (sicherer als getSession)
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        // 1. Eingeloggten User holen
+        const { data: { user: userData }, error: authError } = await supabase.auth.getUser();
         
-        if (authError || !user) {
+        if (authError || !userData) {
           router.push("/login");
           return; 
         }
 
-        // 2. Rollenprüfung: Nur 'admin' oder 'editor' dürfen rein
-        const userRole = user.app_metadata?.role;
-        if (userRole !== "admin" && userRole !== "editor") {
+        // 2. Rolle aus der PROFILES Tabelle laden
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", userData.id)
+          .maybeSingle();
+
+        // 3. Rollenprüfung: Nur 'admin' oder 'editor' dürfen rein
+        if (profileData?.role !== "admin" && profileData?.role !== "editor") {
           alert("Zugriff verweigert: Du hast keine Admin- oder Editor-Rechte.");
           router.push("/"); // Schickt unbefugte Nutzer auf die Startseite
           return;
         }
         
-        // 3. Wenn Rolle passt, Zugriff erlauben
+        // 4. Wenn Rolle passt, Zugriff erlauben
         setHasAccess(true);
         setCheckingAuth(false);
 
-        // 4. Erst jetzt die eigentlichen Blog-Daten aus der DB laden
+        // 5. Erst jetzt die eigentlichen Blog-Daten aus der DB laden
         if (!blogId) return;
         setLoading(true);
         const { data, error } = await supabase
@@ -186,7 +192,7 @@ export default function BlogEditPage() {
           <p className="text-slate-500">Bearbeite oder optimiere deinen bestehenden SEO-Artikel.</p>
         </div>
         <button 
-          type="button"
+          type="button" 
           onClick={() => router.back()}
           className="text-sm font-bold text-slate-500 hover:text-slate-800 bg-white border px-4 py-2 rounded-xl shadow-sm"
         >
