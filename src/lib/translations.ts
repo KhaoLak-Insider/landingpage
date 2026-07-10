@@ -5,15 +5,20 @@ import en from "@/src/locales/en";
 const translations = {
   de,
   en,
-};
+} as const;
 
-export type TranslationKey = keyof typeof de;
+type GermanTranslations = typeof de;
+
+export type TranslationKey = {
+  [Key in keyof GermanTranslations]:
+    GermanTranslations[Key] extends string ? Key : never;
+}[keyof GermanTranslations];
 
 export function t(
   language: Language,
   key: TranslationKey
-): (typeof de)[TranslationKey] {
-  return translations[language][key];
+): string {
+  return translations[language][key] as string;
 }
 
 export function getTranslations(language: Language) {
