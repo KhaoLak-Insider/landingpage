@@ -1,69 +1,57 @@
-"use client";
-
-import { useEffect, useState } from "react";
+// app/blog/[slug]/page.tsx
 import Image from "next/image";
 import Link from "next/link";
-import { supabase } from "@/src/lib/supabase";
+import { createClient } from "@supabase/supabase-js"; // Sicherer Server-Import
 import ReactMarkdown from "react-markdown";
 import BlogImageMagnifier from "@/src/components/BlogImageMagnifier";
 
+// Da die Seite nun auf dem Server läuft, initialisieren wir einen sauberen Client
+const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: { persistSession: false },
+});
+
 interface PostPageProps {
-  params: any; // Da use client, handhaben wir params flexibel
+  params: Promise<{ slug: string }>; // Next.js 15+ standardisiert params als Promise
 }
 
-export default function BlogPostDetailPage({ params }: PostPageProps) {
-  const [slug, setSlug] = useState<string | null>(null);
-  const [post, setPost] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [userProfile, setUserProfile] = useState<any>(null);
+// 1. DIESE FUNKTION FÜR SEO HINZUFÜGEN (SSG): 
+// Teilt Next.js beim Build alle existierenden Slugs mit, damit sie sofort indexierbar sind.
+export async function generateStaticParams() {
+  const { data: posts } = await supabase.from("blog_posts").select("slug");
+  if (!posts) return [];
+  return posts.map((post) => ({
+    slug: post.slug,
+  }));
+}
 
-  // 1. Params auflösen und Blogpost laden
-  useEffect(() => {
-    async function initPage() {
-      try {
-        const resolvedParams = await params;
-        if (!resolvedParams?.slug) return;
-        setSlug(resolvedParams.slug);
+export default async function BlogPostDetailPage({ params }: PostPageProps) {
+  // A. Params direkt auf dem Server auflösen
+  const { slug } = await params;
 
-        // Post aus Supabase laden
-        const { data, error } = await supabase
-          .from("blog_posts")
-          .select("*")
-          .eq("slug", resolvedParams.slug)
-          .single();
+  // B. Daten parallel abrufen (Post + User/Profile falls eingeloggt)
+  // Hinweis: Da Sitemaps/Crawler anonym surfen, fangen wir die User-Abfrage sicher ab
+  const [postResponse, userResponse] = await Promise.all([
+    supabase.from("blog_posts").select("*").eq("slug", slug).single(),
+    supabase.auth.getUser().catch(() => ({ data: { user: null } }))
+  ]);
 
-        if (data) setPost(data);
+  const post = postResponse.data;
+  const userData = userResponse?.data?.user;
 
-        // Exakt deine Logik von der Spot-Seite: User holen & Rolle aus 'profiles' abfragen
-        const { data: { user: userData } } = await supabase.auth.getUser();
-
-        if (userData) {
-          const { data: profileData } = await supabase
-            .from("profiles")
-            .select("role")
-            .eq("id", userData.id)
-            .maybeSingle();
-
-          setUserProfile(profileData);
-        }
-      } catch (e) {
-        console.error("Fehler beim Laden:", e);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    initPage();
-  }, [params]);
-
-  if (loading) {
-    return (
-      <main style={{ padding: 40, textAlign: "center", minHeight: "100vh", background: "#F7F9FA" }}>
-        Beitrag wird geladen....
-      </main>
-    );
+  let userProfile = null;
+  if (userData) {
+    const { data: profileData } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", userData.id)
+      .maybeSingle();
+    userProfile = profileData;
   }
 
+  // C. Fallback falls der Beitrag nicht existiert (wichtig für 404 SEO)
   if (!post) {
     return (
       <main style={{ padding: 40, textAlign: "center", minHeight: "100vh", background: "#F7F9FA" }}>
@@ -165,7 +153,7 @@ export default function BlogPostDetailPage({ params }: PostPageProps) {
               </div>
             </div>
 
-            {/* EXAKT DEINE GEWÜNSCHTE LOGIK: Zeigt den Button nur bei passender Rolle aus profiles an */}
+            {/* Admin/Editor Button */}
             {(userProfile?.role === "admin" || userProfile?.role === "editor") && (
               <div className="shrink-0">
                 <Link
@@ -187,6 +175,8 @@ export default function BlogPostDetailPage({ params }: PostPageProps) {
         <article className="lg:col-span-8 bg-white rounded-3xl border border-slate-200/60 p-6 md:p-10 shadow-sm prose prose-slate max-w-none">
           
           {post.image_url && (
+            /* Hinweis: Falls BlogImageMagnifier interne React-Hooks nutzt, muss diese Komponente 
+               intern ein "use client" deklariert haben. Das ist völlig legitim! */
             <BlogImageMagnifier src={post.image_url} alt={post.title} />
           )}
 
@@ -238,7 +228,7 @@ export default function BlogPostDetailPage({ params }: PostPageProps) {
           <div className="bg-white rounded-2xl p-5 border border-slate-200/60 text-center shadow-sm">
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Transparenz-Hinweis</p>
             <p className="text-slate-500 text-[11px] leading-relaxed">
-              Bei den Links auf dieser Seite handelt es sich um Affiliate-Links. Wenn du darüber eine eSIM buchst, erhalten wir eine kleine Provision – für dich ändert sich am Preis absolut nichts! Danke für deine Unterstützung. ❤️
+              Bei den Links on dieser Seite handelt es sich um Affiliate-Links. Wenn du darüber eine eSIM buchst, erhalten wir eine kleine Provision – für dich ändert sich am Preis absolut nichts! Danke für deine Unterstützung. ❤️
             </p>
           </div>
 
