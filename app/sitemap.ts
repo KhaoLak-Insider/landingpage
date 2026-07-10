@@ -3,40 +3,29 @@ import type { MetadataRoute } from "next";
 import { createClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0; // Verhindert Next.js-seitiges Caching der Sitemap
+export const revalidate = 0;
 
 const baseUrl = "https://www.khaolak.app";
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // 1. Umgebungsvariablen flexibel abgreifen
-  const supabaseUrl = 
-    process.env.SUPABASE_URL || 
-    process.env.NEXT_PUBLIC_SUPABASE_URL;
-    
-  const supabaseAnonKey = 
-    process.env.SUPABASE_ANON_KEY || 
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// Interface-Definitionen für Supabase-Rückgaben
+interface SupabaseSpot {
+  slug: string;
+  created_at: string | null;
+}
 
-  // Statische Basisseiten definieren
+interface SupabasePost {
+  slug: string;
+  created_at: string | null;
+}
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
   const staticPages: MetadataRoute.Sitemap = [
-    {
-      url: baseUrl,
-      lastModified: new Date("2026-06-30"),
-      changeFrequency: "weekly",
-      priority: 1.0,
-    },
-    {
-      url: `${baseUrl}/entdecken`,
-      lastModified: new Date("2026-06-30"),
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/blog`,
-      lastModified: new Date("2026-06-30"),
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
+    { url: baseUrl, lastModified: new Date("2026-06-30"), changeFrequency: "weekly", priority: 1.0 },
+    { url: `${baseUrl}/entdecken`, lastModified: new Date("2026-06-30"), changeFrequency: "weekly", priority: 0.8 },
+    { url: `${baseUrl}/blog`, lastModified: new Date("2026-06-30"), changeFrequency: "weekly", priority: 0.8 },
   ];
 
   if (!supabaseUrl || !supabaseAnonKey) {
@@ -48,18 +37,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     auth: { persistSession: false },
   });
 
-  // Variables für die Daten vorab deklarieren
-  let spots = [];
-  let posts = [];
+  // Hier jetzt sauber mit den Interfaces typisiert!
+  let spots: SupabaseSpot[] = [];
+  let posts: SupabasePost[] = [];
 
-  // 2. Abfragen nacheinander in try-catch ausführen
   try {
-    // JETZT AUCH HIER KORRIGIERT: "created_at" statt "updated_at" geladen
     const { data, error } = await sitemapSupabase.from("spots").select("slug, created_at");
     if (error) {
       console.error("🚨 SITEMAP SPOTS ERROR:", error.message);
     } else {
-      spots = data || [];
+      spots = (data as SupabaseSpot[]) || [];
     }
   } catch (err) {
     console.error("🚨 SITEMAP SPOTS FETCH CRASH:", err);
@@ -70,7 +57,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     if (error) {
       console.error("🚨 SITEMAP BLOG ERROR:", error.message);
     } else {
-      posts = data || [];
+      posts = (data as SupabasePost[]) || [];
     }
   } catch (err) {
     console.error("🚨 SITEMAP BLOG FETCH CRASH:", err);
@@ -78,18 +65,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   console.log(`[Sitemap] Gefunden: ${spots.length} Spots, ${posts.length} Blog-Posts.`);
 
-  // 3. Dynamische Routen für Spots generieren
   const spotPages: MetadataRoute.Sitemap = spots
     .filter((spot) => spot.slug)
     .map((spot) => ({
       url: `${baseUrl}/spot/${spot.slug.trim()}`,
-      // Hier ebenfalls auf created_at umgestellt:
       lastModified: spot.created_at ? new Date(spot.created_at) : new Date("2026-06-30"),
       changeFrequency: "monthly",
       priority: 0.7,
     }));
 
-  // 4. Dynamische Routen für Blog-Posts generieren
   const blogPages: MetadataRoute.Sitemap = posts
     .filter((post) => post.slug)
     .map((post) => ({
