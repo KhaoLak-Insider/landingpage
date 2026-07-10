@@ -520,7 +520,7 @@ export default function EntdeckenClientPage({
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-8 font-[Poppins] text-slate-800 md:px-6 md:py-12">
       <div className="mx-auto max-w-[1440px]">
-        <section className="relative mb-8 min-h-[360px] overflow-hidden rounded-[32px] bg-slate-950 px-6 py-10 shadow-xl md:min-h-[420px] md:px-10 md:py-14">
+        <section className="relative min-h-[360px] overflow-hidden rounded-[32px] bg-slate-950 px-6 py-10 shadow-xl md:min-h-[440px] md:px-12 md:py-16 lg:min-h-[480px]">
           <img
             src="https://pub-e91d905941ab460b95ac5248c28e16f3.r2.dev/assets/Entdecken%20Hero.jpg"
             alt=""
@@ -528,11 +528,11 @@ export default function EntdeckenClientPage({
             className="absolute inset-0 h-full w-full object-cover object-center"
           />
 
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/90 to-slate-950/10" />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/25 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,6,23,0.94)_0%,rgba(2,6,23,0.84)_28%,rgba(2,6,23,0.52)_52%,rgba(2,6,23,0.12)_78%,rgba(2,6,23,0.02)_100%)]" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/35 via-transparent to-slate-950/10" />
 
-          <div className="relative z-10 max-w-3xl">
-            <span className="mb-4 inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-teal-200">
+          <div className="relative z-10 flex min-h-[280px] max-w-4xl flex-col justify-center md:min-h-[312px] lg:min-h-[352px]">
+            <span className="mb-4 inline-flex self-start rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-teal-200 backdrop-blur-sm">
               Khao Lak Insider
             </span>
 
@@ -544,7 +544,7 @@ export default function EntdeckenClientPage({
               {t(language, "discoverIntro")}
             </p>
 
-            <div className="relative max-w-2xl">
+            <div className="relative w-full max-w-4xl">
               <Search
                 size={21}
                 className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"
@@ -579,7 +579,7 @@ export default function EntdeckenClientPage({
 
         <section
           aria-label={t(language, "statisticsOverview")}
-          className="mb-8 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
+          className="relative z-20 -mt-7 mb-8 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl md:-mt-11"
         >
           <div className="grid grid-cols-2 divide-x divide-y divide-slate-100 md:grid-cols-3 lg:grid-cols-5 lg:divide-y-0">
             {statistics.map((statistic) => (
