@@ -119,6 +119,19 @@ const de = {
   openMap: "Karte öffnen",
   topCategories: "Top-Kategorien",
 
+  // Statistik
+  statisticsOverview: "Übersicht zu den verfügbaren Inhalten",
+  statisticsPlaces: "Orte",
+  statisticsPlacesDescription: "in Khao Lak entdecken",
+  statisticsCategories: "Kategorien",
+  statisticsCategoriesDescription: "für jeden Geschmack",
+  statisticsBeaches: "Strände",
+  statisticsBeachesDescription: "traumhafte Küsten",
+  statisticsRestaurants: "Restaurants",
+  statisticsRestaurantsDescription: "lokal und international",
+  statisticsAccommodations: "Unterkünfte",
+  statisticsAccommodationsDescription: "für jeden Anspruch",
+
   // Sonstiges
   bottle: "Flasche",
 

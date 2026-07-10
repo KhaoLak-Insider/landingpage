@@ -119,6 +119,19 @@ const en = {
   openMap: "Open map",
   topCategories: "Top categories",
 
+  // Statistics
+  statisticsOverview: "Overview of available content",
+  statisticsPlaces: "Places",
+  statisticsPlacesDescription: "to discover in Khao Lak",
+  statisticsCategories: "Categories",
+  statisticsCategoriesDescription: "something for everyone",
+  statisticsBeaches: "Beaches",
+  statisticsBeachesDescription: "beautiful coastlines",
+  statisticsRestaurants: "Restaurants",
+  statisticsRestaurantsDescription: "local and international",
+  statisticsAccommodations: "Accommodation",
+  statisticsAccommodationsDescription: "for every style of stay",
+
   // Misc
   bottle: "Bottle",
 

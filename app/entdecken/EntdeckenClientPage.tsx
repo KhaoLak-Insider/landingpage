@@ -223,6 +223,75 @@ export default function EntdeckenClientPage({
     });
   }, [initialCategories, initialSpots, language]);
 
+  const statistics = useMemo(() => {
+    const normalizeCategory = (value: string | null) =>
+      value
+        ?.trim()
+        .toLowerCase()
+        .replace(/ä/g, "ae")
+        .replace(/ö/g, "oe")
+        .replace(/ü/g, "ue")
+        .replace(/ß/g, "ss") || "";
+
+    const countByCategories = (names: string[]) =>
+      initialSpots.filter((spot) =>
+        names.includes(normalizeCategory(spot.category))
+      ).length;
+
+    return [
+      {
+        icon: "MapPin",
+        value: initialSpots.length,
+        label: t(language, "statisticsPlaces"),
+        description: t(language, "statisticsPlacesDescription"),
+      },
+      {
+        icon: "LayoutGrid",
+        value: initialCategories.length,
+        label: t(language, "statisticsCategories"),
+        description: t(language, "statisticsCategoriesDescription"),
+      },
+      {
+        icon: "Palmtree",
+        value: countByCategories([
+          "strand",
+          "straende",
+          "beach",
+          "beaches",
+        ]),
+        label: t(language, "statisticsBeaches"),
+        description: t(language, "statisticsBeachesDescription"),
+      },
+      {
+        icon: "Utensils",
+        value: countByCategories([
+          "restaurant",
+          "restaurants",
+          "local food",
+          "strandbar",
+          "strandbars",
+          "bar",
+          "bars",
+        ]),
+        label: t(language, "statisticsRestaurants"),
+        description: t(language, "statisticsRestaurantsDescription"),
+      },
+      {
+        icon: "BedDouble",
+        value: countByCategories([
+          "unterkunft",
+          "unterkuenfte",
+          "hotel",
+          "hotels",
+          "resort",
+          "resorts",
+        ]),
+        label: t(language, "statisticsAccommodations"),
+        description: t(language, "statisticsAccommodationsDescription"),
+      },
+    ];
+  }, [initialCategories.length, initialSpots, language]);
+
   const filteredSpots = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
 
@@ -286,21 +355,6 @@ export default function EntdeckenClientPage({
     showOnlyFavs,
   ]);
 
-  const suggestions = useMemo(() => {
-    if (search.trim().length < 2) {
-      return [];
-    }
-
-    const normalizedSearch = search.trim().toLowerCase();
-
-    return initialSpots
-      .filter((spot) =>
-        getLocalizedField(spot, "title", language)
-          .toLowerCase()
-          .startsWith(normalizedSearch)
-      )
-      .slice(0, 5);
-  }, [initialSpots, language, search]);
 
   function getIconForCategory(categoryName: string | null) {
     return (
@@ -466,10 +520,18 @@ export default function EntdeckenClientPage({
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-8 font-[Poppins] text-slate-800 md:px-6 md:py-12">
       <div className="mx-auto max-w-[1440px]">
-        <section className="relative mb-8 overflow-hidden rounded-[32px] bg-slate-950 px-6 py-10 shadow-xl md:px-10 md:py-14">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(20,184,166,0.35),transparent_45%)]" />
+        <section className="relative mb-8 min-h-[360px] overflow-hidden rounded-[32px] bg-slate-950 px-6 py-10 shadow-xl md:min-h-[420px] md:px-10 md:py-14">
+          <img
+            src="https://pub-e91d905941ab460b95ac5248c28e16f3.r2.dev/assets/Entdecken%20Hero.jpg"
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 h-full w-full object-cover object-center"
+          />
 
-          <div className="relative max-w-3xl">
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/90 to-slate-950/10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/25 via-transparent to-transparent" />
+
+          <div className="relative z-10 max-w-3xl">
             <span className="mb-4 inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-teal-200">
               Khao Lak Insider
             </span>
@@ -511,37 +573,42 @@ export default function EntdeckenClientPage({
                 </button>
               )}
 
-              {suggestions.length > 0 && (
-                <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-40 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
-                  {suggestions.map((spot) => (
-                    <Link
-                      key={spot.id}
-                      href={localizedHref(
-                        `/spot/${spot.slug}`
-                      )}
-                      className="flex items-center gap-3 border-b border-slate-100 px-4 py-3 text-decoration-none last:border-b-0 hover:bg-slate-50"
-                    >
-                      <img
-                        src={
-                          spot.image_url ||
-                          "/images/og-image.jpg"
-                        }
-                        alt=""
-                        className="h-11 w-14 rounded-lg object-cover"
-                      />
-
-                      <span className="font-bold text-slate-800">
-                        {getLocalizedField(
-                          spot,
-                          "title",
-                          language
-                        )}
-                      </span>
-                    </Link>
-                  ))}
-                </div>
-              )}
             </div>
+          </div>
+        </section>
+
+        <section
+          aria-label={t(language, "statisticsOverview")}
+          className="mb-8 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
+        >
+          <div className="grid grid-cols-2 divide-x divide-y divide-slate-100 md:grid-cols-3 lg:grid-cols-5 lg:divide-y-0">
+            {statistics.map((statistic) => (
+              <div
+                key={statistic.label}
+                className="flex min-w-0 items-center gap-4 px-4 py-5 md:px-6"
+              >
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-teal-50 text-teal-600">
+                  <DynamicIcon
+                    name={statistic.icon}
+                    size={23}
+                  />
+                </div>
+
+                <div className="min-w-0">
+                  <div className="text-2xl font-black leading-none text-slate-900">
+                    {statistic.value}
+                  </div>
+
+                  <div className="mt-1 text-sm font-extrabold text-slate-800">
+                    {statistic.label}
+                  </div>
+
+                  <div className="mt-1 hidden text-xs leading-relaxed text-slate-500 xl:block">
+                    {statistic.description}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </section>
 
