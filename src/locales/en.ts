@@ -117,6 +117,7 @@ const en = {
   loginForMap:
     "Log in to view the map and distances from your accommodation.",
   openMap: "Open map",
+  exploreInteractiveMap: "Explore interactive map",
   topCategories: "Top categories",
 
   // Statistics
@@ -156,8 +157,6 @@ const en = {
   kilometersFromHere: "{distance} km from here",
   kilometersFromHotel:
     "{distance} km from your accommodation",
-
-  exploreInteractiveMap: "Explore interactive map",
 } as const;
 
 export default en;

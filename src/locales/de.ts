@@ -117,6 +117,7 @@ const de = {
   loginForMap:
     "Melde dich an, um die Karte und Entfernungen zu deiner Unterkunft zu sehen.",
   openMap: "Karte öffnen",
+  exploreInteractiveMap: "Interaktive Karte entdecken",
   topCategories: "Top-Kategorien",
 
   // Statistik
