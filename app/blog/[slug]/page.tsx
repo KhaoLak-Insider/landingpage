@@ -1,11 +1,10 @@
 // app/blog/[slug]/page.tsx
-import Image from "next/image";
 import Link from "next/link";
-import { createClient } from "@supabase/supabase-js"; // Sicherer Server-Import
+import Image from "next/image"; 
+import { createClient } from "@supabase/supabase-js";
 import ReactMarkdown from "react-markdown";
 import BlogImageMagnifier from "@/src/components/BlogImageMagnifier";
 
-// Da die Seite nun auf dem Server läuft, initialisieren wir einen sauberen Client
 const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
@@ -14,32 +13,52 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 });
 
 interface PostPageProps {
-  params: Promise<{ slug: string }>; // Next.js 15+ standardisiert params als Promise
+  params: Promise<{ slug: string }>;
 }
 
-// 1. DIESE FUNKTION FÜR SEO HINZUFÜGEN (SSG): 
-// Teilt Next.js beim Build alle existierenden Slugs mit, damit sie sofort indexierbar sind.
+// 1. DYNAMISCHE METADATEN FÜR GOOGLE
+export async function generateMetadata({ params }: PostPageProps) {
+  const { slug } = await params;
+  const { data: post } = await supabase
+    .from("blog_posts")
+    .select("title, excerpt")
+    .eq("slug", slug)
+    .single();
+
+  if (!post) return { title: "Beitrag nicht gefunden | Khao Lak Insider" };
+
+  return {
+    title: `${post.title} | Khao Lak Insider`,
+    description: post.excerpt || `Insider-Tipps und Infos zu: ${post.title}. Erfahre mehr auf Khao Lak Insider.`,
+    openGraph: {
+      title: post.title,
+      description: post.excerpt,
+      url: `https://www.khaolak.app/blog/${slug}`,
+      type: "article",
+    },
+  };
+}
+
+// 2. STATISCHE PFADE FÜR BUILD-OPTIMIERUNG (SSG)
 export async function generateStaticParams() {
   const { data: posts } = await supabase.from("blog_posts").select("slug");
   if (!posts) return [];
-  return posts.map((post) => ({
-    slug: post.slug,
-  }));
+  return posts.map((post) => ({ slug: post.slug }));
 }
 
 export default async function BlogPostDetailPage({ params }: PostPageProps) {
-  // A. Params direkt auf dem Server auflösen
   const { slug } = await params;
 
-  // B. Daten parallel abrufen (Post + User/Profile falls eingeloggt)
-  // Hinweis: Da Sitemaps/Crawler anonym surfen, fangen wir die User-Abfrage sicher ab
-  const [postResponse, userResponse] = await Promise.all([
+  // Paralleler Abruf: Aktueller Post, User-Session und 3 interne Link-Vorschläge
+  const [postResponse, userResponse, morePostsResponse] = await Promise.all([
     supabase.from("blog_posts").select("*").eq("slug", slug).single(),
-    supabase.auth.getUser().catch(() => ({ data: { user: null } }))
+    supabase.auth.getUser().catch(() => ({ data: { user: null } })),
+    supabase.from("blog_posts").select("id, title, slug, image_url, category").neq("slug", slug).limit(3)
   ]);
 
   const post = postResponse.data;
   const userData = userResponse?.data?.user;
+  const morePosts = morePostsResponse.data || [];
 
   let userProfile = null;
   if (userData) {
@@ -51,7 +70,6 @@ export default async function BlogPostDetailPage({ params }: PostPageProps) {
     userProfile = profileData;
   }
 
-  // C. Fallback falls der Beitrag nicht existiert (wichtig für 404 SEO)
   if (!post) {
     return (
       <main style={{ padding: 40, textAlign: "center", minHeight: "100vh", background: "#F7F9FA" }}>
@@ -60,7 +78,22 @@ export default async function BlogPostDetailPage({ params }: PostPageProps) {
     );
   }
 
-  // Erweiterte Komponenten-Konfiguration für ReactMarkdown
+  // STRUCTURED DATA (JSON-LD)
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": post.title,
+    "description": post.excerpt || post.title,
+    "image": post.image_url ? [post.image_url] : [],
+    "datePublished": post.created_at,
+    "dateModified": post.created_at,
+    "author": {
+      "@type": "Organization",
+      "name": "Khao Lak Insider",
+      "url": "https://www.khaolak.app"
+    }
+  };
+
   const markdownComponents = {
     h3: ({ ...props }) => (
       <h3 className="text-2xl font-bold text-slate-900 mt-8 mb-4 tracking-tight" {...props} />
@@ -113,6 +146,10 @@ export default async function BlogPostDetailPage({ params }: PostPageProps) {
 
   return (
     <main className="min-h-screen bg-[#F7F9FA] text-slate-900 antialiased pb-32">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       
       {/* PREMIUM BREADCRUMB & BACK BUTTON */}
       <nav className="container mx-auto px-4 max-w-5xl pt-12 pb-6">
@@ -175,8 +212,6 @@ export default async function BlogPostDetailPage({ params }: PostPageProps) {
         <article className="lg:col-span-8 bg-white rounded-3xl border border-slate-200/60 p-6 md:p-10 shadow-sm prose prose-slate max-w-none">
           
           {post.image_url && (
-            /* Hinweis: Falls BlogImageMagnifier interne React-Hooks nutzt, muss diese Komponente 
-               intern ein "use client" deklariert haben. Das ist völlig legitim! */
             <BlogImageMagnifier src={post.image_url} alt={post.title} />
           )}
 
@@ -228,13 +263,56 @@ export default async function BlogPostDetailPage({ params }: PostPageProps) {
           <div className="bg-white rounded-2xl p-5 border border-slate-200/60 text-center shadow-sm">
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Transparenz-Hinweis</p>
             <p className="text-slate-500 text-[11px] leading-relaxed">
-              Bei den Links on dieser Seite handelt es sich um Affiliate-Links. Wenn du darüber eine eSIM buchst, erhalten wir eine kleine Provision – für dich ändert sich am Preis absolut nichts! Danke für deine Unterstützung. ❤️
+              Bei den Links auf dieser Seite handelt es sich um Affiliate-Links. Wenn du darüber eine eSIM buchst, erhalten wir eine kleine Provision – für dich ändert sich am Preis absolut nichts! Danke für deine Unterstützung. ❤️
             </p>
           </div>
 
         </aside>
 
       </div>
+
+      {/* INTERNE VERLINKUNG / WEITERE BEITRÄGE */}
+      {morePosts.length > 0 && (
+        <section className="container mx-auto px-4 max-w-5xl mt-16 pt-12 border-t border-slate-200">
+          <h3 className="text-2xl font-extrabold text-slate-950 tracking-tight mb-8">
+            Das könnte dich auch interessieren 🌴
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {morePosts.map((item) => (
+              <Link 
+                key={item.id} 
+                href={`/blog/${item.slug}`} 
+                className="group bg-white rounded-2xl border border-slate-200/60 overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 flex flex-col"
+              >
+                {item.image_url && (
+                  <div className="relative w-full h-44 overflow-hidden bg-slate-100">
+                    <Image
+                      src={item.image_url}
+                      alt={item.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      sizes="(max-w-768px) 100vw, 300px"
+                    />
+                  </div>
+                )}
+                <div className="p-5 flex-1 flex flex-col justify-between">
+                  <div>
+                    <span className="text-[10px] font-bold text-teal-600 uppercase tracking-wider block mb-2">
+                      {item.category}
+                    </span>
+                    <h4 className="font-bold text-slate-900 group-hover:text-teal-600 transition-colors text-base leading-snug line-clamp-2">
+                      {item.title}
+                    </h4>
+                  </div>
+                  <span className="text-xs font-bold text-slate-400 mt-4 inline-flex items-center gap-1 group-hover:text-slate-900 transition-colors">
+                    Jetzt lesen <span className="transform group-hover:translate-x-0.5 transition-transform">→</span>
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </main>
   );
 }
