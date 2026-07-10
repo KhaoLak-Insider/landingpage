@@ -864,10 +864,10 @@ export default function EntdeckenClientPage({
               </div>
 
               <Link
-                href={localizedHref("/map")}
+                href={localizedHref("/planen")}
                 className="mt-4 block text-center text-sm font-extrabold text-teal-600 text-decoration-none"
               >
-                {t(language, "openMap")} →
+                {t(language, "exploreInteractiveMap")} →
               </Link>
             </div>
 

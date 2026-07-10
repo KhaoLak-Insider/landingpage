@@ -156,6 +156,8 @@ const en = {
   kilometersFromHere: "{distance} km from here",
   kilometersFromHotel:
     "{distance} km from your accommodation",
+
+  exploreInteractiveMap: "Explore interactive map",
 } as const;
 
 export default en;
