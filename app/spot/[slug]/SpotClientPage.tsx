@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { supabase } from "@/src/lib/supabase";
+import { getLanguage, Language } from "@/src/lib/i18n";
 import MapBoxMini from "@/src/components/MapBoxMini";
 import {
   MapPin,
@@ -24,6 +26,70 @@ import { iconMap } from "@/src/components/IconLibrary";
 import Link from "next/link";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
+import { t, getTranslations } from "@/src/lib/translations";
+
+function getLocalizedField(
+  item: any,
+  field: string,
+  language: Language
+) {
+  const fallback = item?.[field];
+
+  if (language === "de") {
+    return fallback;
+  }
+
+  const localized = item?.[`${field}_${language}`];
+
+  if (Array.isArray(localized)) {
+    return localized.length > 0 ? localized : fallback;
+  }
+
+  if (typeof localized === "string") {
+    return localized.trim() !== "" ? localized : fallback;
+  }
+
+  return localized ?? fallback;
+}
+
+function getLocalizedConfigField(
+  item: any,
+  field: string,
+  language: Language
+) {
+  if (!item) return undefined;
+
+  if (language === "en") {
+    const englishValue = item?.[`${field}_en`];
+
+    if (typeof englishValue === "string" && englishValue.trim() !== "") {
+      return englishValue;
+    }
+
+    if (englishValue !== undefined && englishValue !== null) {
+      return englishValue;
+    }
+  }
+
+  return item?.[field];
+}
+
+function parseDescriptionBlocks(value: any): any[] {
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  if (typeof value === "string" && value.trim() !== "") {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [{ type: "paragraph", content: value }];
+    }
+  }
+
+  return [];
+}
 
 interface SpotClientPageProps {
   initialSpot: any;
@@ -48,6 +114,19 @@ export default function SpotClientPage({
   const [isExpanded, setIsExpanded] = useState(false);
   const [randomSpots, setRandomSpots] = useState<any[]>(initialRandomSpots);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const searchParams = useSearchParams();
+  const language = getLanguage({
+    lng: searchParams.get("lng") ?? undefined,
+  });
+
+  const translations = getTranslations(language);
+  const nearbyRadiusKm = 0.5;
+
+  const localizedHref = (path: string) => {
+    const separator = path.includes("?") ? "&" : "?";
+    return `${path}${separator}lng=${language}`;
+  };
 
   // NEUE STATES FÜR DIE UMGEBUNGS-SPOTS (NUR FÜR STRÄNDE)
   const [nearbySpots, setNearbySpots] = useState<any[]>([]);
@@ -143,7 +222,7 @@ export default function SpotClientPage({
             const filtered = candidates.filter((c) => {
               if (!c.latitude || !c.longitude) return false;
               const dist = getRawDistance(spot.latitude, spot.longitude, c.latitude, c.longitude);
-              return dist <= 1.5;
+              return dist <= nearbyRadiusKm;
             });
             setNearbySpots(filtered);
           }
@@ -194,14 +273,14 @@ export default function SpotClientPage({
     }
 
     initPage();
-  }, [initialSpot]);
+  }, [spot?.id]);
 
   const toggleFavorite = async () => {
     const {
       data: { user },
     } = await supabase.auth.getUser();
 
-    if (!user) return alert("Bitte logge dich ein.");
+    if (!user) return alert(t(language, "loginRequired"));
 
     if (isFavorite) {
       await supabase
@@ -241,16 +320,23 @@ export default function SpotClientPage({
   if (!spot) {
     return (
       <main style={{ padding: 40, textAlign: "center", minHeight: "100vh" }}>
-        Spot wird geladen....
+        {t(language, "loadingSpot")}
       </main>
     );
   }
 
   const slides = gallery.map((url: string) => ({ src: url }));
 
-  const descArray = Array.isArray(spot.long_description)
-    ? spot.long_description
-    : [];
+  const localizedTitle =
+    getLocalizedField(spot, "title", language) || spot.title;
+  const localizedDescription =
+    getLocalizedField(spot, "description", language) || spot.description;
+  const localizedCategory =
+    getLocalizedField(spot, "category", language) || spot.category;
+
+  const descArray = parseDescriptionBlocks(
+    getLocalizedField(spot, "long_description", language)
+  );
 
   const visibleBlocks = descArray.slice(0, 2);
   const hiddenBlocks = descArray.slice(2);
@@ -298,6 +384,7 @@ export default function SpotClientPage({
         <div style={{ position: "relative", width: "100%", height: "450px" }}>
           <img
             src={spot.image_url}
+            alt={localizedTitle}
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
           />
 
@@ -320,7 +407,7 @@ export default function SpotClientPage({
           )}
 
           <Link
-            href="/entdecken"
+            href={localizedHref("/entdecken")}
             style={{
               position: "absolute",
               top: "30px",
@@ -340,7 +427,7 @@ export default function SpotClientPage({
             }}
           >
             <ChevronLeft size={16} />
-            Zurück zu allen Spots
+            {t(language, "backToAllSpots")}
           </Link>
 
           <div
@@ -369,7 +456,7 @@ export default function SpotClientPage({
                 width: "fit-content",
               }}
             >
-              {spot.category}
+              {localizedCategory}
             </div>
 
             <h1
@@ -382,7 +469,7 @@ export default function SpotClientPage({
                 textShadow: "0 2px 10px rgba(0,0,0,0.5)",
               }}
             >
-              {spot.title}
+              {localizedTitle}
             </h1>
 
             <p
@@ -395,7 +482,7 @@ export default function SpotClientPage({
                 textShadow: "0 1px 5px rgba(0,0,0,0.5)",
               }}
             >
-              {spot.description}
+              {localizedDescription}
             </p>
           </div>
         </div>
@@ -437,6 +524,7 @@ export default function SpotClientPage({
                   >
                     <img
                       src={url}
+                      alt={`${localizedTitle} ${i + 1}`}
                       style={{
                         width: "100%",
                         height: "100%",
@@ -481,7 +569,9 @@ export default function SpotClientPage({
                   }}
                 >
                   <span style={{ fontSize: "14px", fontWeight: "bold" }}>
-                    {gallery.length > 3 ? `+${gallery.length - 3}` : "Mehr"}
+                    {gallery.length > 3
+                      ? `+${gallery.length - 3}`
+                      : t(language, "moreImages")}
                   </span>
                 </div>
               </div>
@@ -518,10 +608,12 @@ export default function SpotClientPage({
                           color: "#94a3b8",
                         }}
                       >
-                        {(f.label || "").toUpperCase()}
+                        {String(
+                          getLocalizedConfigField(f, "label", language) || ""
+                        ).toUpperCase()}
                       </div>
                       <div style={{ fontSize: 12, fontWeight: 700 }}>
-                        {f.value || "-"}
+                        {getLocalizedConfigField(f, "value", language) || "-"}
                       </div>
                     </div>
                   </div>
@@ -547,7 +639,7 @@ export default function SpotClientPage({
                     marginBottom: 16,
                   }}
                 >
-                  Beste Reisezeit
+                  {t(language, "bestTravelTime")}
                 </h3>
 
                 <div
@@ -557,20 +649,7 @@ export default function SpotClientPage({
                     gap: "8px",
                   }}
                 >
-                  {[
-                    "Januar",
-                    "Februar",
-                    "März",
-                    "April",
-                    "Mai",
-                    "Juni",
-                    "Juli",
-                    "August",
-                    "September",
-                    "Oktober",
-                    "November",
-                    "Dezember",
-                  ].map((m, i) => (
+                  {translations.months.map((m, i) => (
                     <div
                       key={i}
                       style={{
@@ -613,7 +692,7 @@ export default function SpotClientPage({
                 >
                   <MapPin size={22} color="#14b8a6" />
                   <h2 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>
-                    Lage
+                    {t(language, "location")}
                   </h2>
                 </div>
 
@@ -629,7 +708,7 @@ export default function SpotClientPage({
               {/* BESCHREIBUNG */}
               <div>
                 <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: "20px" }}>
-                  Über {spot.title}
+                  {t(language, "about")} {localizedTitle}
                 </h2>
 
                 {visibleBlocks.map((block: any, i: number) => (
@@ -691,6 +770,7 @@ export default function SpotClientPage({
 
                 {hiddenBlocks.length > 0 && (
                   <button
+                    type="button"
                     onClick={() => setIsExpanded(!isExpanded)}
                     style={{
                       color: "#14b8a6",
@@ -702,7 +782,7 @@ export default function SpotClientPage({
                       textDecoration: "underline",
                     }}
                   >
-                    {isExpanded ? "Weniger erfahren" : "Mehr erfahren..."}
+                    {isExpanded ? t(language, "learnLess") : t(language, "learnMore")}
                   </button>
                 )}
               </div>
@@ -710,11 +790,20 @@ export default function SpotClientPage({
               {/* NEU: DIREKTE UMGEBUNGS-EMPFEHLUNGEN (WENN DER SPOT EIN STRAND IST) */}
               {spot.category && spot.category.toLowerCase() === "strand" && nearbySpots.length > 0 && (
                 <div style={{ marginTop: 20, width: "100%", position: "relative" }}>
-                  <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 4 }}>In der Nähe (Umkreis 500m)</h2>
-                  <p style={{ fontSize: 13, color: "#64748b", margin: "0 0 20px 0" }}>Entdecke passende Strandbars, Restaurants und Hotels direkt an diesem Strand.</p>
+                  <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 4 }}>
+                    {t(language, "nearbyWithin").replace(
+                      "{distance}",
+                      String(Math.round(nearbyRadiusKm * 1000))
+                    )}
+                  </h2>
+                  <p style={{ fontSize: 13, color: "#64748b", margin: "0 0 20px 0" }}>
+                    {t(language, "nearbyDescription")}
+                  </p>
 
                   <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
                     <button
+                      type="button"
+                      aria-label={t(language, "scrollLeft")}
                       onClick={() => scrollNearby("left")}
                       style={{
                         position: "absolute",
@@ -752,7 +841,7 @@ export default function SpotClientPage({
                         return (
                           <Link
                             key={i}
-                            href={`/spot/${s.slug}`}
+                            href={localizedHref(`/spot/${s.slug}`)}
                             style={{
                               textDecoration: "none",
                               flex: "0 0 calc(33.333% - 14px)",
@@ -770,6 +859,7 @@ export default function SpotClientPage({
                               <div style={{ height: 160, position: "relative" }}>
                                 <img
                                   src={s.image_url}
+                                  alt={getLocalizedField(s, "title", language) || s.title}
                                   style={{
                                     width: "100%",
                                     height: "100%",
@@ -792,7 +882,7 @@ export default function SpotClientPage({
                                     letterSpacing: "1px",
                                   }}
                                 >
-                                  {s.category}
+                                  {getLocalizedField(s, "category", language) || s.category}
                                 </div>
                               </div>
 
@@ -805,7 +895,7 @@ export default function SpotClientPage({
                                     margin: "0 0 8px 0",
                                   }}
                                 >
-                                  {s.title}
+                                  {getLocalizedField(s, "title", language) || s.title}
                                 </h3>
 
                                 <p
@@ -817,7 +907,7 @@ export default function SpotClientPage({
                                     overflow: "hidden",
                                   }}
                                 >
-                                  {s.description}
+                                  {getLocalizedField(s, "description", language) || s.description}
                                 </p>
 
                                 <div
@@ -831,7 +921,16 @@ export default function SpotClientPage({
                                   }}
                                 >
                                   <MapPin size={12} />
-                                  <span>Nur {Math.round(parseFloat(distToSpot || "0") * 1000)} Meter entfernt</span>
+                                  <span>
+                                    {t(language, "metersAway").replace(
+                                      "{distance}",
+                                      String(
+                                        Math.round(
+                                          parseFloat(distToSpot || "0") * 1000
+                                        )
+                                      )
+                                    )}
+                                  </span>
                                 </div>
                               </div>
                             </div>
@@ -841,6 +940,8 @@ export default function SpotClientPage({
                     </div>
 
                     <button
+                      type="button"
+                      aria-label={t(language, "scrollRight")}
                       onClick={() => scrollNearby("right")}
                       style={{
                         position: "absolute",
@@ -863,7 +964,7 @@ export default function SpotClientPage({
               {/* WEITERE ENTDECKUNGEN */}
               <div style={{ marginTop: 40, width: "100%", position: "relative" }}>
                 <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 20 }}>
-                  Weitere Entdeckungen
+                  {t(language, "moreDiscoveries")}
                 </h2>
 
                 <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
@@ -878,6 +979,7 @@ export default function SpotClientPage({
                       borderRadius: "50%",
                       boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
                       cursor: "pointer",
+                      border: "none",
                     }}
                   >
                     <ChevronLeft />
@@ -921,7 +1023,7 @@ export default function SpotClientPage({
                       return (
                         <Link
                           key={i}
-                          href={`/spot/${s.slug}`}
+                          href={localizedHref(`/spot/${s.slug}`)}
                           style={{
                             textDecoration: "none",
                             flex: "0 0 calc(33.333% - 14px)",
@@ -961,7 +1063,7 @@ export default function SpotClientPage({
                                   letterSpacing: "1px",
                                 }}
                               >
-                                {s.category}
+                                {getLocalizedField(s, "category", language) || s.category}
                               </div>
                             </div>
 
@@ -974,7 +1076,7 @@ export default function SpotClientPage({
                                   margin: "0 0 8px 0",
                                 }}
                               >
-                                {s.title}
+                                {getLocalizedField(s, "title", language) || s.title}
                               </h3>
 
                               <p
@@ -986,7 +1088,7 @@ export default function SpotClientPage({
                                   overflow: "hidden",
                                 }}
                               >
-                                {s.description}
+                                {getLocalizedField(s, "description", language) || s.description}
                               </p>
 
                               <div
@@ -999,9 +1101,19 @@ export default function SpotClientPage({
                                   gap: 2,
                                 }}
                               >
-                                <span>{distToSpot} km von hier</span>
+                                <span>
+                                  {t(language, "kilometersFromHere").replace(
+                                    "{distance}",
+                                    distToSpot || "0"
+                                  )}
+                                </span>
                                 {distToHotel && (
-                                  <span>{distToHotel} km von Deiner Unterkunft</span>
+                                  <span>
+                                    {t(language, "kilometersFromHotel").replace(
+                                      "{distance}",
+                                      distToHotel
+                                    )}
+                                  </span>
                                 )}
                               </div>
                             </div>
@@ -1052,7 +1164,7 @@ export default function SpotClientPage({
             >
               {(userProfile?.role === "admin" || userProfile?.role === "editor") && (
                 <Link
-                  href={`/editor/edit/${spot.id}`}
+                  href={localizedHref(`/editor/edit/${spot.id}`)}
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -1069,7 +1181,7 @@ export default function SpotClientPage({
                     border: "1px solid #e11d48",
                   }}
                 >
-                  ✏️ Spot bearbeiten
+                  ✏️ {t(language, "editSpot")}
                 </Link>
               )}
 
@@ -1090,10 +1202,16 @@ export default function SpotClientPage({
                     margin: 0,
                   }}
                 >
-                  Spot Information
+                  {t(language, "spotInformation")}
                 </h3>
 
                 <button
+                  type="button"
+                  aria-label={
+                    isFavorite
+                      ? t(language, "removeFromFavorites")
+                      : t(language, "addToFavorites")
+                  }
                   onClick={toggleFavorite}
                   style={{
                     background: "none",
@@ -1115,7 +1233,7 @@ export default function SpotClientPage({
                 }}
               >
                 {spot.category && (
-                  <InfoItem icon={<Tag size={16} />} label="Kategorie" value={spot.category} />
+                  <InfoItem icon={<Tag size={16} />} label={t(language, "category")} value={localizedCategory} />
                 )}
 
                 {spot.stars && (
@@ -1141,7 +1259,7 @@ export default function SpotClientPage({
                           textTransform: "uppercase",
                         }}
                       >
-                        Landeskategorie
+                        {t(language, "officialCategory")}
                         <HelpCircle size={12} className="text-slate-400 cursor-help" />
                       </span>
 
@@ -1152,28 +1270,27 @@ export default function SpotClientPage({
                           color: "#334155",
                         }}
                       >
-                        {spot.stars} Sterne
+                        {spot.stars} {t(language, "stars")}
                       </span>
                     </div>
 
                     <div className="invisible group-hover:visible absolute bottom-full left-0 mb-2 w-64 p-3 bg-slate-900 text-white text-xs rounded-xl shadow-xl z-50 transition-all opacity-0 group-hover:opacity-100 font-medium leading-relaxed">
-                      Diese Sternebewertung basiert auf der offiziellen Landeskategorie vor
-                      Ort und kann von der deutschen Hotelklassifizierung abweichen.
+                      {t(language, "officialCategoryTooltip")}
                     </div>
                   </div>
                 )}
 
                 <InfoItem
                   icon={<Navigation size={16} />}
-                  label="Fahrtweg"
+                  label={t(language, "drivingDistance")}
                   value={
                     isRouting ? (
                       "..."
                     ) : routeDist ? (
-                      `${routeDist} km (${routeTime} Min.)`
+                      `${routeDist} km (${routeTime} ${t(language, "minutesShort")})`
                     ) : (
-                      <Link href="/profile" className="text-teal-600 underline font-bold">
-                        Hotel festlegen
+                      <Link href={localizedHref("/profile")} className="text-teal-600 underline font-bold">
+                        {t(language, "setHotel")}
                       </Link>
                     )
                   }
@@ -1210,14 +1327,14 @@ export default function SpotClientPage({
                           textTransform: "uppercase",
                         }}
                       >
-                        {isFoodCategory ? "Chang Index" : "Budget"}
+                        {isFoodCategory ? t(language, "changIndex") : t(language, "budget")}
                         <HelpCircle size={12} className="text-slate-400 cursor-help ml-0.5" />
                         
                         {/* TOOLTIP ON HOVER */}
                         <div className="invisible group-hover:visible absolute bottom-full left-0 mb-2 w-64 p-3 bg-slate-900 text-white text-xs rounded-xl shadow-xl z-50 transition-all opacity-0 group-hover:opacity-100 font-medium normal-case tracking-normal leading-relaxed">
                           {isFoodCategory 
-                            ? "Der Chang-Index zeigt das Preisniveau basierend auf dem Preis für eine große Flasche Chang Bier vor Ort (1 = sehr günstig, 5 = teuer)." 
-                            : "Gibt das allgemeine Preisniveau des Spots von 1 (günstig) bis 5 (exklusiv) an."
+                            ? t(language, "changIndexTooltip")
+                            : t(language, "budgetTooltip")
                           }
                         </div>
                       </span>
@@ -1232,7 +1349,7 @@ export default function SpotClientPage({
                               <img
                                 key={index}
                                 src="/icons/bottle.svg"
-                                alt="Flasche"
+                                alt={t(language, "bottle")}
                                 style={{ 
                                   width: 10, 
                                   height: 22, 
@@ -1259,16 +1376,22 @@ export default function SpotClientPage({
                 {spot.opening_hours && spot.opening_hours.trim() !== "" && (
                   <InfoItem
                     icon={<Clock size={16} />}
-                    label="Öffnungszeiten"
-                    value={spot.opening_hours}
+                    label={t(language, "openingHours")}
+                    value={
+                      getLocalizedField(spot, "opening_hours", language) ||
+                      spot.opening_hours
+                    }
                   />
                 )}
 
                 {spot.best_time && spot.best_time.trim() !== "" && (
                   <InfoItem
                     icon={<Sun size={16} />}
-                    label="Beste Besuchszeit"
-                    value={spot.best_time}
+                    label={t(language, "bestVisitTime")}
+                    value={
+                      getLocalizedField(spot, "best_time", language) ||
+                      spot.best_time
+                    }
                   />
                 )}
 
@@ -1276,23 +1399,41 @@ export default function SpotClientPage({
                   <>
                     <InfoItem
                       icon={<Car size={16} />}
-                      label="Parkplatz"
-                      value={spot.parking_info.name}
+                      label={t(language, "parking")}
+                      value={
+                        getLocalizedConfigField(
+                          spot.parking_info,
+                          "name",
+                          language
+                        ) || spot.parking_info.name
+                      }
                     />
 
                     {spot.parking_info.price && spot.parking_info.price.trim() !== "" && (
                       <InfoItem
                         icon={<DollarSign size={16} />}
-                        label="Parkkosten"
-                        value={spot.parking_info.price}
+                        label={t(language, "parkingCost")}
+                        value={
+                          getLocalizedConfigField(
+                            spot.parking_info,
+                            "price",
+                            language
+                          ) || spot.parking_info.price
+                        }
                       />
                     )}
 
                     {spot.parking_info.details && spot.parking_info.details.trim() !== "" && (
                       <InfoItem
                         icon={<MapPin size={16} />}
-                        label="Details"
-                        value={spot.parking_info.details}
+                        label={t(language, "details")}
+                        value={
+                          getLocalizedConfigField(
+                            spot.parking_info,
+                            "details",
+                            language
+                          ) || spot.parking_info.details
+                        }
                       />
                     )}
                   </>
@@ -1301,10 +1442,18 @@ export default function SpotClientPage({
 
               {/* PREMIUM BUTTONS */}
               <PremiumActionButton
-                href={`https://www.google.com/maps/dir/?api=1&origin=${hotelLat},${hotelLng}&destination=${spot.parking_info?.lat || spot.latitude},${spot.parking_info?.lng || spot.longitude}&travelmode=driving`}
+                href={`https://www.google.com/maps/dir/?api=1&${
+                  hotelLat && hotelLng
+                    ? `origin=${hotelLat},${hotelLng}&`
+                    : ""
+                }destination=${
+                  spot.parking_info?.lat || spot.latitude
+                },${
+                  spot.parking_info?.lng || spot.longitude
+                }&travelmode=driving`}
                 icon={<Navigation size={22} />}
-                title="Route starten"
-                subtitle="In Google Maps öffnen"
+                title={t(language, "startRoute")}
+                subtitle={t(language, "openInGoogleMaps")}
                 variant="navy"
               />
 
@@ -1316,8 +1465,8 @@ export default function SpotClientPage({
                       : `${spot.youtube_url}?t=${spot.youtube_timestamp || 0}`
                   }
                   icon={<Play size={22} fill="white" />}
-                  title="YouTube Video"
-                  subtitle="Video zum Spot ansehen"
+                  title={t(language, "youtubeVideo")}
+                  subtitle={t(language, "watchSpotVideo")}
                   variant="red"
                 />
               )}
@@ -1326,8 +1475,8 @@ export default function SpotClientPage({
                 <PremiumActionButton
                   href={`${spot.tour_link}${spot.tour_link.includes("?") ? "&" : "?"}partner_id=JAPXTFH`}
                   icon={<Sparkles size={22} />}
-                  title="Tourempfehlungen*"
-                  subtitle="Passende Ausflüge entdecken"
+                  title={`${t(language, "tourRecommendations")}*`}
+                  subtitle={t(language, "discoverExcursions")}
                   variant="orange"
                 />
               )}
@@ -1356,12 +1505,17 @@ export default function SpotClientPage({
                     textDecoration: "none",
                   }}
                 >
-                  <MapPin size={16} /> Unterkunft buchen*
+                  <MapPin size={16} /> {t(language, "bookAccommodation")}*
                 </a>
               )}
 
               <a
-                href={`mailto:admin@khaolak.app?subject=Änderungsvorschlag für ${spot.title}`}
+                href={`mailto:admin@khaolak.app?subject=${encodeURIComponent(
+                  t(language, "changeSuggestionSubject").replace(
+                    "{title}",
+                    localizedTitle
+                  )
+                )}`}
                 style={{
                   marginTop: "12px",
                   width: "100%",
@@ -1377,7 +1531,7 @@ export default function SpotClientPage({
                   textDecoration: "none",
                 }}
               >
-                <AlertCircle size={16} /> Änderung melden
+                <AlertCircle size={16} /> {t(language, "reportChange")}
               </a>
 
               {(spot.tour_link || spot.booking_link) && (
@@ -1389,7 +1543,7 @@ export default function SpotClientPage({
                     textAlign: "center",
                   }}
                 >
-                  *enthält Affiliate-Links
+                  *{t(language, "affiliateLinksNotice")}
                 </p>
               )}
 
@@ -1404,7 +1558,7 @@ export default function SpotClientPage({
                       marginBottom: 12,
                     }}
                   >
-                    Ausflüge & Aktivitäten
+                    {t(language, "excursionsActivities")}
                   </h3>
 
                   {tours.slice(0, 3).map((tour: any, i: number) => (
