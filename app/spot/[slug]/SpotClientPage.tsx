@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/src/lib/supabase";
-import { getLanguage, Language } from "@/src/lib/i18n";
+import { getLanguage } from "@/src/lib/i18n";
 import MapBoxMini from "@/src/components/MapBoxMini";
 import {
   MapPin,
@@ -27,74 +27,13 @@ import Link from "next/link";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import { t, getTranslations } from "@/src/lib/translations";
-
-function getLocalizedField(
-  item: any,
-  field: string,
-  language: Language
-) {
-  const fallback = item?.[field];
-
-  if (language === "de") {
-    return fallback;
-  }
-
-  const localized = item?.[`${field}_${language}`];
-
-  if (Array.isArray(localized)) {
-    return localized.length > 0 ? localized : fallback;
-  }
-
-  if (typeof localized === "string") {
-    return localized.trim() !== "" ? localized : fallback;
-  }
-
-  return localized ?? fallback;
-}
-
-function getLocalizedConfigField(
-  item: any,
-  field: string,
-  language: Language
-) {
-  if (!item) return undefined;
-
-  if (language === "en") {
-    const englishValue = item?.[`${field}_en`];
-
-    if (typeof englishValue === "string" && englishValue.trim() !== "") {
-      return englishValue;
-    }
-
-    if (englishValue !== undefined && englishValue !== null) {
-      return englishValue;
-    }
-  }
-
-  return item?.[field];
-}
-
-function parseDescriptionBlocks(value: any): any[] {
-  if (Array.isArray(value)) {
-    return value;
-  }
-
-  if (typeof value === "string" && value.trim() !== "") {
-    try {
-      const parsed = JSON.parse(value);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [{ type: "paragraph", content: value }];
-    }
-  }
-
-  return [];
-}
-
-interface SpotClientPageProps {
-  initialSpot: any;
-  initialRandomSpots: any[];
-}
+import SpotHero from "@/src/components/spot/SpotHero";
+import {
+  getLocalizedConfigField,
+  getLocalizedField,
+  parseDescriptionBlocks,
+} from "@/src/lib/spot/localization";
+import type { SpotClientPageProps } from "@/src/types/spot";
 
 export default function SpotClientPage({
   initialSpot,
@@ -380,112 +319,14 @@ export default function SpotClientPage({
           overflow: "visible",
         }}
       >
-        {/* HERO */}
-        <div style={{ position: "relative", width: "100%", height: "450px" }}>
-          <img
-            src={spot.image_url}
-            alt={localizedTitle}
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
-          />
-
-          {spot.image_url?.includes("google") && (
-            <div
-              style={{
-                position: "absolute",
-                bottom: "10px",
-                left: "10px",
-                fontSize: "10px",
-                color: "rgba(255,255,255,0.7)",
-                background: "rgba(0,0,0,0.3)",
-                padding: "2px 6px",
-                borderRadius: "4px",
-                zIndex: 10,
-              }}
-            >
-              Powered by Google
-            </div>
-          )}
-
-          <Link
-            href={localizedHref("/entdecken")}
-            style={{
-              position: "absolute",
-              top: "30px",
-              left: "30px",
-              zIndex: 20,
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              background: "rgba(255,255,255,0.9)",
-              padding: "10px 20px",
-              borderRadius: "50px",
-              fontSize: "14px",
-              fontWeight: 600,
-              color: "#333",
-              textDecoration: "none",
-              boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-            }}
-          >
-            <ChevronLeft size={16} />
-            {t(language, "backToAllSpots")}
-          </Link>
-
-          <div
-            style={{
-              position: "absolute",
-              bottom: "40px",
-              left: "40px",
-              zIndex: 10,
-              display: "flex",
-              flexDirection: "column",
-              gap: "12px",
-              alignItems: "flex-start",
-              maxWidth: "calc(100% - 400px)",
-            }}
-          >
-            <div
-              style={{
-                background: "#14b8a6",
-                color: "#fff",
-                padding: "6px 16px",
-                borderRadius: "50px",
-                fontSize: "12px",
-                fontWeight: 700,
-                textTransform: "uppercase",
-                letterSpacing: "1px",
-                width: "fit-content",
-              }}
-            >
-              {localizedCategory}
-            </div>
-
-            <h1
-              style={{
-                color: "#fff",
-                fontSize: 48,
-                fontWeight: 800,
-                letterSpacing: "-0.02em",
-                margin: 0,
-                textShadow: "0 2px 10px rgba(0,0,0,0.5)",
-              }}
-            >
-              {localizedTitle}
-            </h1>
-
-            <p
-              style={{
-                color: "#fff",
-                fontSize: 16,
-                fontWeight: 300,
-                margin: 0,
-                opacity: 0.9,
-                textShadow: "0 1px 5px rgba(0,0,0,0.5)",
-              }}
-            >
-              {localizedDescription}
-            </p>
-          </div>
-        </div>
+        <SpotHero
+          spot={spot}
+          language={language}
+          title={localizedTitle}
+          description={localizedDescription}
+          category={localizedCategory}
+          backHref={localizedHref("/entdecken")}
+        />
 
         <div
           style={{
