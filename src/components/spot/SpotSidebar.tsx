@@ -39,6 +39,7 @@ interface SpotSidebarProps {
   hotelLng: number | null | undefined;
   tours: any[];
   localizedHref: (path: string) => string;
+  overlapHero?: boolean;
 }
 
 export default function SpotSidebar({
@@ -56,6 +57,7 @@ export default function SpotSidebar({
   hotelLng,
   tours,
   localizedHref,
+  overlapHero = true,
 }: SpotSidebarProps) {
   const normalizedCategory = spot.category?.toLowerCase();
 
@@ -71,7 +73,7 @@ export default function SpotSidebar({
         width: 320,
         position: "sticky",
         top: "20px",
-        marginTop: "-430px",
+        marginTop: overlapHero ? "-430px" : 0,
         alignSelf: "start",
       }}
     >

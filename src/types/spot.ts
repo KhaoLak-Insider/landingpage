@@ -50,6 +50,11 @@ export interface HotelProfileRecord {
   check_in_time?: string | null;
   check_out_time?: string | null;
   price_level?: number | null;
+  beachfront?: boolean | null;
+  suitable_for_couples?: boolean | null;
+  suitable_for_families?: boolean | null;
+  suitable_for_honeymoon?: boolean | null;
+  suitable_for_relaxation?: boolean | null;
   best_for_de?: unknown[];
   best_for_en?: unknown[];
   highlights_de?: unknown[];
