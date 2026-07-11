@@ -1,14 +1,12 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/src/lib/supabase";
 import { getLanguage } from "@/src/lib/i18n";
 import MapBoxMini from "@/src/components/MapBoxMini";
 import {
   MapPin,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 import { iconMap } from "@/src/components/IconLibrary";
 import Link from "next/link";
@@ -17,6 +15,8 @@ import SpotHero from "@/src/components/spot/SpotHero";
 import SpotGallery from "@/src/components/spot/SpotGallery";
 import SpotDescription from "@/src/components/spot/SpotDescription";
 import SpotSidebar from "@/src/components/spot/SpotSidebar";
+import NearbySpots from "@/src/components/spot/NearbySpots";
+import MoreDiscoveries from "@/src/components/spot/MoreDiscoveries";
 import {
   getLocalizedConfigField,
   getLocalizedField,
@@ -38,7 +38,6 @@ export default function SpotClientPage({
   const [tours, setTours] = useState<any[]>([]);
   const [isFavorite, setIsFavorite] = useState(false);
   const [randomSpots, setRandomSpots] = useState<any[]>(initialRandomSpots);
-  const scrollRef = useRef<HTMLDivElement>(null);
 
   const searchParams = useSearchParams();
   const language = getLanguage({
@@ -55,27 +54,6 @@ export default function SpotClientPage({
 
   // NEUE STATES FÜR DIE UMGEBUNGS-SPOTS (NUR FÜR STRÄNDE)
   const [nearbySpots, setNearbySpots] = useState<any[]>([]);
-  const nearbyScrollRef = useRef<HTMLDivElement>(null);
-
-  const calculateDistance = (
-    lat1: number,
-    lon1: number,
-    lat2: number,
-    lon2: number
-  ) => {
-    if (!lat1 || !lon1 || !lat2 || !lon2) return null;
-    const R = 6371;
-    const dLat = (lat2 - lat1) * (Math.PI / 180);
-    const dLon = (lon2 - lon1) * (Math.PI / 180);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * (Math.PI / 180)) *
-        Math.cos(lat2 * (Math.PI / 180)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-
-    return (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))).toFixed(1);
-  };
 
   // HELPER: Gibt die Distanz als reine Zahl für mathematische Filter zurück
   const getRawDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -135,22 +113,119 @@ export default function SpotClientPage({
           .then((data) => setTours(data.result || []))
           .catch((e) => console.error("Tour Ladefehler:", e));
 
-        // NEU: Wenn es ein Strand ist, laden wir Gastro, Strandbars & Hotels im Umkreis
-        if (spot.category && spot.category.toLowerCase() === "strand" && spot.latitude && spot.longitude) {
-          const { data: candidates } = await supabase
+        // Wenn es ein Strand ist, laden wir passende Spots im direkten Umkreis.
+        const normalizedSpotCategory = String(spot.category || "")
+          .trim()
+          .toLowerCase()
+          .replace(/ä/g, "ae")
+          .replace(/ö/g, "oe")
+          .replace(/ü/g, "ue")
+          .replace(/ß/g, "ss");
+
+        const isBeachCategory =
+          normalizedSpotCategory === "strand" ||
+          normalizedSpotCategory === "straende" ||
+          normalizedSpotCategory === "beach" ||
+          normalizedSpotCategory === "beaches";
+
+        if (isBeachCategory && spot.latitude && spot.longitude) {
+          setNearbySpots([]);
+
+          const { data: candidates, error: nearbyError } = await supabase
             .from("spots")
-            .select("*")
-            .in("category", ["Restaurants", "Strandbars", "Hotel", "Hotels", "Restaurant"])
-            .not("id", "eq", spot.id);
+            .select(`
+              id,
+              slug,
+              title,
+              title_en,
+              description,
+              description_en,
+              image_url,
+              category,
+              category_en,
+              latitude,
+              longitude
+            `)
+            .neq("id", spot.id)
+            .not("latitude", "is", null)
+            .not("longitude", "is", null);
+
+          if (nearbyError) {
+            console.error(
+              "Fehler beim Laden der Umgebungs-Spots:",
+              nearbyError
+            );
+          }
 
           if (candidates) {
-            const filtered = candidates.filter((c) => {
-              if (!c.latitude || !c.longitude) return false;
-              const dist = getRawDistance(spot.latitude, spot.longitude, c.latitude, c.longitude);
-              return dist <= nearbyRadiusKm;
-            });
+            const allowedCategories = new Set([
+              "restaurant",
+              "restaurants",
+              "strandbar",
+              "strandbars",
+              "bar",
+              "bars",
+              "hotel",
+              "hotels",
+              "resort",
+              "resorts",
+              "unterkunft",
+              "unterkuenfte",
+              "accommodation",
+              "accommodations",
+            ]);
+
+            const filtered = candidates
+              .filter((candidate) => {
+                const normalizedCandidateCategory = String(
+                  candidate.category || ""
+                )
+                  .trim()
+                  .toLowerCase()
+                  .replace(/ä/g, "ae")
+                  .replace(/ö/g, "oe")
+                  .replace(/ü/g, "ue")
+                  .replace(/ß/g, "ss");
+
+                if (
+                  !allowedCategories.has(
+                    normalizedCandidateCategory
+                  )
+                ) {
+                  return false;
+                }
+
+                const distance = getRawDistance(
+                  spot.latitude,
+                  spot.longitude,
+                  candidate.latitude,
+                  candidate.longitude
+                );
+
+                return distance <= nearbyRadiusKm;
+              })
+              .sort((first, second) => {
+                const firstDistance = getRawDistance(
+                  spot.latitude,
+                  spot.longitude,
+                  first.latitude,
+                  first.longitude
+                );
+
+                const secondDistance = getRawDistance(
+                  spot.latitude,
+                  spot.longitude,
+                  second.latitude,
+                  second.longitude
+                );
+
+                return firstDistance - secondDistance;
+              });
+
             setNearbySpots(filtered);
           }
+        } else {
+          setNearbySpots([]);
         }
 
         const {
@@ -220,26 +295,6 @@ export default function SpotClientPage({
     }
 
     setIsFavorite(!isFavorite);
-  };
-
-  const scroll = (direction: "left" | "right") => {
-    if (scrollRef.current) {
-      const amount = 300;
-      scrollRef.current.scrollBy({
-        left: direction === "left" ? -amount : amount,
-        behavior: "smooth",
-      });
-    }
-  };
-
-  const scrollNearby = (direction: "left" | "right") => {
-    if (nearbyScrollRef.current) {
-      const amount = 300;
-      nearbyScrollRef.current.scrollBy({
-        left: direction === "left" ? -amount : amount,
-        behavior: "smooth",
-      });
-    }
   };
 
   if (!spot) {
@@ -452,359 +507,33 @@ export default function SpotClientPage({
                 language={language}
               />
 
-              {/* NEU: DIREKTE UMGEBUNGS-EMPFEHLUNGEN (WENN DER SPOT EIN STRAND IST) */}
-              {spot.category && spot.category.toLowerCase() === "strand" && nearbySpots.length > 0 && (
-                <div style={{ marginTop: 20, width: "100%", position: "relative" }}>
-                  <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 4 }}>
-                    {t(language, "nearbyWithin").replace(
-                      "{distance}",
-                      String(Math.round(nearbyRadiusKm * 1000))
-                    )}
-                  </h2>
-                  <p style={{ fontSize: 13, color: "#64748b", margin: "0 0 20px 0" }}>
-                    {t(language, "nearbyDescription")}
-                  </p>
-
-                  <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-                    <button
-                      type="button"
-                      aria-label={t(language, "scrollLeft")}
-                      onClick={() => scrollNearby("left")}
-                      style={{
-                        position: "absolute",
-                        left: -20,
-                        zIndex: 10,
-                        background: "white",
-                        padding: 10,
-                        borderRadius: "50%",
-                        boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
-                        cursor: "pointer",
-                        border: "none"
-                      }}
-                    >
-                      <ChevronLeft />
-                    </button>
-
-                    <div
-                      ref={nearbyScrollRef}
-                      style={{
-                        display: "flex",
-                        gap: 20,
-                        overflowX: "hidden",
-                        scrollBehavior: "smooth",
-                        width: "100%",
-                      }}
-                    >
-                      {nearbySpots.map((s, i) => {
-                        const distToSpot = calculateDistance(
-                          spot.latitude,
-                          spot.longitude,
-                          s.latitude,
-                          s.longitude
-                        );
-
-                        return (
-                          <Link
-                            key={i}
-                            href={localizedHref(`/spot/${s.slug}`)}
-                            style={{
-                              textDecoration: "none",
-                              flex: "0 0 calc(33.333% - 14px)",
-                              minWidth: "calc(33.333% - 14px)",
-                            }}
-                          >
-                            <div
-                              style={{
-                                background: "#fff",
-                                borderRadius: 16,
-                                overflow: "hidden",
-                                border: "1px solid #e5e5e5",
-                              }}
-                            >
-                              <div style={{ height: 160, position: "relative" }}>
-                                <img
-                                  src={s.image_url}
-                                  alt={getLocalizedField(s, "title", language) || s.title}
-                                  style={{
-                                    width: "100%",
-                                    height: "100%",
-                                    objectFit: "cover",
-                                  }}
-                                />
-
-                                <div
-                                  style={{
-                                    position: "absolute",
-                                    top: 10,
-                                    left: 10,
-                                    background: "rgba(20, 184, 166, 0.9)",
-                                    color: "white",
-                                    padding: "4px 10px",
-                                    borderRadius: 20,
-                                    fontSize: 10,
-                                    fontWeight: 700,
-                                    textTransform: "uppercase",
-                                    letterSpacing: "1px",
-                                  }}
-                                >
-                                  {getLocalizedField(s, "category", language) || s.category}
-                                </div>
-                              </div>
-
-                              <div style={{ padding: 16 }}>
-                                <h3
-                                  style={{
-                                    fontSize: 16,
-                                    fontWeight: 700,
-                                    color: "#1e293b",
-                                    margin: "0 0 8px 0",
-                                  }}
-                                >
-                                  {getLocalizedField(s, "title", language) || s.title}
-                                </h3>
-
-                                <p
-                                  style={{
-                                    fontSize: 12,
-                                    color: "#64748b",
-                                    margin: "0 0 12px 0",
-                                    height: 36,
-                                    overflow: "hidden",
-                                  }}
-                                >
-                                  {getLocalizedField(s, "description", language) || s.description}
-                                </p>
-
-                                <div
-                                  style={{
-                                    fontSize: 11,
-                                    fontWeight: 600,
-                                    color: "#14b8a6",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 4,
-                                  }}
-                                >
-                                  <MapPin size={12} />
-                                  <span>
-                                    {t(language, "metersAway").replace(
-                                      "{distance}",
-                                      String(
-                                        Math.round(
-                                          parseFloat(distToSpot || "0") * 1000
-                                        )
-                                      )
-                                    )}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </Link>
-                        );
-                      })}
-                    </div>
-
-                    <button
-                      type="button"
-                      aria-label={t(language, "scrollRight")}
-                      onClick={() => scrollNearby("right")}
-                      style={{
-                        position: "absolute",
-                        right: -20,
-                        zIndex: 10,
-                        background: "white",
-                        padding: 10,
-                        borderRadius: "50%",
-                        boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
-                        cursor: "pointer",
-                        border: "none"
-                      }}
-                    >
-                      <ChevronRight />
-                    </button>
-                  </div>
-                </div>
+              {["strand", "straende", "beach", "beaches"].includes(
+                String(spot.category || "")
+                  .trim()
+                  .toLowerCase()
+                  .replace(/ä/g, "ae")
+                  .replace(/ö/g, "oe")
+                  .replace(/ü/g, "ue")
+                  .replace(/ß/g, "ss")
+              ) && (
+                <NearbySpots
+                  spots={nearbySpots}
+                  originLatitude={spot.latitude}
+                  originLongitude={spot.longitude}
+                  radiusKm={nearbyRadiusKm}
+                  language={language}
+                  localizedHref={localizedHref}
+                />
               )}
 
-              {/* WEITERE ENTDECKUNGEN */}
-              <div style={{ marginTop: 40, width: "100%", position: "relative" }}>
-                <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 20 }}>
-                  {t(language, "moreDiscoveries")}
-                </h2>
-
-                <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-                  <button
-                    onClick={() => scroll("left")}
-                    style={{
-                      position: "absolute",
-                      left: -20,
-                      zIndex: 10,
-                      background: "white",
-                      padding: 10,
-                      borderRadius: "50%",
-                      boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
-                      cursor: "pointer",
-                      border: "none",
-                    }}
-                  >
-                    <ChevronLeft />
-                  </button>
-
-                  <div
-                    ref={scrollRef}
-                    style={{
-                      display: "flex",
-                      gap: 20,
-                      overflowX: "hidden",
-                      scrollBehavior: "smooth",
-                      width: "100%",
-                    }}
-                  >
-                    {randomSpots.map((s, i) => {
-                      const hotelData = Array.isArray(userProfile?.hotels)
-                        ? userProfile.hotels[0]
-                        : (userProfile?.hotels as any);
-
-                      const hLat = userProfile?.hotel_id
-                        ? hotelData?.lat
-                        : userProfile?.custom_hotel_lat;
-
-                      const hLng = userProfile?.hotel_id
-                        ? hotelData?.lng
-                        : userProfile?.custom_hotel_lng;
-
-                      const distToSpot = calculateDistance(
-                        spot.latitude,
-                        spot.longitude,
-                        s.latitude,
-                        s.longitude
-                      );
-
-                      const distToHotel =
-                        hLat && hLng
-                          ? calculateDistance(hLat, hLng, s.latitude, s.longitude)
-                          : null;
-
-                      return (
-                        <Link
-                          key={i}
-                          href={localizedHref(`/spot/${s.slug}`)}
-                          style={{
-                            textDecoration: "none",
-                            flex: "0 0 calc(33.333% - 14px)",
-                            minWidth: "calc(33.333% - 14px)",
-                          }}
-                        >
-                          <div
-                            style={{
-                              background: "#fff",
-                              borderRadius: 16,
-                              overflow: "hidden",
-                              border: "1px solid #e5e5e5",
-                            }}
-                          >
-                            <div style={{ height: 160, position: "relative" }}>
-                              <img
-                                src={s.image_url}
-                                style={{
-                                  width: "100%",
-                                  height: "100%",
-                                  objectFit: "cover",
-                                }}
-                              />
-
-                              <div
-                                style={{
-                                  position: "absolute",
-                                  top: 10,
-                                  left: 10,
-                                  background: "rgba(20, 184, 166, 0.9)",
-                                  color: "white",
-                                  padding: "4px 10px",
-                                  borderRadius: 20,
-                                  fontSize: 10,
-                                  fontWeight: 700,
-                                  textTransform: "uppercase",
-                                  letterSpacing: "1px",
-                                }}
-                              >
-                                {getLocalizedField(s, "category", language) || s.category}
-                              </div>
-                            </div>
-
-                            <div style={{ padding: 16 }}>
-                              <h3
-                                style={{
-                                  fontSize: 16,
-                                  fontWeight: 700,
-                                  color: "#1e293b",
-                                  margin: "0 0 8px 0",
-                                }}
-                              >
-                                {getLocalizedField(s, "title", language) || s.title}
-                              </h3>
-
-                              <p
-                                style={{
-                                  fontSize: 12,
-                                  color: "#64748b",
-                                  margin: "0 0 12px 0",
-                                  height: 36,
-                                  overflow: "hidden",
-                                }}
-                              >
-                                {getLocalizedField(s, "description", language) || s.description}
-                              </p>
-
-                              <div
-                                style={{
-                                  fontSize: 11,
-                                  fontWeight: 600,
-                                  color: "#14b8a6",
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  gap: 2,
-                                }}
-                              >
-                                <span>
-                                  {t(language, "kilometersFromHere").replace(
-                                    "{distance}",
-                                    distToSpot || "0"
-                                  )}
-                                </span>
-                                {distToHotel && (
-                                  <span>
-                                    {t(language, "kilometersFromHotel").replace(
-                                      "{distance}",
-                                      distToHotel
-                                    )}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
-
-                  <button
-                    onClick={() => scroll("right")}
-                    style={{
-                      position: "absolute",
-                      right: -20,
-                      zIndex: 10,
-                      background: "white",
-                      padding: 10,
-                      borderRadius: "50%",
-                      boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <ChevronRight />
-                  </button>
-                </div>
-              </div>
+              <MoreDiscoveries
+                spots={randomSpots}
+                originLatitude={spot.latitude}
+                originLongitude={spot.longitude}
+                userProfile={userProfile}
+                language={language}
+                localizedHref={localizedHref}
+              />
             </div>
           </div>
 
