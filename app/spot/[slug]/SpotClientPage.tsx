@@ -27,6 +27,7 @@ import Link from "next/link";
 import { t, getTranslations } from "@/src/lib/translations";
 import SpotHero from "@/src/components/spot/SpotHero";
 import SpotGallery from "@/src/components/spot/SpotGallery";
+import SpotDescription from "@/src/components/spot/SpotDescription";
 import {
   getLocalizedConfigField,
   getLocalizedField,
@@ -47,7 +48,6 @@ export default function SpotClientPage({
   const [routeGeoJSON, setRouteGeoJSON] = useState<any>(null);
   const [tours, setTours] = useState<any[]>([]);
   const [isFavorite, setIsFavorite] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
   const [randomSpots, setRandomSpots] = useState<any[]>(initialRandomSpots);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -272,9 +272,6 @@ export default function SpotClientPage({
     getLocalizedField(spot, "long_description", language)
   );
 
-  const visibleBlocks = descArray.slice(0, 2);
-  const hiddenBlocks = descArray.slice(2);
-
   const hotelLat =
     userProfile?.custom_hotel_lat ||
     (Array.isArray(userProfile?.hotels)
@@ -467,87 +464,11 @@ export default function SpotClientPage({
                 </div>
               </div>
 
-              {/* BESCHREIBUNG */}
-              <div>
-                <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: "20px" }}>
-                  {t(language, "about")} {localizedTitle}
-                </h2>
-
-                {visibleBlocks.map((block: any, i: number) => (
-                  <div key={i}>
-                    {block.type === "heading" ? (
-                      <h3
-                        style={{
-                          fontSize: 20,
-                          fontWeight: 700,
-                          marginTop: "24px",
-                          marginBottom: "12px",
-                        }}
-                      >
-                        {block.content}
-                      </h3>
-                    ) : (
-                      <p
-                        style={{
-                          color: "#475569",
-                          lineHeight: 1.8,
-                          fontSize: "15px",
-                          marginBottom: "16px",
-                        }}
-                      >
-                        {block.content}
-                      </p>
-                    )}
-                  </div>
-                ))}
-
-                {isExpanded &&
-                  hiddenBlocks.map((block: any, i: number) => (
-                    <div key={`extra-${i}`}>
-                      {block.type === "heading" ? (
-                        <h3
-                          style={{
-                            fontSize: 20,
-                            fontWeight: 700,
-                            marginTop: "24px",
-                            marginBottom: "12px",
-                        }}
-                        >
-                          {block.content}
-                        </h3>
-                      ) : (
-                        <p
-                          style={{
-                            color: "#475569",
-                            lineHeight: 1.8,
-                            fontSize: "15px",
-                            marginBottom: "16px",
-                          }}
-                        >
-                          {block.content}
-                        </p>
-                      )}
-                    </div>
-                  ))}
-
-                {hiddenBlocks.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setIsExpanded(!isExpanded)}
-                    style={{
-                      color: "#14b8a6",
-                      fontWeight: 700,
-                      fontSize: "15px",
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      textDecoration: "underline",
-                    }}
-                  >
-                    {isExpanded ? t(language, "learnLess") : t(language, "learnMore")}
-                  </button>
-                )}
-              </div>
+              <SpotDescription
+                title={localizedTitle}
+                blocks={descArray}
+                language={language}
+              />
 
               {/* NEU: DIREKTE UMGEBUNGS-EMPFEHLUNGEN (WENN DER SPOT EIN STRAND IST) */}
               {spot.category && spot.category.toLowerCase() === "strand" && nearbySpots.length > 0 && (
