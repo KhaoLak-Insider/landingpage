@@ -24,10 +24,9 @@ import {
 } from "lucide-react";
 import { iconMap } from "@/src/components/IconLibrary";
 import Link from "next/link";
-import Lightbox from "yet-another-react-lightbox";
-import "yet-another-react-lightbox/styles.css";
 import { t, getTranslations } from "@/src/lib/translations";
 import SpotHero from "@/src/components/spot/SpotHero";
+import SpotGallery from "@/src/components/spot/SpotGallery";
 import {
   getLocalizedConfigField,
   getLocalizedField,
@@ -41,8 +40,6 @@ export default function SpotClientPage({
 }: SpotClientPageProps) {
   const [spot, setSpot] = useState<any>(initialSpot);
   const [gallery, setGallery] = useState<string[]>([]);
-  const [open, setOpen] = useState(false);
-  const [index, setIndex] = useState(0);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [routeDist, setRouteDist] = useState<string | null>(null);
   const [routeTime, setRouteTime] = useState<number | null>(null);
@@ -264,8 +261,6 @@ export default function SpotClientPage({
     );
   }
 
-  const slides = gallery.map((url: string) => ({ src: url }));
-
   const localizedTitle =
     getLocalizedField(spot, "title", language) || spot.title;
   const localizedDescription =
@@ -338,85 +333,11 @@ export default function SpotClientPage({
         >
           {/* MAIN COLUMN */}
           <div style={{ flex: 1, minWidth: 0 }}>
-            {/* GALERIE */}
-            {gallery.length > 0 && (
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(4, 1fr)",
-                  gap: "10px",
-                  marginBottom: "40px",
-                }}
-              >
-                {gallery.slice(0, 3).map((url: string, i: number) => (
-                  <div
-                    key={i}
-                    onClick={() => {
-                      setIndex(i);
-                      setOpen(true);
-                    }}
-                    style={{
-                      height: "120px",
-                      borderRadius: "12px",
-                      overflow: "hidden",
-                      cursor: "pointer",
-                      position: "relative",
-                    }}
-                  >
-                    <img
-                      src={url}
-                      alt={`${localizedTitle} ${i + 1}`}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
-                    />
-
-                    {url.includes("google") && (
-                      <div
-                        style={{
-                          position: "absolute",
-                          bottom: "4px",
-                          right: "4px",
-                          fontSize: "8px",
-                          color: "white",
-                          background: "rgba(0,0,0,0.5)",
-                          padding: "1px 4px",
-                          borderRadius: "2px",
-                        }}
-                      >
-                        Google
-                      </div>
-                    )}
-                  </div>
-                ))}
-
-                <div
-                  onClick={() => {
-                    setIndex(3);
-                    setOpen(true);
-                  }}
-                  style={{
-                    height: "120px",
-                    borderRadius: "12px",
-                    background: "#1f2937",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "white",
-                    cursor: "pointer",
-                  }}
-                >
-                  <span style={{ fontSize: "14px", fontWeight: "bold" }}>
-                    {gallery.length > 3
-                      ? `+${gallery.length - 3}`
-                      : t(language, "moreImages")}
-                  </span>
-                </div>
-              </div>
-            )}
+            <SpotGallery
+              gallery={gallery}
+              title={localizedTitle}
+              language={language}
+            />
 
             <div style={{ display: "flex", flexDirection: "column", gap: "40px" }}>
               {/* FEATURES */}
@@ -1426,14 +1347,6 @@ export default function SpotClientPage({
           </aside>
         </div>
       </div>
-
-      <Lightbox
-        open={open}
-        close={() => setOpen(false)}
-        slides={slides}
-        index={index}
-        on={{ view: ({ index: i }) => setIndex(i) }}
-      />
     </main>
   );
 }
