@@ -3,6 +3,7 @@
 import StandardTemplate, {
   type StandardTemplateProps,
 } from "@/src/components/templates/StandardTemplate";
+import PremiumHotelTemplate from "@/src/components/templates/PremiumHotelTemplate";
 
 interface TemplateRendererProps
   extends StandardTemplateProps {
@@ -25,6 +26,10 @@ export default function TemplateRenderer({
   const normalizedTemplate = normalizeTemplate(template);
 
   switch (normalizedTemplate) {
+    case "premium-hotel":
+    case "hotel-premium":
+      return <PremiumHotelTemplate {...templateProps} />;
+
     case "standard":
     case "default":
     case "":

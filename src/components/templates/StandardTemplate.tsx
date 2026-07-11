@@ -5,6 +5,7 @@ import { MapPin } from "lucide-react";
 import { iconMap } from "@/src/components/IconLibrary";
 import { t } from "@/src/lib/translations";
 import type { Language } from "@/src/lib/i18n";
+import type { HotelProfileRecord } from "@/src/types/spot";
 import SpotHero from "@/src/components/spot/SpotHero";
 import SpotGallery from "@/src/components/spot/SpotGallery";
 import SpotDescription, {
@@ -17,6 +18,7 @@ import { getLocalizedConfigField } from "@/src/lib/spot/localization";
 
 export interface StandardTemplateProps {
   spot: any;
+  hotelProfile?: HotelProfileRecord | null;
   language: Language;
   gallery: string[];
   localizedTitle: string;
@@ -40,6 +42,7 @@ export interface StandardTemplateProps {
   hotelLng: number | null | undefined;
   tours: any[];
   localizedHref: (path: string) => string;
+  showHero?: boolean;
 }
 
 function normalizeCategory(value: unknown): string {
@@ -85,6 +88,7 @@ export default function StandardTemplate({
   hotelLng,
   tours,
   localizedHref,
+  showHero = true,
 }: StandardTemplateProps) {
   const isBeach = [
     "strand",
@@ -113,14 +117,16 @@ export default function StandardTemplate({
           overflow: "visible",
         }}
       >
-        <SpotHero
-          spot={spot}
-          language={language}
-          title={localizedTitle}
-          description={localizedDescription}
-          category={localizedCategory}
-          backHref={localizedHref("/entdecken")}
-        />
+        {showHero && (
+          <SpotHero
+            spot={spot}
+            language={language}
+            title={localizedTitle}
+            description={localizedDescription}
+            category={localizedCategory}
+            backHref={localizedHref("/entdecken")}
+          />
+        )}
 
         <div
           style={{

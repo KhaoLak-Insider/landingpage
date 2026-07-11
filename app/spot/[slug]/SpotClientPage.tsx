@@ -15,6 +15,7 @@ import type { SpotClientPageProps } from "@/src/types/spot";
 export default function SpotClientPage({
   initialSpot,
   initialRandomSpots,
+  initialHotelProfile,
 }: SpotClientPageProps) {
   const [spot, setSpot] = useState<any>(initialSpot);
   const [gallery, setGallery] = useState<string[]>([]);
@@ -320,6 +321,7 @@ export default function SpotClientPage({
     <TemplateRenderer
       template={spot.template}
       spot={spot}
+      hotelProfile={initialHotelProfile}
       language={language}
       gallery={gallery}
       localizedTitle={localizedTitle}

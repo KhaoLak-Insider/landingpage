@@ -352,6 +352,34 @@ export default async function Page({
     notFound();
   }
 
+  const isPremiumHotel =
+    String(spotData.template || "")
+      .trim()
+      .toLowerCase()
+      .replace(/_/g, "-") === "premium-hotel";
+
+  let hotelProfile = null;
+
+  if (isPremiumHotel) {
+    const {
+      data: hotelProfileData,
+      error: hotelProfileError,
+    } = await supabase
+      .from("hotel_profiles")
+      .select("*")
+      .eq("spot_id", spotData.id)
+      .maybeSingle();
+
+    if (hotelProfileError) {
+      console.error(
+        "Fehler beim Laden des Premium-Hotelprofils:",
+        hotelProfileError
+      );
+    }
+
+    hotelProfile = hotelProfileData;
+  }
+
   const { data: randomData, error: randomError } =
     await supabase
       .from("spots")
@@ -564,6 +592,7 @@ export default async function Page({
       <SpotClientPage
         initialSpot={spotData}
         initialRandomSpots={filteredRandom}
+        initialHotelProfile={hotelProfile}
       />
     </>
   );
