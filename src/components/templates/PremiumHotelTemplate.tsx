@@ -5,6 +5,7 @@ import MapBoxMini from "@/src/components/MapBoxMini";
 import HotelHero from "@/src/components/hotel/HotelHero";
 import HotelQuickFacts from "@/src/components/hotel/HotelQuickFacts";
 import HotelEditorialSummary from "@/src/components/hotel/HotelEditorialSummary";
+import HotelHighlights from "@/src/components/hotel/HotelHighlights";
 import SpotGallery from "@/src/components/spot/SpotGallery";
 import SpotDescription from "@/src/components/spot/SpotDescription";
 import SpotSidebar from "@/src/components/spot/SpotSidebar";
@@ -63,6 +64,12 @@ export default function PremiumHotelTemplate(
           />
 
           <HotelEditorialSummary
+            hotelProfile={hotelProfile}
+            language={props.language}
+            userRole={props.userProfile?.role}
+          />
+
+          <HotelHighlights
             hotelProfile={hotelProfile}
             language={props.language}
             userRole={props.userProfile?.role}
