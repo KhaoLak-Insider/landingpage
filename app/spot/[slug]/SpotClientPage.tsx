@@ -19,6 +19,7 @@ export default function SpotClientPage({
   initialHotelImages,
   initialHotelRooms,
   initialHotelRestaurants,
+  initialHotelPools,
 }: SpotClientPageProps) {
   const [spot, setSpot] = useState<any>(initialSpot);
   const [gallery, setGallery] = useState<string[]>([]);
@@ -328,6 +329,7 @@ export default function SpotClientPage({
       hotelImages={initialHotelImages}
       hotelRooms={initialHotelRooms}
       hotelRestaurants={initialHotelRestaurants}
+      hotelPools={initialHotelPools}
       language={language}
       gallery={gallery}
       localizedTitle={localizedTitle}

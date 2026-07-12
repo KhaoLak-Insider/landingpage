@@ -150,6 +150,42 @@ export interface HotelRestaurantRecord {
   updated_at?: string;
 }
 
+
+export interface HotelPoolRecord {
+  id: string;
+  hotel_profile_id: string;
+  pool_type:
+    | "main_pool"
+    | "infinity_pool"
+    | "family_pool"
+    | "children_pool"
+    | "private_pool"
+    | "other";
+  name_de: string;
+  name_en?: string | null;
+  description_de?: string | null;
+  description_en?: string | null;
+  image_url?: string | null;
+  location_de?: string | null;
+  location_en?: string | null;
+  opening_hours_de?: string | null;
+  opening_hours_en?: string | null;
+  depth_min_m?: number | null;
+  depth_max_m?: number | null;
+  has_children_area?: boolean | null;
+  has_pool_bar?: boolean | null;
+  is_heated?: boolean | null;
+  is_saltwater?: boolean | null;
+  highlights_de?: unknown[];
+  highlights_en?: unknown[];
+  sort_order: number;
+  status: "draft" | "published" | "archived";
+  verified_at?: string | null;
+  source_id?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface SpotClientPageProps {
   initialSpot: SpotRecord;
   initialRandomSpots: SpotRecord[];
@@ -157,4 +193,5 @@ export interface SpotClientPageProps {
   initialHotelImages: HotelImageRecord[];
   initialHotelRooms: HotelRoomRecord[];
   initialHotelRestaurants: HotelRestaurantRecord[];
+  initialHotelPools: HotelPoolRecord[];
 }
