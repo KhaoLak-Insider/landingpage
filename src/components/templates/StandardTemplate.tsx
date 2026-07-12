@@ -7,7 +7,9 @@ import { t } from "@/src/lib/translations";
 import type { Language } from "@/src/lib/i18n";
 import type {
   HotelAmenityRecord,
+  HotelFaqRecord,
   HotelImageRecord,
+  HotelLocationRecord,
   HotelProfileRecord,
   HotelRestaurantRecord,
   HotelRoomRecord,
@@ -29,6 +31,8 @@ export interface StandardTemplateProps {
   hotelRooms?: HotelRoomRecord[];
   hotelRestaurants?: HotelRestaurantRecord[];
   hotelAmenities?: HotelAmenityRecord[];
+  hotelLocation?: HotelLocationRecord | null;
+  hotelFaqs?: HotelFaqRecord[];
   language: Language;
   gallery: string[];
   localizedTitle: string;

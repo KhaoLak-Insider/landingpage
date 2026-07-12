@@ -568,6 +568,94 @@ export default async function Page({
     hotelAmenities = hotelAmenityData || [];
   }
 
+  let hotelLocation: Record<string, unknown> | null = null;
+
+  if (hotelProfile?.id) {
+    const {
+      data: hotelLocationData,
+      error: hotelLocationError,
+    } = await supabase
+      .from("hotel_location")
+      .select(`
+        id,
+        hotel_profile_id,
+        setting_de,
+        setting_en,
+        editorial_summary_de,
+        editorial_summary_en,
+        beach_access_de,
+        beach_access_en,
+        terrain_de,
+        terrain_en,
+        noise_level_de,
+        noise_level_en,
+        walkability_de,
+        walkability_en,
+        transport_recommendation_de,
+        transport_recommendation_en,
+        sunset_view,
+        swimming_conditions_de,
+        swimming_conditions_en,
+        nearby_services_de,
+        nearby_services_en,
+        distances,
+        status,
+        verified_at,
+        source_id,
+        created_at,
+        updated_at
+      `)
+      .eq("hotel_profile_id", hotelProfile.id)
+      .eq("status", "published")
+      .maybeSingle();
+
+    if (hotelLocationError) {
+      console.error(
+        "Fehler beim Laden der Hotellage:",
+        hotelLocationError
+      );
+    }
+
+    hotelLocation = hotelLocationData;
+  }
+
+  let hotelFaqs: Array<Record<string, unknown>> = [];
+
+  if (hotelProfile?.id) {
+    const {
+      data: hotelFaqData,
+      error: hotelFaqError,
+    } = await supabase
+      .from("hotel_faqs")
+      .select(`
+        id,
+        hotel_profile_id,
+        question_de,
+        question_en,
+        answer_de,
+        answer_en,
+        category,
+        sort_order,
+        status,
+        verified_at,
+        source_id,
+        created_at,
+        updated_at
+      `)
+      .eq("hotel_profile_id", hotelProfile.id)
+      .eq("status", "published")
+      .order("sort_order", { ascending: true });
+
+    if (hotelFaqError) {
+      console.error(
+        "Fehler beim Laden der Hotel-FAQ:",
+        hotelFaqError
+      );
+    }
+
+    hotelFaqs = hotelFaqData || [];
+  }
+
   const { data: randomData, error: randomError } =
     await supabase
       .from("spots")
@@ -785,6 +873,8 @@ export default async function Page({
         initialHotelRooms={hotelRooms}
         initialHotelRestaurants={hotelRestaurants}
         initialHotelAmenities={hotelAmenities}
+        initialHotelLocation={hotelLocation}
+        initialHotelFaqs={hotelFaqs}
       />
     </>
   );

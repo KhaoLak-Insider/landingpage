@@ -256,6 +256,53 @@ export interface HotelSpaRecord {
   updated_at?: string;
 }
 
+
+export interface HotelLocationRecord {
+  id: string;
+  hotel_profile_id: string;
+  setting_de?: string | null;
+  setting_en?: string | null;
+  editorial_summary_de?: string | null;
+  editorial_summary_en?: string | null;
+  beach_access_de?: string | null;
+  beach_access_en?: string | null;
+  terrain_de?: string | null;
+  terrain_en?: string | null;
+  noise_level_de?: string | null;
+  noise_level_en?: string | null;
+  walkability_de?: string | null;
+  walkability_en?: string | null;
+  transport_recommendation_de?: string | null;
+  transport_recommendation_en?: string | null;
+  sunset_view: boolean;
+  swimming_conditions_de?: string | null;
+  swimming_conditions_en?: string | null;
+  nearby_services_de?: unknown[];
+  nearby_services_en?: unknown[];
+  distances?: unknown[];
+  status: "draft" | "published" | "archived";
+  verified_at?: string | null;
+  source_id?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface HotelFaqRecord {
+  id: string;
+  hotel_profile_id: string;
+  question_de: string;
+  question_en?: string | null;
+  answer_de: string;
+  answer_en?: string | null;
+  category: string;
+  sort_order: number;
+  status: "draft" | "published" | "archived";
+  verified_at?: string | null;
+  source_id?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface SpotClientPageProps {
   initialSpot: SpotRecord;
   initialRandomSpots: SpotRecord[];
@@ -264,4 +311,6 @@ export interface SpotClientPageProps {
   initialHotelRooms: HotelRoomRecord[];
   initialHotelRestaurants: HotelRestaurantRecord[];
   initialHotelAmenities: HotelAmenityRecord[];
+  initialHotelLocation: HotelLocationRecord | null;
+  initialHotelFaqs: HotelFaqRecord[];
 }
