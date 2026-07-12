@@ -1,18 +1,16 @@
 "use client";
 
-import type { ReactNode } from "react";
 import {
-  Car,
-  Check,
-  Footprints,
+  Landmark,
   MapPin,
-  MoonStar,
-  Navigation,
+  Palmtree,
+  Plane,
   ShoppingBag,
-  Sparkles,
-  Sun,
+  Store,
   Waves,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import MapBoxMini from "@/src/components/MapBoxMini";
 import type { Language } from "@/src/lib/i18n";
 import type {
   HotelLocationRecord,
@@ -23,82 +21,60 @@ interface HotelLocationProps {
   location: HotelLocationRecord | null;
   hotelProfile: HotelProfileRecord;
   language: Language;
+  latitude?: number | null;
+  longitude?: number | null;
   userRole?: string | null;
 }
 
 interface DistanceItem {
-  name_de?: string;
-  name_en?: string;
-  distance?: string;
-  duration?: string;
-  mode?: "walk" | "drive" | "transfer";
+  key: string;
+  label: string;
+  distanceInMeters: number | null | undefined;
+  icon: LucideIcon;
 }
 
 const labels = {
   de: {
-    eyebrow: "Lage & Umgebung",
-    title: "Wie liegt das Resort?",
-    subtitle:
-      "Lage, Erreichbarkeit und wichtige Ziele in der Umgebung kompakt zusammengefasst.",
-    setting: "Lagecharakter",
-    beachAccess: "Strandzugang",
-    terrain: "Gelände",
-    noise: "Umgebung",
-    walkability: "Zu Fuß",
-    transport: "Mobilität",
-    swimming: "Baden im Meer",
-    sunset: "Sonnenuntergang",
-    sunsetValue: "Vom Resort aus erlebbar",
-    nearby: "In der Nähe",
-    distances: "Wichtige Entfernungen",
+    title: "Lage",
+    bangNiangMarket: "Bang Niang Market",
+    coconutBeach: "Coconut Beach",
+    memoriesBeach: "Memories Beach",
+    nangThongCenter: "Zentrum von Khao Lak",
+    nearestExchange: "Nächste Wechselstube",
+    phuketAirport: "Flughafen Phuket",
+    showOnMap: "Auf Karte anzeigen",
     draft: "Redaktionelle Vorschau",
     draftNotice:
       "Diese Lageinformationen sind noch nicht zur Veröffentlichung freigegeben.",
   },
   en: {
-    eyebrow: "Location & surroundings",
-    title: "Where is the resort located?",
-    subtitle:
-      "A compact overview of the setting, accessibility and important nearby destinations.",
-    setting: "Setting",
-    beachAccess: "Beach access",
-    terrain: "Terrain",
-    noise: "Surroundings",
-    walkability: "Walkability",
-    transport: "Getting around",
-    swimming: "Sea conditions",
-    sunset: "Sunset",
-    sunsetValue: "Visible from the resort",
-    nearby: "Nearby",
-    distances: "Key distances",
+    title: "Location",
+    bangNiangMarket: "Bang Niang Market",
+    coconutBeach: "Coconut Beach",
+    memoriesBeach: "Memories Beach",
+    nangThongCenter: "Khao Lak centre",
+    nearestExchange: "Nearest currency exchange",
+    phuketAirport: "Phuket Airport",
+    showOnMap: "View on map",
     draft: "Editorial preview",
     draftNotice:
       "This location information has not yet been approved for publication.",
   },
 } as const;
 
-function localizedValue(
+function getLocalizedSummary(
   location: HotelLocationRecord,
   language: Language,
-  field:
-    | "setting"
-    | "editorial_summary"
-    | "beach_access"
-    | "terrain"
-    | "noise_level"
-    | "walkability"
-    | "transport_recommendation"
-    | "swimming_conditions"
 ): string {
   const primary =
     language === "en"
-      ? location[`${field}_en`]
-      : location[`${field}_de`];
+      ? location.editorial_summary_en
+      : location.editorial_summary_de;
 
   const fallback =
     language === "en"
-      ? location[`${field}_de`]
-      : location[`${field}_en`];
+      ? location.editorial_summary_de
+      : location.editorial_summary_en;
 
   if (typeof primary === "string" && primary.trim()) {
     return primary.trim();
@@ -111,69 +87,49 @@ function localizedValue(
   return "";
 }
 
-function localizedList(
-  germanValue: unknown,
-  englishValue: unknown,
-  language: Language
-): string[] {
-  const primary = language === "en" ? englishValue : germanValue;
-  const fallback = language === "en" ? germanValue : englishValue;
+function normalizeDistance(value: unknown): number | null {
+  const parsedValue =
+    typeof value === "number"
+      ? value
+      : typeof value === "string" && value.trim() !== ""
+        ? Number(value)
+        : Number.NaN;
 
-  const source = Array.isArray(primary)
-    ? primary
-    : Array.isArray(fallback)
-      ? fallback
-      : [];
-
-  return source.filter(
-    (item): item is string =>
-      typeof item === "string" && item.trim() !== ""
-  );
-}
-
-function getDistances(value: unknown): DistanceItem[] {
-  if (!Array.isArray(value)) {
-    return [];
+  if (!Number.isFinite(parsedValue) || parsedValue < 0) {
+    return null;
   }
 
-  return value.filter(
-    (item): item is DistanceItem =>
-      typeof item === "object" &&
-      item !== null
-  );
+  return Math.round(parsedValue);
 }
 
-function getDistanceName(
-  item: DistanceItem,
-  language: Language
+function formatDistance(
+  distanceInMeters: number,
+  language: Language,
 ): string {
-  const primary =
-    language === "en" ? item.name_en : item.name_de;
-
-  const fallback =
-    language === "en" ? item.name_de : item.name_en;
-
-  return primary?.trim() || fallback?.trim() || "";
-}
-
-function getModeIcon(
-  mode?: DistanceItem["mode"]
-): ReactNode {
-  if (mode === "walk") {
-    return <Footprints size={16} />;
+  if (distanceInMeters < 1000) {
+    return `${distanceInMeters.toLocaleString(
+      language === "de" ? "de-DE" : "en-US",
+    )} m`;
   }
 
-  if (mode === "transfer") {
-    return <Navigation size={16} />;
-  }
+  const distanceInKilometres = distanceInMeters / 1000;
+  const hasDecimal = distanceInKilometres % 1 !== 0;
 
-  return <Car size={16} />;
+  return `${distanceInKilometres.toLocaleString(
+    language === "de" ? "de-DE" : "en-US",
+    {
+      minimumFractionDigits: hasDecimal ? 1 : 0,
+      maximumFractionDigits: 1,
+    },
+  )} km`;
 }
 
 export default function HotelLocation({
   location,
   hotelProfile,
   language,
+  latitude,
+  longitude,
   userRole,
 }: HotelLocationProps) {
   const copy = labels[language];
@@ -183,11 +139,9 @@ export default function HotelLocation({
     .toLowerCase();
 
   const isEditor =
-    normalizedRole === "admin" ||
-    normalizedRole === "editor";
+    normalizedRole === "admin" || normalizedRole === "editor";
 
-  const isPublished =
-    hotelProfile.status === "published";
+  const isPublished = hotelProfile.status === "published";
 
   if (!isPublished && !isEditor) {
     return null;
@@ -197,462 +151,336 @@ export default function HotelLocation({
     return null;
   }
 
-  const editorialSummary = localizedValue(
-    location,
-    language,
-    "editorial_summary"
+  const summary = getLocalizedSummary(location, language);
+
+  const distances: DistanceItem[] = [
+    {
+      key: "bang-niang-market",
+      label: copy.bangNiangMarket,
+      distanceInMeters: normalizeDistance(
+        location.distance_bang_niang_market_m,
+      ),
+      icon: ShoppingBag,
+    },
+    {
+      key: "coconut-beach",
+      label: copy.coconutBeach,
+      distanceInMeters: normalizeDistance(
+        location.distance_coconut_beach_m,
+      ),
+      icon: Palmtree,
+    },
+    {
+      key: "memories-beach",
+      label: copy.memoriesBeach,
+      distanceInMeters: normalizeDistance(
+        location.distance_memories_beach_m,
+      ),
+      icon: Waves,
+    },
+    {
+      key: "nang-thong-center",
+      label: copy.nangThongCenter,
+      distanceInMeters: normalizeDistance(
+        location.distance_nang_thong_center_m,
+      ),
+      icon: Landmark,
+    },
+    {
+      key: "nearest-exchange",
+      label: copy.nearestExchange,
+      distanceInMeters: normalizeDistance(
+        location.distance_nearest_exchange_m,
+      ),
+      icon: Store,
+    },
+    {
+      key: "phuket-airport",
+      label: copy.phuketAirport,
+      distanceInMeters: normalizeDistance(
+        location.distance_phuket_airport_m,
+      ),
+      icon: Plane,
+    },
+  ].filter(
+    (
+      item,
+    ): item is DistanceItem & {
+      distanceInMeters: number;
+    } => item.distanceInMeters !== null,
   );
 
-  const facts = [
-    {
-      key: "setting",
-      label: copy.setting,
-      value: localizedValue(location, language, "setting"),
-      icon: <MapPin size={18} />,
-    },
-    {
-      key: "beach",
-      label: copy.beachAccess,
-      value: localizedValue(location, language, "beach_access"),
-      icon: <Waves size={18} />,
-    },
-    {
-      key: "terrain",
-      label: copy.terrain,
-      value: localizedValue(location, language, "terrain"),
-      icon: <Navigation size={18} />,
-    },
-    {
-      key: "noise",
-      label: copy.noise,
-      value: localizedValue(location, language, "noise_level"),
-      icon: <MoonStar size={18} />,
-    },
-    {
-      key: "walkability",
-      label: copy.walkability,
-      value: localizedValue(location, language, "walkability"),
-      icon: <Footprints size={18} />,
-    },
-    {
-      key: "transport",
-      label: copy.transport,
-      value: localizedValue(
-        location,
-        language,
-        "transport_recommendation"
-      ),
-      icon: <Car size={18} />,
-    },
-    {
-      key: "swimming",
-      label: copy.swimming,
-      value: localizedValue(
-        location,
-        language,
-        "swimming_conditions"
-      ),
-      icon: <Waves size={18} />,
-    },
-  ].filter((fact) => fact.value);
+  const hasCoordinates =
+    typeof latitude === "number" &&
+    Number.isFinite(latitude) &&
+    typeof longitude === "number" &&
+    Number.isFinite(longitude);
 
-  if (location.sunset_view) {
-    facts.push({
-      key: "sunset",
-      label: copy.sunset,
-      value: copy.sunsetValue,
-      icon: <Sun size={18} />,
-    });
-  }
-
-  const nearbyServices = localizedList(
-    location.nearby_services_de,
-    location.nearby_services_en,
-    language
-  );
-
-  const distances = getDistances(location.distances);
-
-  if (
-    !editorialSummary &&
-    facts.length === 0 &&
-    nearbyServices.length === 0 &&
-    distances.length === 0
-  ) {
+  if (!summary && distances.length === 0 && !hasCoordinates) {
     return null;
   }
 
+  const mapsUrl = hasCoordinates
+    ? `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`
+    : null;
+
   return (
-    <section
-      style={{
-        maxWidth: 1180,
-        margin: "0 auto 48px",
-        padding: "0 28px",
-      }}
-    >
-      <div
-        style={{
-          marginBottom: 26,
-          display: "flex",
-          alignItems: "flex-end",
-          justifyContent: "space-between",
-          gap: 24,
-          flexWrap: "wrap",
-        }}
-      >
-        <div style={{ maxWidth: 760 }}>
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              marginBottom: 10,
-              color: "#0f766e",
-              fontSize: 11,
-              fontWeight: 800,
-              textTransform: "uppercase",
-              letterSpacing: "0.13em",
-            }}
-          >
-            <MapPin size={17} />
-            {copy.eyebrow}
-          </div>
-
-          <h2
-            style={{
-              margin: 0,
-              color: "#0f172a",
-              fontSize: "clamp(28px, 4vw, 42px)",
-              lineHeight: 1.12,
-              fontWeight: 800,
-              letterSpacing: "-0.04em",
-            }}
-          >
-            {copy.title}
-          </h2>
-
-          <p
-            style={{
-              margin: "12px 0 0",
-              maxWidth: 720,
-              color: "#64748b",
-              fontSize: 15,
-              lineHeight: 1.75,
-            }}
-          >
-            {copy.subtitle}
-          </p>
-        </div>
+    <section className="hotel-location-card">
+      <div className="hotel-location-card__heading">
+        <h2>{copy.title}</h2>
 
         {!isPublished && isEditor && (
-          <div
-            style={{
-              maxWidth: 290,
-              padding: "12px 14px",
-              borderRadius: 16,
-              background: "#fff7ed",
-              border: "1px solid #fed7aa",
-              color: "#9a3412",
-            }}
-          >
-            <div
-              style={{
-                marginBottom: 4,
-                fontSize: 10,
-                fontWeight: 800,
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-              }}
-            >
-              {copy.draft}
-            </div>
-
-            <div
-              style={{
-                fontSize: 11,
-                fontWeight: 600,
-                lineHeight: 1.5,
-              }}
-            >
-              {copy.draftNotice}
-            </div>
+          <div className="hotel-location-card__draft">
+            <strong>{copy.draft}</strong>
+            <span>{copy.draftNotice}</span>
           </div>
         )}
       </div>
 
-      {editorialSummary && (
-        <div
-          style={{
-            marginBottom: 18,
-            padding: "22px 24px",
-            borderRadius: 22,
-            background:
-              "linear-gradient(135deg, #0f172a 0%, #164e63 100%)",
-            color: "#ffffff",
-            boxShadow:
-              "0 16px 40px rgba(15,23,42,0.14)",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              marginBottom: 9,
-              color: "#99f6e4",
-              fontSize: 10,
-              fontWeight: 800,
-              textTransform: "uppercase",
-              letterSpacing: "0.09em",
-            }}
-          >
-            <Sparkles size={16} />
-            Khao Lak Insider
-          </div>
-
-          <p
-            style={{
-              margin: 0,
-              fontSize: 15,
-              lineHeight: 1.75,
-              color: "rgba(255,255,255,0.9)",
-            }}
-          >
-            {editorialSummary}
-          </p>
-        </div>
-      )}
-
-      {facts.length > 0 && (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns:
-              "repeat(auto-fit, minmax(220px, 1fr))",
-            gap: 14,
-            marginBottom:
-              nearbyServices.length > 0 ||
-              distances.length > 0
-                ? 18
-                : 0,
-          }}
-        >
-          {facts.map((fact) => (
-            <div
-              key={fact.key}
-              style={{
-                padding: 18,
-                borderRadius: 18,
-                background: "#ffffff",
-                border: "1px solid #e2e8f0",
-                boxShadow:
-                  "0 10px 24px rgba(15,23,42,0.06)",
-              }}
-            >
-              <div
-                style={{
-                  width: 40,
-                  height: 40,
-                  marginBottom: 13,
-                  borderRadius: 13,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  background: "#f0fdfa",
-                  color: "#0f766e",
-                }}
-              >
-                {fact.icon}
-              </div>
-
-              <div
-                style={{
-                  marginBottom: 6,
-                  color: "#64748b",
-                  fontSize: 9,
-                  fontWeight: 800,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
-                }}
-              >
-                {fact.label}
-              </div>
-
-              <div
-                style={{
-                  color: "#334155",
-                  fontSize: 12,
-                  fontWeight: 700,
-                  lineHeight: 1.55,
-                }}
-              >
-                {fact.value}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
       <div
-        style={{
-          display: "grid",
-          gridTemplateColumns:
-            "repeat(auto-fit, minmax(280px, 1fr))",
-          gap: 18,
-        }}
+        className={`hotel-location-card__layout ${
+          !hasCoordinates ? "hotel-location-card__layout--without-map" : ""
+        }`}
       >
-        {nearbyServices.length > 0 && (
-          <div
-            style={{
-              padding: 22,
-              borderRadius: 22,
-              background: "#ffffff",
-              border: "1px solid #e2e8f0",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                marginBottom: 15,
-                color: "#0f172a",
-                fontSize: 14,
-                fontWeight: 800,
-              }}
-            >
-              <ShoppingBag size={18} color="#0f766e" />
-              {copy.nearby}
-            </div>
+        <div className="hotel-location-card__content">
+          {summary && (
+            <p className="hotel-location-card__summary">{summary}</p>
+          )}
 
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 8,
-              }}
-            >
-              {nearbyServices.map((service) => (
-                <span
-                  key={service}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 6,
-                    padding: "8px 11px",
-                    borderRadius: 999,
-                    background: "#f0fdfa",
-                    color: "#115e59",
-                    fontSize: 10,
-                    fontWeight: 700,
-                  }}
-                >
-                  <Check size={13} />
-                  {service}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {distances.length > 0 && (
-          <div
-            style={{
-              padding: 22,
-              borderRadius: 22,
-              background: "#ffffff",
-              border: "1px solid #e2e8f0",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                marginBottom: 15,
-                color: "#0f172a",
-                fontSize: 14,
-                fontWeight: 800,
-              }}
-            >
-              <Navigation size={18} color="#0f766e" />
-              {copy.distances}
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 10,
-              }}
-            >
-              {distances.map((item, index) => {
-                const name = getDistanceName(item, language);
-
-                if (!name) {
-                  return null;
-                }
+          {distances.length > 0 && (
+            <div className="hotel-location-card__distances">
+              {distances.map((item) => {
+                const Icon = item.icon;
 
                 return (
-                  <div
-                    key={`${name}-${index}`}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      gap: 14,
-                      padding: "11px 12px",
-                      borderRadius: 14,
-                      background: "#f8fafc",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 9,
-                        minWidth: 0,
-                      }}
-                    >
-                      <span
-                        style={{
-                          flexShrink: 0,
-                          color: "#0f766e",
-                        }}
-                      >
-                        {getModeIcon(item.mode)}
-                      </span>
-
-                      <span
-                        style={{
-                          color: "#334155",
-                          fontSize: 11,
-                          fontWeight: 700,
-                        }}
-                      >
-                        {name}
-                      </span>
-                    </div>
-
-                    <span
-                      style={{
-                        flexShrink: 0,
-                        color: "#64748b",
-                        fontSize: 10,
-                        fontWeight: 700,
-                      }}
-                    >
-                      {[item.distance, item.duration]
-                        .filter(Boolean)
-                        .join(" · ")}
+                  <div className="hotel-location-card__distance" key={item.key}>
+                    <span className="hotel-location-card__distance-name">
+                      <Icon size={15} strokeWidth={1.8} />
+                      <span>{item.label}</span>
                     </span>
+
+                    <span className="hotel-location-card__dots" />
+
+                    <strong>
+                      {formatDistance(item.distanceInMeters, language)}
+                    </strong>
                   </div>
                 );
               })}
             </div>
+          )}
+        </div>
+
+        {hasCoordinates && (
+          <div className="hotel-location-card__map-column">
+            <div className="hotel-location-card__map">
+              <MapBoxMini lat={latitude} lng={longitude} route={null} />
+            </div>
+
+            {mapsUrl && (
+              <a
+                className="hotel-location-card__map-link"
+                href={mapsUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {copy.showOnMap}
+                <span aria-hidden="true">→</span>
+              </a>
+            )}
           </div>
         )}
       </div>
+
+      <style jsx>{`
+        .hotel-location-card {
+          width: 100%;
+          padding: 18px;
+        }
+
+        .hotel-location-card__heading {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          margin-bottom: 12px;
+        }
+
+        h2 {
+          margin: 0;
+          color: #10233f;
+          font-size: 18px;
+          line-height: 1.3;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+        }
+
+        .hotel-location-card__draft {
+          display: flex;
+          max-width: 265px;
+          flex-direction: column;
+          gap: 2px;
+          padding: 8px 10px;
+          border: 1px solid #fed7aa;
+          border-radius: 10px;
+          background: #fff7ed;
+          color: #9a3412;
+          font-size: 9px;
+          line-height: 1.35;
+        }
+
+        .hotel-location-card__draft strong {
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+        }
+
+        .hotel-location-card__layout {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 220px;
+          gap: 18px;
+          align-items: stretch;
+        }
+
+        .hotel-location-card__layout--without-map {
+          grid-template-columns: 1fr;
+        }
+
+        .hotel-location-card__content {
+          min-width: 0;
+        }
+
+        .hotel-location-card__summary {
+          margin: 0 0 13px;
+          color: #526276;
+          font-size: 12px;
+          line-height: 1.65;
+        }
+
+        .hotel-location-card__distances {
+          display: flex;
+          flex-direction: column;
+          gap: 9px;
+        }
+
+        .hotel-location-card__distance {
+          display: flex;
+          min-width: 0;
+          align-items: center;
+          gap: 8px;
+          color: #415167;
+          font-size: 11px;
+          line-height: 1.35;
+        }
+
+        .hotel-location-card__distance-name {
+          display: inline-flex;
+          min-width: 0;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .hotel-location-card__distance-name :global(svg) {
+          flex: 0 0 auto;
+          color: #0f8f91;
+        }
+
+        .hotel-location-card__distance-name span {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .hotel-location-card__dots {
+          min-width: 18px;
+          flex: 1 1 auto;
+          border-bottom: 1px dotted #cbd5df;
+          transform: translateY(-1px);
+        }
+
+        .hotel-location-card__distance strong {
+          flex: 0 0 auto;
+          color: #10233f;
+          font-size: 11px;
+          font-weight: 700;
+        }
+
+        .hotel-location-card__map-column {
+          display: flex;
+          min-width: 0;
+          overflow: hidden;
+          flex-direction: column;
+          border: 1px solid #e8edf2;
+          border-radius: 12px;
+          background: #ffffff;
+        }
+
+        .hotel-location-card__map {
+          height: 196px;
+          overflow: hidden;
+          background: #eef5f4;
+        }
+
+        .hotel-location-card__map :global(.mapboxgl-map) {
+          width: 100%;
+          height: 100%;
+        }
+
+        .hotel-location-card__map-link {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 7px;
+          min-height: 38px;
+          padding: 8px 12px;
+          border-top: 1px solid #edf1f4;
+          color: #079ca5;
+          font-size: 10px;
+          line-height: 1.3;
+          font-weight: 700;
+          text-decoration: none;
+          transition:
+            background 180ms ease,
+            color 180ms ease;
+        }
+
+        .hotel-location-card__map-link:hover {
+          background: #f0fdfa;
+          color: #087f86;
+        }
+
+        @media (max-width: 760px) {
+          .hotel-location-card__layout {
+            grid-template-columns: 1fr;
+          }
+
+          .hotel-location-card__map {
+            height: 220px;
+          }
+        }
+
+        @media (max-width: 560px) {
+          .hotel-location-card {
+            padding: 14px;
+          }
+
+          .hotel-location-card__heading {
+            align-items: flex-start;
+            flex-direction: column;
+          }
+
+          .hotel-location-card__summary {
+            font-size: 11px;
+          }
+
+          .hotel-location-card__distance {
+            font-size: 10px;
+          }
+
+          .hotel-location-card__distance strong {
+            font-size: 10px;
+          }
+        }
+      `}</style>
     </section>
   );
 }
