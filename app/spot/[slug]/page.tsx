@@ -471,6 +471,52 @@ export default async function Page({
     hotelRooms = hotelRoomData || [];
   }
 
+  let hotelRestaurants: Array<Record<string, unknown>> = [];
+
+  if (hotelProfile?.id) {
+    const {
+      data: hotelRestaurantData,
+      error: hotelRestaurantError,
+    } = await supabase
+      .from("hotel_restaurants")
+      .select(`
+        id,
+        hotel_profile_id,
+        venue_type,
+        name,
+        description_de,
+        description_en,
+        cuisine_de,
+        cuisine_en,
+        location_de,
+        location_en,
+        opening_hours_de,
+        opening_hours_en,
+        image_url,
+        highlights_de,
+        highlights_en,
+        reservation_url,
+        sort_order,
+        status,
+        verified_at,
+        source_id,
+        created_at,
+        updated_at
+      `)
+      .eq("hotel_profile_id", hotelProfile.id)
+      .eq("status", "published")
+      .order("sort_order", { ascending: true });
+
+    if (hotelRestaurantError) {
+      console.error(
+        "Fehler beim Laden der Hotelrestaurants:",
+        hotelRestaurantError
+      );
+    }
+
+    hotelRestaurants = hotelRestaurantData || [];
+  }
+
   const { data: randomData, error: randomError } =
     await supabase
       .from("spots")
@@ -686,6 +732,7 @@ export default async function Page({
         initialHotelProfile={hotelProfile}
         initialHotelImages={hotelImages}
         initialHotelRooms={hotelRooms}
+        initialHotelRestaurants={hotelRestaurants}
       />
     </>
   );

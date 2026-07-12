@@ -124,10 +124,37 @@ export interface HotelRoomRecord {
   updated_at?: string;
 }
 
+
+export interface HotelRestaurantRecord {
+  id: string;
+  hotel_profile_id: string;
+  venue_type: "restaurant" | "bar" | "cafe" | "beach_bar" | "other";
+  name: string;
+  description_de?: string | null;
+  description_en?: string | null;
+  cuisine_de?: string | null;
+  cuisine_en?: string | null;
+  location_de?: string | null;
+  location_en?: string | null;
+  opening_hours_de?: string | null;
+  opening_hours_en?: string | null;
+  image_url?: string | null;
+  highlights_de?: unknown[];
+  highlights_en?: unknown[];
+  reservation_url?: string | null;
+  sort_order: number;
+  status: "draft" | "published" | "archived";
+  verified_at?: string | null;
+  source_id?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface SpotClientPageProps {
   initialSpot: SpotRecord;
   initialRandomSpots: SpotRecord[];
   initialHotelProfile: HotelProfileRecord | null;
   initialHotelImages: HotelImageRecord[];
   initialHotelRooms: HotelRoomRecord[];
+  initialHotelRestaurants: HotelRestaurantRecord[];
 }
