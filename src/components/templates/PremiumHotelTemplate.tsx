@@ -11,6 +11,7 @@ import HotelRestaurants from "@/src/components/hotel/HotelRestaurants";
 import HotelPools from "@/src/components/hotel/HotelPools";
 import HotelSpa from "@/src/components/hotel/HotelSpa";
 import HotelActivities from "@/src/components/hotel/HotelActivities";
+import HotelFacilities from "@/src/components/hotel/HotelFacilities";
 import HotelGallery from "@/src/components/hotel/HotelGallery";
 import SpotDescription from "@/src/components/spot/SpotDescription";
 import SpotSidebar from "@/src/components/spot/SpotSidebar";
@@ -189,6 +190,12 @@ export default function PremiumHotelTemplate(
       amenity.amenity_type === "activity"
   );
 
+  const hotelFacilities = hotelAmenities.filter(
+    (amenity) =>
+      amenity.amenity_type === "facility" ||
+      amenity.amenity_type === "service"
+  );
+
   const isBeach = [
     "strand",
     "straende",
@@ -280,6 +287,13 @@ export default function PremiumHotelTemplate(
 
           <HotelActivities
             activities={hotelActivities}
+            hotelProfile={hotelProfile}
+            language={props.language}
+            userRole={props.userProfile?.role}
+          />
+
+          <HotelFacilities
+            facilities={hotelFacilities}
             hotelProfile={hotelProfile}
             language={props.language}
             userRole={props.userProfile?.role}
