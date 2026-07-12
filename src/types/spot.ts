@@ -95,9 +95,39 @@ export interface HotelImageRecord {
   updated_at?: string;
 }
 
+
+export interface HotelRoomRecord {
+  id: string;
+  hotel_profile_id: string;
+  name_de: string;
+  name_en?: string | null;
+  description_de?: string | null;
+  description_en?: string | null;
+  image_url?: string | null;
+  size_sqm?: number | null;
+  max_adults?: number | null;
+  max_children?: number | null;
+  bed_type_de?: string | null;
+  bed_type_en?: string | null;
+  view_de?: string | null;
+  view_en?: string | null;
+  highlights_de?: unknown[];
+  highlights_en?: unknown[];
+  price_from?: number | null;
+  currency?: string | null;
+  booking_url?: string | null;
+  sort_order: number;
+  status: "draft" | "published" | "archived";
+  verified_at?: string | null;
+  source_id?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface SpotClientPageProps {
   initialSpot: SpotRecord;
   initialRandomSpots: SpotRecord[];
   initialHotelProfile: HotelProfileRecord | null;
   initialHotelImages: HotelImageRecord[];
+  initialHotelRooms: HotelRoomRecord[];
 }

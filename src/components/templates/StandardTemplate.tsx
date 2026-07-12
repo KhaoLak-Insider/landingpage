@@ -8,6 +8,7 @@ import type { Language } from "@/src/lib/i18n";
 import type {
   HotelImageRecord,
   HotelProfileRecord,
+  HotelRoomRecord,
 } from "@/src/types/spot";
 import SpotHero from "@/src/components/spot/SpotHero";
 import SpotGallery from "@/src/components/spot/SpotGallery";
@@ -23,6 +24,7 @@ export interface StandardTemplateProps {
   spot: any;
   hotelProfile?: HotelProfileRecord | null;
   hotelImages?: HotelImageRecord[];
+  hotelRooms?: HotelRoomRecord[];
   language: Language;
   gallery: string[];
   localizedTitle: string;
