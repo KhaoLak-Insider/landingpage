@@ -1,14 +1,12 @@
 "use client";
 
-import type { ReactNode } from "react";
 import {
   ArrowRight,
+  Beer,
   Check,
   Clock3,
   Coffee,
-  GlassWater,
   MapPin,
-  Soup,
   UtensilsCrossed,
 } from "lucide-react";
 import type { Language } from "@/src/lib/i18n";
@@ -18,7 +16,7 @@ import type {
 } from "@/src/types/spot";
 
 interface HotelRestaurantsProps {
-  restaurants: HotelRestaurantRecord[];
+  venues: HotelRestaurantRecord[];
   hotelProfile: HotelProfileRecord;
   language: Language;
   userRole?: string | null;
@@ -29,16 +27,19 @@ const labels = {
     eyebrow: "Restaurants & Bars",
     title: "Kulinarik innerhalb des Resorts",
     subtitle:
-      "Restaurants, Bars und Cafés mit ihren wichtigsten Informationen im Überblick.",
+      "Restaurants, Bars und Cafés mit ihren Konzepten, Öffnungszeiten und wichtigsten Angeboten.",
     restaurant: "Restaurant",
     bar: "Bar",
     cafe: "Café",
-    beachBar: "Strandbar",
-    other: "Gastronomie",
-    cuisine: "Küche",
+    cuisine: "Küche & Konzept",
     location: "Lage",
     openingHours: "Öffnungszeiten",
-    reservation: "Mehr erfahren",
+    breakfast: "Frühstück",
+    lunch: "Mittagessen",
+    dinner: "Abendessen",
+    drinks: "Getränke",
+    menu: "Menü ansehen",
+    reservation: "Reservieren",
     draft: "Redaktionelle Vorschau",
     draftNotice:
       "Diese Gastronomieinformationen sind noch nicht zur Veröffentlichung freigegeben.",
@@ -47,16 +48,19 @@ const labels = {
     eyebrow: "Restaurants & bars",
     title: "Dining within the resort",
     subtitle:
-      "An overview of the resort's restaurants, bars and cafés.",
+      "Restaurants, bars and cafés with their concepts, opening hours and key offerings.",
     restaurant: "Restaurant",
     bar: "Bar",
     cafe: "Café",
-    beachBar: "Beach bar",
-    other: "Dining venue",
-    cuisine: "Cuisine",
+    cuisine: "Cuisine & concept",
     location: "Location",
     openingHours: "Opening hours",
-    reservation: "Learn more",
+    breakfast: "Breakfast",
+    lunch: "Lunch",
+    dinner: "Dinner",
+    drinks: "Drinks",
+    menu: "View menu",
+    reservation: "Reserve",
     draft: "Editorial preview",
     draftNotice:
       "This dining information has not yet been approved for publication.",
@@ -64,9 +68,10 @@ const labels = {
 } as const;
 
 function localizedValue(
-  restaurant: HotelRestaurantRecord,
+  venue: HotelRestaurantRecord,
   language: Language,
   field:
+    | "name"
     | "description"
     | "cuisine"
     | "location"
@@ -74,13 +79,13 @@ function localizedValue(
 ): string {
   const primary =
     language === "en"
-      ? restaurant[`${field}_en`]
-      : restaurant[`${field}_de`];
+      ? venue[`${field}_en`]
+      : venue[`${field}_de`];
 
   const fallback =
     language === "en"
-      ? restaurant[`${field}_de`]
-      : restaurant[`${field}_en`];
+      ? venue[`${field}_de`]
+      : venue[`${field}_en`];
 
   if (
     typeof primary === "string" &&
@@ -100,18 +105,18 @@ function localizedValue(
 }
 
 function localizedHighlights(
-  restaurant: HotelRestaurantRecord,
+  venue: HotelRestaurantRecord,
   language: Language
 ): string[] {
   const primary =
     language === "en"
-      ? restaurant.highlights_en
-      : restaurant.highlights_de;
+      ? venue.highlights_en
+      : venue.highlights_de;
 
   const fallback =
     language === "en"
-      ? restaurant.highlights_de
-      : restaurant.highlights_en;
+      ? venue.highlights_de
+      : venue.highlights_en;
 
   const source = Array.isArray(primary)
     ? primary
@@ -126,50 +131,8 @@ function localizedHighlights(
   );
 }
 
-function getVenueMeta(
-  type: HotelRestaurantRecord["venue_type"],
-  language: Language
-): {
-  label: string;
-  icon: ReactNode;
-} {
-  const copy = labels[language];
-
-  switch (type) {
-    case "bar":
-      return {
-        label: copy.bar,
-        icon: <GlassWater size={17} />,
-      };
-
-    case "cafe":
-      return {
-        label: copy.cafe,
-        icon: <Coffee size={17} />,
-      };
-
-    case "beach_bar":
-      return {
-        label: copy.beachBar,
-        icon: <GlassWater size={17} />,
-      };
-
-    case "restaurant":
-      return {
-        label: copy.restaurant,
-        icon: <UtensilsCrossed size={17} />,
-      };
-
-    default:
-      return {
-        label: copy.other,
-        icon: <Soup size={17} />,
-      };
-  }
-}
-
 export default function HotelRestaurants({
-  restaurants,
+  venues,
   hotelProfile,
   language,
   userRole,
@@ -191,7 +154,7 @@ export default function HotelRestaurants({
     return null;
   }
 
-  if (restaurants.length === 0) {
+  if (venues.length === 0) {
     return null;
   }
 
@@ -301,44 +264,73 @@ export default function HotelRestaurants({
           gap: 18,
         }}
       >
-        {restaurants.map((restaurant) => {
-          const venue = getVenueMeta(
-            restaurant.venue_type,
-            language
-          );
+        {venues.map((venue) => {
+          const name =
+            localizedValue(venue, language, "name");
 
-          const description = localizedValue(
-            restaurant,
-            language,
-            "description"
-          );
+          const description =
+            localizedValue(
+              venue,
+              language,
+              "description"
+            );
 
-          const cuisine = localizedValue(
-            restaurant,
-            language,
-            "cuisine"
-          );
+          const cuisine =
+            localizedValue(
+              venue,
+              language,
+              "cuisine"
+            );
 
-          const location = localizedValue(
-            restaurant,
-            language,
-            "location"
-          );
+          const location =
+            localizedValue(
+              venue,
+              language,
+              "location"
+            );
 
-          const openingHours = localizedValue(
-            restaurant,
-            language,
-            "opening_hours"
-          );
+          const openingHours =
+            localizedValue(
+              venue,
+              language,
+              "opening_hours"
+            );
 
-          const highlights = localizedHighlights(
-            restaurant,
-            language
-          );
+          const highlights =
+            localizedHighlights(venue, language);
+
+          const services = [
+            venue.serves_breakfast
+              ? copy.breakfast
+              : "",
+            venue.serves_lunch
+              ? copy.lunch
+              : "",
+            venue.serves_dinner
+              ? copy.dinner
+              : "",
+            venue.serves_drinks
+              ? copy.drinks
+              : "",
+          ].filter(Boolean);
+
+          const typeLabel =
+            venue.venue_type === "bar"
+              ? copy.bar
+              : venue.venue_type === "cafe"
+                ? copy.cafe
+                : copy.restaurant;
+
+          const TypeIcon =
+            venue.venue_type === "bar"
+              ? Beer
+              : venue.venue_type === "cafe"
+                ? Coffee
+                : UtensilsCrossed;
 
           return (
             <article
-              key={restaurant.id}
+              key={venue.id}
               style={{
                 overflow: "hidden",
                 borderRadius: 24,
@@ -348,43 +340,68 @@ export default function HotelRestaurants({
                   "0 16px 40px rgba(15,23,42,0.08)",
               }}
             >
-              {restaurant.image_url && (
+              {venue.image_url && (
                 <div
                   style={{
-                    height: 210,
+                    position: "relative",
+                    height: 215,
                     overflow: "hidden",
                     background: "#e2e8f0",
                   }}
                 >
                   <img
-                    src={restaurant.image_url}
-                    alt={restaurant.name}
+                    src={venue.image_url}
+                    alt={name}
                     style={{
                       width: "100%",
                       height: "100%",
                       objectFit: "cover",
                     }}
                   />
+
+                  <div
+                    style={{
+                      position: "absolute",
+                      left: 14,
+                      top: 14,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 7,
+                      padding: "8px 11px",
+                      borderRadius: 999,
+                      background:
+                        "rgba(15,23,42,0.82)",
+                      color: "#ffffff",
+                      fontSize: 10,
+                      fontWeight: 800,
+                      backdropFilter: "blur(8px)",
+                    }}
+                  >
+                    <TypeIcon size={14} />
+                    {typeLabel}
+                  </div>
                 </div>
               )}
 
               <div style={{ padding: 24 }}>
-                <div
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 7,
-                    marginBottom: 11,
-                    color: "#0f766e",
-                    fontSize: 10,
-                    fontWeight: 800,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.08em",
-                  }}
-                >
-                  {venue.icon}
-                  {venue.label}
-                </div>
+                {!venue.image_url && (
+                  <div
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 7,
+                      marginBottom: 12,
+                      color: "#0f766e",
+                      fontSize: 10,
+                      fontWeight: 800,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                    }}
+                  >
+                    <TypeIcon size={15} />
+                    {typeLabel}
+                  </div>
+                )}
 
                 <h3
                   style={{
@@ -396,7 +413,7 @@ export default function HotelRestaurants({
                     letterSpacing: "-0.03em",
                   }}
                 >
-                  {restaurant.name}
+                  {name}
                 </h3>
 
                 {description && (
@@ -412,43 +429,43 @@ export default function HotelRestaurants({
                   </p>
                 )}
 
-                {(cuisine ||
-                  location ||
-                  openingHours) && (
-                  <div
-                    style={{
-                      display: "grid",
-                      gap: 10,
-                      marginTop: 20,
-                    }}
-                  >
-                    {cuisine && (
-                      <RestaurantFact
-                        icon={<UtensilsCrossed size={16} />}
-                        label={copy.cuisine}
-                        value={cuisine}
-                      />
-                    )}
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns:
+                      "repeat(2, minmax(0, 1fr))",
+                    gap: 10,
+                    marginTop: 20,
+                  }}
+                >
+                  {cuisine && (
+                    <VenueFact
+                      icon={
+                        <UtensilsCrossed size={16} />
+                      }
+                      label={copy.cuisine}
+                      value={cuisine}
+                    />
+                  )}
 
-                    {location && (
-                      <RestaurantFact
-                        icon={<MapPin size={16} />}
-                        label={copy.location}
-                        value={location}
-                      />
-                    )}
+                  {location && (
+                    <VenueFact
+                      icon={<MapPin size={16} />}
+                      label={copy.location}
+                      value={location}
+                    />
+                  )}
 
-                    {openingHours && (
-                      <RestaurantFact
-                        icon={<Clock3 size={16} />}
-                        label={copy.openingHours}
-                        value={openingHours}
-                      />
-                    )}
-                  </div>
-                )}
+                  {openingHours && (
+                    <VenueFact
+                      icon={<Clock3 size={16} />}
+                      label={copy.openingHours}
+                      value={openingHours}
+                    />
+                  )}
+                </div>
 
-                {highlights.length > 0 && (
+                {services.length > 0 && (
                   <div
                     style={{
                       display: "flex",
@@ -457,9 +474,9 @@ export default function HotelRestaurants({
                       marginTop: 18,
                     }}
                   >
-                    {highlights.map((highlight) => (
+                    {services.map((service) => (
                       <span
-                        key={highlight}
+                        key={service}
                         style={{
                           display: "inline-flex",
                           alignItems: "center",
@@ -473,40 +490,72 @@ export default function HotelRestaurants({
                         }}
                       >
                         <Check size={13} />
-                        {highlight}
+                        {service}
                       </span>
                     ))}
                   </div>
                 )}
 
-                {restaurant.reservation_url && (
+                {highlights.length > 0 && (
+                  <ul
+                    style={{
+                      margin: "18px 0 0",
+                      padding: 0,
+                      listStyle: "none",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 8,
+                    }}
+                  >
+                    {highlights.map((highlight) => (
+                      <li
+                        key={highlight}
+                        style={{
+                          display: "flex",
+                          gap: 8,
+                          color: "#475569",
+                          fontSize: 11,
+                          lineHeight: 1.5,
+                        }}
+                      >
+                        <Check
+                          size={15}
+                          color="#0f766e"
+                          style={{ flexShrink: 0 }}
+                        />
+                        {highlight}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {(venue.menu_url ||
+                  venue.reservation_url) && (
                   <div
                     style={{
                       marginTop: 22,
                       paddingTop: 18,
                       borderTop: "1px solid #e2e8f0",
+                      display: "flex",
+                      gap: 10,
+                      flexWrap: "wrap",
                     }}
                   >
-                    <a
-                      href={restaurant.reservation_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 7,
-                        padding: "10px 13px",
-                        borderRadius: 12,
-                        background: "#0f766e",
-                        color: "#ffffff",
-                        textDecoration: "none",
-                        fontSize: 11,
-                        fontWeight: 800,
-                      }}
-                    >
-                      {copy.reservation}
-                      <ArrowRight size={15} />
-                    </a>
+                    {venue.menu_url && (
+                      <VenueLink
+                        href={venue.menu_url}
+                        label={copy.menu}
+                        primary={false}
+                      />
+                    )}
+
+                    {venue.reservation_url && (
+                      <VenueLink
+                        href={venue.reservation_url}
+                        label={copy.reservation}
+                        primary
+                      />
+                    )}
                   </div>
                 )}
               </div>
@@ -518,21 +567,18 @@ export default function HotelRestaurants({
   );
 }
 
-function RestaurantFact({
+function VenueFact({
   icon,
   label,
   value,
 }: {
-  icon: ReactNode;
+  icon: React.ReactNode;
   label: string;
   value: string;
 }) {
   return (
     <div
       style={{
-        display: "flex",
-        alignItems: "flex-start",
-        gap: 10,
         padding: "11px 12px",
         borderRadius: 14,
         background: "#f8fafc",
@@ -541,38 +587,73 @@ function RestaurantFact({
     >
       <div
         style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
           color: "#0f766e",
-          marginTop: 1,
+          marginBottom: 5,
         }}
       >
         {icon}
-      </div>
-
-      <div>
-        <div
+        <span
           style={{
-            color: "#64748b",
             fontSize: 9,
             fontWeight: 800,
             textTransform: "uppercase",
             letterSpacing: "0.07em",
-            marginBottom: 3,
           }}
         >
           {label}
-        </div>
+        </span>
+      </div>
 
-        <div
-          style={{
-            color: "#334155",
-            fontSize: 11,
-            fontWeight: 700,
-            lineHeight: 1.45,
-          }}
-        >
-          {value}
-        </div>
+      <div
+        style={{
+          color: "#334155",
+          fontSize: 11,
+          fontWeight: 700,
+          lineHeight: 1.4,
+        }}
+      >
+        {value}
       </div>
     </div>
+  );
+}
+
+function VenueLink({
+  href,
+  label,
+  primary,
+}: {
+  href: string;
+  label: string;
+  primary: boolean;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 7,
+        padding: "10px 13px",
+        borderRadius: 12,
+        background: primary
+          ? "#0f766e"
+          : "#f1f5f9",
+        color: primary
+          ? "#ffffff"
+          : "#334155",
+        textDecoration: "none",
+        fontSize: 11,
+        fontWeight: 800,
+      }}
+    >
+      {label}
+      <ArrowRight size={15} />
+    </a>
   );
 }

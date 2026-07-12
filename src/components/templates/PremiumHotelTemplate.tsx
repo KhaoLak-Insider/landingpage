@@ -10,6 +10,7 @@ import HotelRooms from "@/src/components/hotel/HotelRooms";
 import HotelRestaurants from "@/src/components/hotel/HotelRestaurants";
 import HotelPools from "@/src/components/hotel/HotelPools";
 import HotelSpa from "@/src/components/hotel/HotelSpa";
+import HotelActivities from "@/src/components/hotel/HotelActivities";
 import HotelGallery from "@/src/components/hotel/HotelGallery";
 import SpotDescription from "@/src/components/spot/SpotDescription";
 import SpotSidebar from "@/src/components/spot/SpotSidebar";
@@ -17,6 +18,140 @@ import NearbySpots from "@/src/components/spot/NearbySpots";
 import MoreDiscoveries from "@/src/components/spot/MoreDiscoveries";
 import { t } from "@/src/lib/translations";
 import type { StandardTemplateProps } from "@/src/components/templates/StandardTemplate";
+import type {
+  HotelAmenityRecord,
+  HotelPoolRecord,
+  HotelSpaRecord,
+} from "@/src/types/spot";
+
+
+function getAmenityDetail<T>(
+  amenity: HotelAmenityRecord,
+  key: string,
+  fallback: T
+): T {
+  const details = amenity.details;
+
+  if (
+    !details ||
+    typeof details !== "object" ||
+    !(key in details)
+  ) {
+    return fallback;
+  }
+
+  return details[key] as T;
+}
+
+function toPoolRecord(
+  amenity: HotelAmenityRecord
+): HotelPoolRecord {
+  return {
+    id: amenity.id,
+    hotel_profile_id: amenity.hotel_profile_id,
+    pool_type: getAmenityDetail<
+      HotelPoolRecord["pool_type"]
+    >(amenity, "pool_type", "other"),
+    name_de: amenity.name_de,
+    name_en: amenity.name_en,
+    description_de: amenity.description_de,
+    description_en: amenity.description_en,
+    image_url: amenity.image_url,
+    location_de: amenity.location_de,
+    location_en: amenity.location_en,
+    opening_hours_de: amenity.opening_hours_de,
+    opening_hours_en: amenity.opening_hours_en,
+    depth_min_m: getAmenityDetail<number | null>(
+      amenity,
+      "depth_min_m",
+      null
+    ),
+    depth_max_m: getAmenityDetail<number | null>(
+      amenity,
+      "depth_max_m",
+      null
+    ),
+    has_children_area: getAmenityDetail(
+      amenity,
+      "has_children_area",
+      false
+    ),
+    has_pool_bar: getAmenityDetail(
+      amenity,
+      "has_pool_bar",
+      false
+    ),
+    is_heated: getAmenityDetail(
+      amenity,
+      "is_heated",
+      false
+    ),
+    is_saltwater: getAmenityDetail(
+      amenity,
+      "is_saltwater",
+      false
+    ),
+    highlights_de: amenity.highlights_de,
+    highlights_en: amenity.highlights_en,
+    sort_order: amenity.sort_order,
+    status: amenity.status,
+    verified_at: amenity.verified_at,
+    source_id: amenity.source_id,
+    created_at: amenity.created_at,
+    updated_at: amenity.updated_at,
+  };
+}
+
+function toSpaRecord(
+  amenity: HotelAmenityRecord
+): HotelSpaRecord {
+  return {
+    id: amenity.id,
+    hotel_profile_id: amenity.hotel_profile_id,
+    name_de: amenity.name_de,
+    name_en: amenity.name_en,
+    description_de: amenity.description_de,
+    description_en: amenity.description_en,
+    image_url: amenity.image_url,
+    location_de: amenity.location_de,
+    location_en: amenity.location_en,
+    opening_hours_de: amenity.opening_hours_de,
+    opening_hours_en: amenity.opening_hours_en,
+    treatments_de: getAmenityDetail<unknown[]>(
+      amenity,
+      "treatments_de",
+      []
+    ),
+    treatments_en: getAmenityDetail<unknown[]>(
+      amenity,
+      "treatments_en",
+      []
+    ),
+    highlights_de: amenity.highlights_de,
+    highlights_en: amenity.highlights_en,
+    price_from: getAmenityDetail<number | null>(
+      amenity,
+      "price_from",
+      null
+    ),
+    currency: getAmenityDetail<string | null>(
+      amenity,
+      "currency",
+      null
+    ),
+    reservation_url: getAmenityDetail<string | null>(
+      amenity,
+      "reservation_url",
+      null
+    ),
+    sort_order: amenity.sort_order,
+    status: amenity.status,
+    verified_at: amenity.verified_at,
+    source_id: amenity.source_id,
+    created_at: amenity.created_at,
+    updated_at: amenity.updated_at,
+  };
+}
 
 function normalizeCategory(value: unknown): string {
   return String(value || "")
@@ -32,6 +167,27 @@ export default function PremiumHotelTemplate(
   props: StandardTemplateProps
 ) {
   const hotelProfile = props.hotelProfile;
+
+  const hotelAmenities = props.hotelAmenities || [];
+
+  const hotelPools = hotelAmenities
+    .filter(
+      (amenity) =>
+        amenity.amenity_type === "pool"
+    )
+    .map(toPoolRecord);
+
+  const hotelSpaAreas = hotelAmenities
+    .filter(
+      (amenity) =>
+        amenity.amenity_type === "spa"
+    )
+    .map(toSpaRecord);
+
+  const hotelActivities = hotelAmenities.filter(
+    (amenity) =>
+      amenity.amenity_type === "activity"
+  );
 
   const isBeach = [
     "strand",
@@ -102,21 +258,28 @@ export default function PremiumHotelTemplate(
           />
 
           <HotelRestaurants
-            restaurants={props.hotelRestaurants || []}
+            venues={props.hotelRestaurants || []}
             hotelProfile={hotelProfile}
             language={props.language}
             userRole={props.userProfile?.role}
           />
 
           <HotelPools
-            pools={props.hotelPools || []}
+            pools={hotelPools}
             hotelProfile={hotelProfile}
             language={props.language}
             userRole={props.userProfile?.role}
           />
 
           <HotelSpa
-            spaAreas={props.hotelSpa || []}
+            spaAreas={hotelSpaAreas}
+            hotelProfile={hotelProfile}
+            language={props.language}
+            userRole={props.userProfile?.role}
+          />
+
+          <HotelActivities
+            activities={hotelActivities}
             hotelProfile={hotelProfile}
             language={props.language}
             userRole={props.userProfile?.role}

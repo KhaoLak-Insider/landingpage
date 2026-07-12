@@ -6,12 +6,11 @@ import { iconMap } from "@/src/components/IconLibrary";
 import { t } from "@/src/lib/translations";
 import type { Language } from "@/src/lib/i18n";
 import type {
+  HotelAmenityRecord,
   HotelImageRecord,
-  HotelPoolRecord,
   HotelProfileRecord,
   HotelRestaurantRecord,
   HotelRoomRecord,
-  HotelSpaRecord,
 } from "@/src/types/spot";
 import SpotHero from "@/src/components/spot/SpotHero";
 import SpotGallery from "@/src/components/spot/SpotGallery";
@@ -29,8 +28,7 @@ export interface StandardTemplateProps {
   hotelImages?: HotelImageRecord[];
   hotelRooms?: HotelRoomRecord[];
   hotelRestaurants?: HotelRestaurantRecord[];
-  hotelPools?: HotelPoolRecord[];
-  hotelSpa?: HotelSpaRecord[];
+  hotelAmenities?: HotelAmenityRecord[];
   language: Language;
   gallery: string[];
   localizedTitle: string;

@@ -483,18 +483,24 @@ export default async function Page({
         id,
         hotel_profile_id,
         venue_type,
-        name,
+        name_de,
+        name_en,
         description_de,
         description_en,
+        image_url,
         cuisine_de,
         cuisine_en,
         location_de,
         location_en,
         opening_hours_de,
         opening_hours_en,
-        image_url,
+        serves_breakfast,
+        serves_lunch,
+        serves_dinner,
+        serves_drinks,
         highlights_de,
         highlights_en,
+        menu_url,
         reservation_url,
         sort_order,
         status,
@@ -509,7 +515,7 @@ export default async function Page({
 
     if (hotelRestaurantError) {
       console.error(
-        "Fehler beim Laden der Hotelrestaurants:",
+        "Fehler beim Laden der Hotelgastronomie:",
         hotelRestaurantError
       );
     }
@@ -517,18 +523,18 @@ export default async function Page({
     hotelRestaurants = hotelRestaurantData || [];
   }
 
-  let hotelPools: Array<Record<string, unknown>> = [];
+  let hotelAmenities: Array<Record<string, unknown>> = [];
 
   if (hotelProfile?.id) {
     const {
-      data: hotelPoolData,
-      error: hotelPoolError,
+      data: hotelAmenityData,
+      error: hotelAmenityError,
     } = await supabase
-      .from("hotel_pools")
+      .from("hotel_amenities")
       .select(`
         id,
         hotel_profile_id,
-        pool_type,
+        amenity_type,
         name_de,
         name_en,
         description_de,
@@ -538,14 +544,9 @@ export default async function Page({
         location_en,
         opening_hours_de,
         opening_hours_en,
-        depth_min_m,
-        depth_max_m,
-        has_children_area,
-        has_pool_bar,
-        is_heated,
-        is_saltwater,
         highlights_de,
         highlights_en,
+        details,
         sort_order,
         status,
         verified_at,
@@ -557,62 +558,14 @@ export default async function Page({
       .eq("status", "published")
       .order("sort_order", { ascending: true });
 
-    if (hotelPoolError) {
+    if (hotelAmenityError) {
       console.error(
-        "Fehler beim Laden der Hotelpools:",
-        hotelPoolError
+        "Fehler beim Laden der Hotelausstattung:",
+        hotelAmenityError
       );
     }
 
-    hotelPools = hotelPoolData || [];
-  }
-
-  let hotelSpa: Array<Record<string, unknown>> = [];
-
-  if (hotelProfile?.id) {
-    const {
-      data: hotelSpaData,
-      error: hotelSpaError,
-    } = await supabase
-      .from("hotel_spa")
-      .select(`
-        id,
-        hotel_profile_id,
-        name_de,
-        name_en,
-        description_de,
-        description_en,
-        image_url,
-        location_de,
-        location_en,
-        opening_hours_de,
-        opening_hours_en,
-        treatments_de,
-        treatments_en,
-        highlights_de,
-        highlights_en,
-        price_from,
-        currency,
-        reservation_url,
-        sort_order,
-        status,
-        verified_at,
-        source_id,
-        created_at,
-        updated_at
-      `)
-      .eq("hotel_profile_id", hotelProfile.id)
-      .eq("status", "published")
-      .order("sort_order", { ascending: true });
-
-    if (hotelSpaError) {
-      console.error(
-        "Fehler beim Laden der Spa-Bereiche:",
-        hotelSpaError
-      );
-    }
-
-    hotelSpa = hotelSpaData || [];
+    hotelAmenities = hotelAmenityData || [];
   }
 
   const { data: randomData, error: randomError } =
@@ -831,8 +784,7 @@ export default async function Page({
         initialHotelImages={hotelImages}
         initialHotelRooms={hotelRooms}
         initialHotelRestaurants={hotelRestaurants}
-        initialHotelPools={hotelPools}
-        initialHotelSpa={hotelSpa}
+        initialHotelAmenities={hotelAmenities}
       />
     </>
   );

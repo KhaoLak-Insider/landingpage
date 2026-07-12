@@ -128,20 +128,63 @@ export interface HotelRoomRecord {
 export interface HotelRestaurantRecord {
   id: string;
   hotel_profile_id: string;
-  venue_type: "restaurant" | "bar" | "cafe" | "beach_bar" | "other";
-  name: string;
+  venue_type: "restaurant" | "bar" | "cafe";
+  name_de: string;
+  name_en?: string | null;
   description_de?: string | null;
   description_en?: string | null;
+  image_url?: string | null;
   cuisine_de?: string | null;
   cuisine_en?: string | null;
   location_de?: string | null;
   location_en?: string | null;
   opening_hours_de?: string | null;
   opening_hours_en?: string | null;
-  image_url?: string | null;
+  serves_breakfast: boolean;
+  serves_lunch: boolean;
+  serves_dinner: boolean;
+  serves_drinks: boolean;
   highlights_de?: unknown[];
   highlights_en?: unknown[];
+  menu_url?: string | null;
   reservation_url?: string | null;
+  sort_order: number;
+  status: "draft" | "published" | "archived";
+  verified_at?: string | null;
+  source_id?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+
+export type HotelAmenityType =
+  | "pool"
+  | "spa"
+  | "activity"
+  | "fitness"
+  | "kids_club"
+  | "shuttle"
+  | "beach_service"
+  | "service"
+  | "facility"
+  | "other";
+
+export interface HotelAmenityRecord {
+  id: string;
+  hotel_profile_id: string;
+  amenity_type: HotelAmenityType;
+  name_de: string;
+  name_en?: string | null;
+  description_de?: string | null;
+  description_en?: string | null;
+  image_url?: string | null;
+  location_de?: string | null;
+  location_en?: string | null;
+  opening_hours_de?: string | null;
+  opening_hours_en?: string | null;
+  highlights_de?: unknown[];
+  highlights_en?: unknown[];
+  details?: Record<string, unknown> | null;
   sort_order: number;
   status: "draft" | "published" | "archived";
   verified_at?: string | null;
@@ -172,10 +215,10 @@ export interface HotelPoolRecord {
   opening_hours_en?: string | null;
   depth_min_m?: number | null;
   depth_max_m?: number | null;
-  has_children_area?: boolean | null;
-  has_pool_bar?: boolean | null;
-  is_heated?: boolean | null;
-  is_saltwater?: boolean | null;
+  has_children_area: boolean;
+  has_pool_bar: boolean;
+  is_heated: boolean;
+  is_saltwater: boolean;
   highlights_de?: unknown[];
   highlights_en?: unknown[];
   sort_order: number;
@@ -185,7 +228,6 @@ export interface HotelPoolRecord {
   created_at?: string;
   updated_at?: string;
 }
-
 
 export interface HotelSpaRecord {
   id: string;
@@ -221,6 +263,5 @@ export interface SpotClientPageProps {
   initialHotelImages: HotelImageRecord[];
   initialHotelRooms: HotelRoomRecord[];
   initialHotelRestaurants: HotelRestaurantRecord[];
-  initialHotelPools: HotelPoolRecord[];
-  initialHotelSpa: HotelSpaRecord[];
+  initialHotelAmenities: HotelAmenityRecord[];
 }
