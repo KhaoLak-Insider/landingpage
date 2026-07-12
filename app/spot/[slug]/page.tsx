@@ -1,5 +1,6 @@
 import { supabase } from "@/src/lib/supabase";
 import SpotClientPage from "./SpotClientPage";
+import type { SpotClientPageProps } from "@/src/types/spot";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -358,7 +359,7 @@ export default async function Page({
       .toLowerCase()
       .replace(/_/g, "-") === "premium-hotel";
 
-  let hotelProfile = null;
+  let hotelProfile: SpotClientPageProps["initialHotelProfile"] = null;
 
   if (isPremiumHotel) {
     const {
@@ -380,7 +381,7 @@ export default async function Page({
     hotelProfile = hotelProfileData;
   }
 
-  let hotelImages: Array<Record<string, unknown>> = [];
+  let hotelImages: SpotClientPageProps["initialHotelImages"] = [];
 
   if (hotelProfile?.id) {
     const {
@@ -422,7 +423,7 @@ export default async function Page({
     hotelImages = hotelImageData || [];
   }
 
-  let hotelRooms: Array<Record<string, unknown>> = [];
+  let hotelRooms: SpotClientPageProps["initialHotelRooms"] = [];
 
   if (hotelProfile?.id) {
     const {
@@ -471,7 +472,7 @@ export default async function Page({
     hotelRooms = hotelRoomData || [];
   }
 
-  let hotelRestaurants: Array<Record<string, unknown>> = [];
+  let hotelRestaurants: SpotClientPageProps["initialHotelRestaurants"] = [];
 
   if (hotelProfile?.id) {
     const {
@@ -523,7 +524,7 @@ export default async function Page({
     hotelRestaurants = hotelRestaurantData || [];
   }
 
-  let hotelAmenities: Array<Record<string, unknown>> = [];
+  let hotelAmenities: SpotClientPageProps["initialHotelAmenities"] = [];
 
   if (hotelProfile?.id) {
     const {
@@ -568,7 +569,7 @@ export default async function Page({
     hotelAmenities = hotelAmenityData || [];
   }
 
-  let hotelLocation: Record<string, unknown> | null = null;
+  let hotelLocation: SpotClientPageProps["initialHotelLocation"] = null;
 
   if (hotelProfile?.id) {
     const {
@@ -625,7 +626,7 @@ export default async function Page({
     hotelLocation = hotelLocationData;
   }
 
-  let hotelFaqs: Array<Record<string, unknown>> = [];
+  let hotelFaqs: SpotClientPageProps["initialHotelFaqs"] = [];
 
   if (hotelProfile?.id) {
     const {
