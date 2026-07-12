@@ -17,8 +17,17 @@ import type {
   HotelProfileRecord,
 } from "@/src/types/spot";
 
+interface HotelLocationWithDistances extends HotelLocationRecord {
+  distance_bang_niang_market_m?: number | string | null;
+  distance_coconut_beach_m?: number | string | null;
+  distance_memories_beach_m?: number | string | null;
+  distance_nang_thong_center_m?: number | string | null;
+  distance_nearest_exchange_m?: number | string | null;
+  distance_phuket_airport_m?: number | string | null;
+}
+
 interface HotelLocationProps {
-  location: HotelLocationRecord | null;
+  location: HotelLocationWithDistances | null;
   hotelProfile: HotelProfileRecord;
   language: Language;
   latitude?: number | null;
@@ -29,8 +38,13 @@ interface HotelLocationProps {
 interface DistanceItem {
   key: string;
   label: string;
-  distanceInMeters: number | null | undefined;
+  distanceInMeters: number | null;
   icon: LucideIcon;
+}
+
+interface ResolvedDistanceItem
+  extends Omit<DistanceItem, "distanceInMeters"> {
+  distanceInMeters: number;
 }
 
 const labels = {
@@ -63,7 +77,7 @@ const labels = {
 } as const;
 
 function getLocalizedSummary(
-  location: HotelLocationRecord,
+  location: HotelLocationWithDistances,
   language: Language,
 ): string {
   const primary =
@@ -153,7 +167,7 @@ export default function HotelLocation({
 
   const summary = getLocalizedSummary(location, language);
 
-  const distances: DistanceItem[] = [
+  const distanceItems: DistanceItem[] = [
     {
       key: "bang-niang-market",
       label: copy.bangNiangMarket,
@@ -202,12 +216,11 @@ export default function HotelLocation({
       ),
       icon: Plane,
     },
-  ].filter(
-    (
-      item,
-    ): item is DistanceItem & {
-      distanceInMeters: number;
-    } => item.distanceInMeters !== null,
+  ];
+
+  const distances: ResolvedDistanceItem[] = distanceItems.filter(
+    (item): item is ResolvedDistanceItem =>
+      item.distanceInMeters !== null,
   );
 
   const hasCoordinates =
