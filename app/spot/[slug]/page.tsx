@@ -567,6 +567,54 @@ export default async function Page({
     hotelPools = hotelPoolData || [];
   }
 
+  let hotelSpa: Array<Record<string, unknown>> = [];
+
+  if (hotelProfile?.id) {
+    const {
+      data: hotelSpaData,
+      error: hotelSpaError,
+    } = await supabase
+      .from("hotel_spa")
+      .select(`
+        id,
+        hotel_profile_id,
+        name_de,
+        name_en,
+        description_de,
+        description_en,
+        image_url,
+        location_de,
+        location_en,
+        opening_hours_de,
+        opening_hours_en,
+        treatments_de,
+        treatments_en,
+        highlights_de,
+        highlights_en,
+        price_from,
+        currency,
+        reservation_url,
+        sort_order,
+        status,
+        verified_at,
+        source_id,
+        created_at,
+        updated_at
+      `)
+      .eq("hotel_profile_id", hotelProfile.id)
+      .eq("status", "published")
+      .order("sort_order", { ascending: true });
+
+    if (hotelSpaError) {
+      console.error(
+        "Fehler beim Laden der Spa-Bereiche:",
+        hotelSpaError
+      );
+    }
+
+    hotelSpa = hotelSpaData || [];
+  }
+
   const { data: randomData, error: randomError } =
     await supabase
       .from("spots")
@@ -784,6 +832,7 @@ export default async function Page({
         initialHotelRooms={hotelRooms}
         initialHotelRestaurants={hotelRestaurants}
         initialHotelPools={hotelPools}
+        initialHotelSpa={hotelSpa}
       />
     </>
   );

@@ -9,6 +9,7 @@ import HotelHighlights from "@/src/components/hotel/HotelHighlights";
 import HotelRooms from "@/src/components/hotel/HotelRooms";
 import HotelRestaurants from "@/src/components/hotel/HotelRestaurants";
 import HotelPools from "@/src/components/hotel/HotelPools";
+import HotelSpa from "@/src/components/hotel/HotelSpa";
 import HotelGallery from "@/src/components/hotel/HotelGallery";
 import SpotDescription from "@/src/components/spot/SpotDescription";
 import SpotSidebar from "@/src/components/spot/SpotSidebar";
@@ -109,6 +110,13 @@ export default function PremiumHotelTemplate(
 
           <HotelPools
             pools={props.hotelPools || []}
+            hotelProfile={hotelProfile}
+            language={props.language}
+            userRole={props.userProfile?.role}
+          />
+
+          <HotelSpa
+            spaAreas={props.hotelSpa || []}
             hotelProfile={hotelProfile}
             language={props.language}
             userRole={props.userProfile?.role}

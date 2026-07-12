@@ -186,6 +186,34 @@ export interface HotelPoolRecord {
   updated_at?: string;
 }
 
+
+export interface HotelSpaRecord {
+  id: string;
+  hotel_profile_id: string;
+  name_de: string;
+  name_en?: string | null;
+  description_de?: string | null;
+  description_en?: string | null;
+  image_url?: string | null;
+  location_de?: string | null;
+  location_en?: string | null;
+  opening_hours_de?: string | null;
+  opening_hours_en?: string | null;
+  treatments_de?: unknown[];
+  treatments_en?: unknown[];
+  highlights_de?: unknown[];
+  highlights_en?: unknown[];
+  price_from?: number | null;
+  currency?: string | null;
+  reservation_url?: string | null;
+  sort_order: number;
+  status: "draft" | "published" | "archived";
+  verified_at?: string | null;
+  source_id?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface SpotClientPageProps {
   initialSpot: SpotRecord;
   initialRandomSpots: SpotRecord[];
@@ -194,4 +222,5 @@ export interface SpotClientPageProps {
   initialHotelRooms: HotelRoomRecord[];
   initialHotelRestaurants: HotelRestaurantRecord[];
   initialHotelPools: HotelPoolRecord[];
+  initialHotelSpa: HotelSpaRecord[];
 }

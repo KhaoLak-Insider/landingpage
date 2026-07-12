@@ -11,6 +11,7 @@ import type {
   HotelProfileRecord,
   HotelRestaurantRecord,
   HotelRoomRecord,
+  HotelSpaRecord,
 } from "@/src/types/spot";
 import SpotHero from "@/src/components/spot/SpotHero";
 import SpotGallery from "@/src/components/spot/SpotGallery";
@@ -29,6 +30,7 @@ export interface StandardTemplateProps {
   hotelRooms?: HotelRoomRecord[];
   hotelRestaurants?: HotelRestaurantRecord[];
   hotelPools?: HotelPoolRecord[];
+  hotelSpa?: HotelSpaRecord[];
   language: Language;
   gallery: string[];
   localizedTitle: string;
