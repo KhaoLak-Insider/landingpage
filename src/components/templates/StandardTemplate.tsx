@@ -5,7 +5,10 @@ import { MapPin } from "lucide-react";
 import { iconMap } from "@/src/components/IconLibrary";
 import { t } from "@/src/lib/translations";
 import type { Language } from "@/src/lib/i18n";
-import type { HotelProfileRecord } from "@/src/types/spot";
+import type {
+  HotelImageRecord,
+  HotelProfileRecord,
+} from "@/src/types/spot";
 import SpotHero from "@/src/components/spot/SpotHero";
 import SpotGallery from "@/src/components/spot/SpotGallery";
 import SpotDescription, {
@@ -19,6 +22,7 @@ import { getLocalizedConfigField } from "@/src/lib/spot/localization";
 export interface StandardTemplateProps {
   spot: any;
   hotelProfile?: HotelProfileRecord | null;
+  hotelImages?: HotelImageRecord[];
   language: Language;
   gallery: string[];
   localizedTitle: string;

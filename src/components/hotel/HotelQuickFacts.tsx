@@ -249,7 +249,7 @@ export default function HotelQuickFacts({
         position: "relative",
         zIndex: 6,
         maxWidth: 1220,
-        margin: "-54px auto 38px",
+        margin: "42px auto 38px",
         padding: "0 28px",
       }}
     >

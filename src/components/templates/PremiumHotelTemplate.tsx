@@ -6,7 +6,7 @@ import HotelHero from "@/src/components/hotel/HotelHero";
 import HotelQuickFacts from "@/src/components/hotel/HotelQuickFacts";
 import HotelEditorialSummary from "@/src/components/hotel/HotelEditorialSummary";
 import HotelHighlights from "@/src/components/hotel/HotelHighlights";
-import SpotGallery from "@/src/components/spot/SpotGallery";
+import HotelGallery from "@/src/components/hotel/HotelGallery";
 import SpotDescription from "@/src/components/spot/SpotDescription";
 import SpotSidebar from "@/src/components/spot/SpotSidebar";
 import NearbySpots from "@/src/components/spot/NearbySpots";
@@ -55,6 +55,21 @@ export default function PremiumHotelTemplate(
         backHref={props.localizedHref("/entdecken")}
       />
 
+      <section
+        style={{
+          maxWidth: 1280,
+          margin: "0 auto",
+          padding: "34px 40px 0",
+        }}
+      >
+        <HotelGallery
+          images={props.hotelImages || []}
+          fallbackImages={props.gallery}
+          hotelTitle={props.localizedTitle}
+          language={props.language}
+        />
+      </section>
+
       {hotelProfile && (
         <>
           <HotelQuickFacts
@@ -100,12 +115,6 @@ export default function PremiumHotelTemplate(
               gap: 40,
             }}
           >
-            <SpotGallery
-              gallery={props.gallery}
-              title={props.localizedTitle}
-              language={props.language}
-            />
-
             <SpotDescription
               title={props.localizedTitle}
               blocks={props.descriptionBlocks}

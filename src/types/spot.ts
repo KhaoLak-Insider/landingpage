@@ -73,8 +73,31 @@ export interface HotelProfileRecord {
   [key: string]: unknown;
 }
 
+
+export interface HotelImageRecord {
+  id: string;
+  hotel_profile_id: string;
+  image_url: string;
+  category: string;
+  display_name_de?: string | null;
+  display_name_en?: string | null;
+  title_de?: string | null;
+  title_en?: string | null;
+  alt_de?: string | null;
+  alt_en?: string | null;
+  credit_name?: string | null;
+  credit_url?: string | null;
+  sort_order: number;
+  is_cover: boolean;
+  is_featured: boolean;
+  status: "draft" | "published" | "archived";
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface SpotClientPageProps {
   initialSpot: SpotRecord;
   initialRandomSpots: SpotRecord[];
   initialHotelProfile: HotelProfileRecord | null;
+  initialHotelImages: HotelImageRecord[];
 }
