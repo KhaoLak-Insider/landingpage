@@ -2,109 +2,22 @@
 
 import { Check } from "lucide-react";
 import HotelHero from "@/src/components/hotel/HotelHero";
-import HotelQuickFacts from "@/src/components/hotel/HotelQuickFacts";
 import HotelHighlights from "@/src/components/hotel/HotelHighlights";
 import HotelRooms from "@/src/components/hotel/HotelRooms";
-import HotelRestaurants from "@/src/components/hotel/HotelRestaurants";
-import HotelPools from "@/src/components/hotel/HotelPools";
-import HotelSpa from "@/src/components/hotel/HotelSpa";
-import HotelActivities from "@/src/components/hotel/HotelActivities";
-import HotelFacilities from "@/src/components/hotel/HotelFacilities";
 import HotelLocation from "@/src/components/hotel/HotelLocation";
 import HotelFAQ from "@/src/components/hotel/HotelFAQ";
 import HotelGallery from "@/src/components/hotel/HotelGallery";
-import SpotDescription from "@/src/components/spot/SpotDescription";
-import SpotSidebar from "@/src/components/spot/SpotSidebar";
-import NearbySpots from "@/src/components/spot/NearbySpots";
-import MoreDiscoveries from "@/src/components/spot/MoreDiscoveries";
+import HotelBestTravelTime from "@/src/components/hotel/HotelBestTravelTime";
+import HotelNearby from "@/src/components/hotel/HotelNearby";
 import type { StandardTemplateProps } from "@/src/components/templates/StandardTemplate";
 import type {
-  HotelAmenityRecord,
-  HotelPoolRecord,
-  HotelSpaRecord,
+  HotelFaqRecord,
+  HotelImageRecord,
+  HotelLocationRecord,
+  HotelProfileRecord,
+  PremiumHotelRecord,
+  PremiumRoomRecord,
 } from "@/src/types/spot";
-
-function getAmenityDetail<T>(
-  amenity: HotelAmenityRecord,
-  key: string,
-  fallback: T,
-): T {
-  const details = amenity.details;
-
-  if (!details || typeof details !== "object" || !(key in details)) {
-    return fallback;
-  }
-
-  return details[key] as T;
-}
-
-function toPoolRecord(amenity: HotelAmenityRecord): HotelPoolRecord {
-  return {
-    id: amenity.id,
-    hotel_profile_id: amenity.hotel_profile_id,
-    pool_type: getAmenityDetail<HotelPoolRecord["pool_type"]>(
-      amenity,
-      "pool_type",
-      "other",
-    ),
-    name_de: amenity.name_de,
-    name_en: amenity.name_en,
-    description_de: amenity.description_de,
-    description_en: amenity.description_en,
-    image_url: amenity.image_url,
-    location_de: amenity.location_de,
-    location_en: amenity.location_en,
-    opening_hours_de: amenity.opening_hours_de,
-    opening_hours_en: amenity.opening_hours_en,
-    depth_min_m: getAmenityDetail<number | null>(amenity, "depth_min_m", null),
-    depth_max_m: getAmenityDetail<number | null>(amenity, "depth_max_m", null),
-    has_children_area: getAmenityDetail(amenity, "has_children_area", false),
-    has_pool_bar: getAmenityDetail(amenity, "has_pool_bar", false),
-    is_heated: getAmenityDetail(amenity, "is_heated", false),
-    is_saltwater: getAmenityDetail(amenity, "is_saltwater", false),
-    highlights_de: amenity.highlights_de,
-    highlights_en: amenity.highlights_en,
-    sort_order: amenity.sort_order,
-    status: amenity.status,
-    verified_at: amenity.verified_at,
-    source_id: amenity.source_id,
-    created_at: amenity.created_at,
-    updated_at: amenity.updated_at,
-  };
-}
-
-function toSpaRecord(amenity: HotelAmenityRecord): HotelSpaRecord {
-  return {
-    id: amenity.id,
-    hotel_profile_id: amenity.hotel_profile_id,
-    name_de: amenity.name_de,
-    name_en: amenity.name_en,
-    description_de: amenity.description_de,
-    description_en: amenity.description_en,
-    image_url: amenity.image_url,
-    location_de: amenity.location_de,
-    location_en: amenity.location_en,
-    opening_hours_de: amenity.opening_hours_de,
-    opening_hours_en: amenity.opening_hours_en,
-    treatments_de: getAmenityDetail<unknown[]>(amenity, "treatments_de", []),
-    treatments_en: getAmenityDetail<unknown[]>(amenity, "treatments_en", []),
-    highlights_de: amenity.highlights_de,
-    highlights_en: amenity.highlights_en,
-    price_from: getAmenityDetail<number | null>(amenity, "price_from", null),
-    currency: getAmenityDetail<string | null>(amenity, "currency", null),
-    reservation_url: getAmenityDetail<string | null>(
-      amenity,
-      "reservation_url",
-      null,
-    ),
-    sort_order: amenity.sort_order,
-    status: amenity.status,
-    verified_at: amenity.verified_at,
-    source_id: amenity.source_id,
-    created_at: amenity.created_at,
-    updated_at: amenity.updated_at,
-  };
-}
 
 interface CompactFeatureItem {
   title: string;
@@ -134,81 +47,166 @@ function normalizeCompactFeatures(value: unknown): CompactFeatureItem[] {
 }
 
 function getCompactFeatures(
-  hotelProfile: StandardTemplateProps["hotelProfile"],
-  localizedTitle: string,
+  hotel: PremiumHotelRecord | null | undefined,
   language: StandardTemplateProps["language"],
 ): CompactFeatureItem[] {
-  const normalizedTitle = localizedTitle.trim().toLowerCase();
-
-  if (normalizedTitle.includes("moracea")) {
-    return language === "en"
-      ? [
-          { title: "Spectacular sea views" },
-          { title: "Direct beach access" },
-          { title: "Excellent service" },
-        ]
-      : [
-          { title: "Spektakulärer Meerblick" },
-          { title: "Direkter Strandzugang" },
-          { title: "Exzellenter Service" },
-        ];
-  }
-
-  if (!hotelProfile) {
+  if (!hotel) {
     return [];
   }
 
-  const localizedHighlights =
-    language === "en" ? hotelProfile.highlights_en : hotelProfile.highlights_de;
+  const localizedFeatures =
+    language === "en"
+      ? hotel.intro_features_en
+      : hotel.intro_features_de;
 
-  const fallbackHighlights =
-    language === "en" ? hotelProfile.highlights_de : hotelProfile.highlights_en;
+  const fallbackFeatures =
+    language === "en"
+      ? hotel.intro_features_de
+      : hotel.intro_features_en;
 
-  const features = normalizeCompactFeatures(localizedHighlights);
-  const fallbackFeatures = normalizeCompactFeatures(fallbackHighlights);
+  const features = normalizeCompactFeatures(localizedFeatures);
+  const fallback = normalizeCompactFeatures(fallbackFeatures);
 
-  return (features.length > 0 ? features : fallbackFeatures).slice(0, 3);
+  return (features.length > 0 ? features : fallback).slice(0, 3);
 }
 
-function normalizeCategory(value: unknown): string {
-  return String(value || "")
-    .trim()
-    .toLowerCase()
-    .replace(/ä/g, "ae")
-    .replace(/ö/g, "oe")
-    .replace(/ü/g, "ue")
-    .replace(/ß/g, "ss");
+function toLegacyHotelProfile(
+  hotel: PremiumHotelRecord,
+): HotelProfileRecord {
+  return {
+    id: hotel.id,
+    spot_id: hotel.spot_id,
+    status: hotel.status,
+    pool_count: hotel.pool_count ?? null,
+    room_count: hotel.room_count ?? null,
+    restaurant_count: hotel.restaurant_count ?? null,
+    bar_count: hotel.bar_count ?? null,
+    suitable_for_families: hotel.suitable_for_families,
+    verified_at: hotel.verified_at ?? null,
+    created_at: hotel.created_at,
+    updated_at: hotel.updated_at,
+  };
+}
+
+function toLegacyImages(
+  hotel: PremiumHotelRecord,
+): HotelImageRecord[] {
+  if (!Array.isArray(hotel.gallery_images)) {
+    return [];
+  }
+
+  return hotel.gallery_images
+    .filter(
+      (image) =>
+        typeof image?.image_url === "string" &&
+        image.image_url.trim() !== "",
+    )
+    .map((image, index) => ({
+      id: String(image.id || `premium-gallery-${index + 1}`),
+      hotel_profile_id: hotel.id,
+      image_url: image.image_url.trim(),
+      category: String(image.category || "gallery"),
+      title_de: image.title_de ?? null,
+      title_en: image.title_en ?? null,
+      alt_de: image.alt_de ?? null,
+      alt_en: image.alt_en ?? null,
+      credit_name: image.credit_name ?? null,
+      credit_url: image.credit_url ?? null,
+      sort_order: Number(image.sort_order ?? index),
+      is_cover: Boolean(image.is_cover),
+      is_featured: Boolean(image.is_featured),
+      status: "published",
+    }));
+}
+
+function toLegacyLocation(
+  hotel: PremiumHotelRecord,
+): HotelLocationRecord & {
+  distance_bang_niang_market_m?: number | null;
+  distance_coconut_beach_m?: number | null;
+  distance_memories_beach_m?: number | null;
+  distance_nang_thong_center_m?: number | null;
+  distance_nearest_exchange_m?: number | null;
+  distance_nearest_7eleven_m?: number | null;
+  distance_phuket_airport_m?: number | null;
+} {
+  return {
+    id: hotel.id,
+    hotel_profile_id: hotel.id,
+    editorial_summary_de: hotel.editorial_summary_de ?? null,
+    editorial_summary_en: hotel.editorial_summary_en ?? null,
+    distance_bang_niang_market_m:
+      hotel.distance_bang_niang_market_m ?? null,
+    distance_coconut_beach_m:
+      hotel.distance_coconut_beach_m ?? null,
+    distance_memories_beach_m:
+      hotel.distance_memories_beach_m ?? null,
+    distance_nang_thong_center_m:
+      hotel.distance_nang_thong_center_m ?? null,
+    distance_nearest_exchange_m:
+      hotel.distance_nearest_exchange_m ?? null,
+    distance_nearest_7eleven_m:
+      hotel.distance_nearest_7eleven_m ?? null,
+    distance_phuket_airport_m:
+      hotel.distance_phuket_airport_m ?? null,
+    sunset_view: false,
+    status: hotel.status,
+    verified_at: hotel.verified_at ?? null,
+  };
+}
+
+function toLegacyFaqs(
+  hotel: PremiumHotelRecord,
+): HotelFaqRecord[] {
+  if (!Array.isArray(hotel.faq_items)) {
+    return [];
+  }
+
+  return hotel.faq_items
+    .filter(
+      (faq) =>
+        typeof faq?.question_de === "string" &&
+        typeof faq?.answer_de === "string",
+    )
+    .map((faq, index) => ({
+      id: String(faq.id || `premium-faq-${index + 1}`),
+      hotel_profile_id: hotel.id,
+      question_de: faq.question_de,
+      question_en: faq.question_en ?? null,
+      answer_de: faq.answer_de,
+      answer_en: faq.answer_en ?? null,
+      category: String(faq.category || "general"),
+      sort_order: Number(faq.sort_order ?? index),
+      status:
+        faq.status === "draft" || faq.status === "archived"
+          ? faq.status
+          : "published",
+      verified_at: faq.verified_at ?? null,
+    }));
 }
 
 export default function PremiumHotelTemplate(props: StandardTemplateProps) {
-  const hotelProfile = props.hotelProfile;
+  const premiumHotel = props.premiumHotel;
+  const premiumRooms: PremiumRoomRecord[] = props.premiumRooms || [];
 
-  const hotelAmenities = props.hotelAmenities || [];
+  const hotelProfile = premiumHotel
+    ? toLegacyHotelProfile(premiumHotel)
+    : null;
 
-  const hotelPools = hotelAmenities
-    .filter((amenity) => amenity.amenity_type === "pool")
-    .map(toPoolRecord);
+  const hotelImages = premiumHotel
+    ? toLegacyImages(premiumHotel)
+    : [];
 
-  const hotelSpaAreas = hotelAmenities
-    .filter((amenity) => amenity.amenity_type === "spa")
-    .map(toSpaRecord);
+  const hotelLocation = premiumHotel
+    ? toLegacyLocation(premiumHotel)
+    : null;
 
-  const hotelActivities = hotelAmenities.filter(
-    (amenity) => amenity.amenity_type === "activity",
-  );
-
-  const hotelFacilities = hotelAmenities.filter(
-    (amenity) =>
-      amenity.amenity_type === "facility" || amenity.amenity_type === "service",
-  );
-
-  const isBeach = ["strand", "straende", "beach", "beaches"].includes(
-    normalizeCategory(props.spot.category),
-  );
+  const hotelFaqs = premiumHotel
+    ? toLegacyFaqs(premiumHotel)
+    : [];
 
   const compactFeatures = getCompactFeatures(
-    hotelProfile,
-    props.localizedTitle,
+    premiumHotel,
     props.language,
   );
 
@@ -219,6 +217,7 @@ export default function PremiumHotelTemplate(props: StandardTemplateProps) {
         language={props.language}
         title={props.localizedTitle}
         description={props.localizedDescription}
+        premiumHotel={premiumHotel}
         category={props.localizedCategory}
         backHref={props.localizedHref("/entdecken")}
       />
@@ -229,9 +228,7 @@ export default function PremiumHotelTemplate(props: StandardTemplateProps) {
             Überblick
           </a>
           <a href="#rooms">Zimmer</a>
-          <a href="#facilities">Ausstattung</a>
           <a href="#location">Lage</a>
-          <a href="#restaurants">Restaurants</a>
           <a href="#faq">FAQ</a>
           <a href="#nearby">In der Nähe</a>
         </div>
@@ -285,10 +282,10 @@ export default function PremiumHotelTemplate(props: StandardTemplateProps) {
               <>
                 <div className="premium-slot premium-slot--highlights">
                   <HotelHighlights
-                    hotelProfile={hotelProfile}
-                    language={props.language}
-                    userRole={props.userProfile?.role}
-                  />
+  premiumHotel={premiumHotel}
+  language={props.language}
+  userRole={props.userProfile?.role}
+/>
                 </div>
 
               </>
@@ -298,7 +295,7 @@ export default function PremiumHotelTemplate(props: StandardTemplateProps) {
           <div className="premium-hotel-stack">
             <div className="premium-slot premium-slot--gallery">
               <HotelGallery
-                images={props.hotelImages || []}
+                images={hotelImages}
                 fallbackImages={props.gallery}
                 hotelTitle={props.localizedTitle}
                 language={props.language}
@@ -315,7 +312,7 @@ export default function PremiumHotelTemplate(props: StandardTemplateProps) {
           >
             <div className="premium-slot premium-slot--location">
               <HotelLocation
-                location={props.hotelLocation || null}
+                location={hotelLocation}
                 hotelProfile={hotelProfile}
                 language={props.language}
                 latitude={props.spot.latitude}
@@ -324,144 +321,45 @@ export default function PremiumHotelTemplate(props: StandardTemplateProps) {
               />
             </div>
 
-            <div
-              className="premium-location-row__placeholder"
-              aria-hidden="true"
-            />
+            <div className="premium-slot premium-slot--traveltime">
+              <HotelBestTravelTime language={props.language} />
+            </div>
           </section>
         )}
 
         {hotelProfile && (
           <>
             <section id="rooms" className="premium-slot premium-slot--wide">
-              <HotelRooms
-                rooms={props.hotelRooms || []}
-                hotelProfile={hotelProfile}
-                language={props.language}
-                userRole={props.userProfile?.role}
-              />
-            </section>
-
-            <section id="facilities" className="premium-hotel-section-group">
-              <div className="premium-hotel-grid premium-hotel-grid--balanced">
-                <div className="premium-slot">
-                  <HotelPools
-                    pools={hotelPools}
-                    hotelProfile={hotelProfile}
-                    language={props.language}
-                    userRole={props.userProfile?.role}
-                  />
-                </div>
-
-                <div className="premium-slot">
-                  <HotelSpa
-                    spaAreas={hotelSpaAreas}
-                    hotelProfile={hotelProfile}
-                    language={props.language}
-                    userRole={props.userProfile?.role}
-                  />
-                </div>
-              </div>
-
-              <div className="premium-hotel-grid premium-hotel-grid--balanced">
-                <div className="premium-slot">
-                  <HotelActivities
-                    activities={hotelActivities}
-                    hotelProfile={hotelProfile}
-                    language={props.language}
-                    userRole={props.userProfile?.role}
-                  />
-                </div>
-
-                <div className="premium-slot">
-                  <HotelFacilities
-                    facilities={hotelFacilities}
-                    hotelProfile={hotelProfile}
-                    language={props.language}
-                    userRole={props.userProfile?.role}
-                  />
-                </div>
-              </div>
-            </section>
-
-            <section
-              id="restaurants"
-              className="premium-slot premium-slot--wide"
-            >
-              <HotelRestaurants
-                venues={props.hotelRestaurants || []}
-                hotelProfile={hotelProfile}
-                language={props.language}
-                userRole={props.userProfile?.role}
-              />
-            </section>
-
-            <section id="faq" className="premium-slot premium-slot--wide">
-              <HotelFAQ
-                faqs={props.hotelFaqs || []}
-                hotelProfile={hotelProfile}
-                language={props.language}
-                userRole={props.userProfile?.role}
-              />
-            </section>
-          </>
-        )}
-
-        <section
-          id="nearby"
-          className="premium-hotel-grid premium-hotel-grid--content"
-        >
-          <div className="premium-hotel-stack">
-            {isBeach && (
-              <div className="premium-slot">
-                <NearbySpots
-                  spots={props.nearbySpots}
-                  originLatitude={props.spot.latitude}
-                  originLongitude={props.spot.longitude}
-                  radiusKm={props.nearbyRadiusKm}
+              <div className="premium-slot premium-slot--rooms">
+                <HotelRooms
+                  roomsData={premiumRooms}
+                  hotelSlug={props.spot.slug}
                   language={props.language}
                   localizedHref={props.localizedHref}
                 />
               </div>
-            )}
+            </section>
 
-            <div className="premium-slot">
-              <MoreDiscoveries
-                spots={props.randomSpots}
-                originLatitude={props.spot.latitude}
-                originLongitude={props.spot.longitude}
-                userProfile={props.userProfile}
+            <section id="faq" className="premium-slot premium-slot--wide">
+              <HotelFAQ
+                faqs={hotelFaqs}
+                hotelProfile={hotelProfile}
                 language={props.language}
-                localizedHref={props.localizedHref}
+                userRole={props.userProfile?.role}
               />
-            </div>
+            </section>
 
-            <div className="premium-slot premium-slot--text">
-              <SpotDescription
-                title={props.localizedTitle}
-                blocks={props.descriptionBlocks}
-                language={props.language}
-              />
-            </div>
-          </div>
+          </>
+        )}
 
-          <div className="premium-sidebar-column">
-            <SpotSidebar
-              spot={props.spot}
+        <section id="nearby" className="premium-slot premium-slot--wide">
+          <div className="premium-slot premium-slot--nearby">
+            <HotelNearby
+              spots={props.nearbySpots}
+              originLatitude={props.spot.latitude}
+              originLongitude={props.spot.longitude}
               language={props.language}
-              localizedTitle={props.localizedTitle}
-              localizedCategory={props.localizedCategory}
-              userProfile={props.userProfile}
-              isFavorite={props.isFavorite}
-              onToggleFavorite={props.onToggleFavorite}
-              routeDist={props.routeDist}
-              routeTime={props.routeTime}
-              isRouting={props.isRouting}
-              hotelLat={props.hotelLat}
-              hotelLng={props.hotelLng}
-              tours={props.tours}
               localizedHref={props.localizedHref}
-              overlapHero={false}
             />
           </div>
         </section>
@@ -543,13 +441,6 @@ export default function PremiumHotelTemplate(props: StandardTemplateProps) {
           align-items: start;
         }
 
-        .premium-hotel-section-group {
-          display: flex;
-          flex-direction: column;
-          gap: 18px;
-          scroll-margin-top: 92px;
-        }
-
         .premium-hotel-shell > section {
           scroll-margin-top: 92px;
         }
@@ -558,22 +449,10 @@ export default function PremiumHotelTemplate(props: StandardTemplateProps) {
           grid-template-columns: minmax(0, 7fr) minmax(360px, 5fr);
           align-items: start;
         }
-        .premium-hotel-grid--balanced {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
         .premium-hotel-grid--location-row {
           grid-template-columns: minmax(0, 7fr) minmax(360px, 5fr);
           align-items: start;
         }
-
-        .premium-location-row__placeholder {
-          min-height: 1px;
-        }
-        .premium-hotel-grid--content {
-          grid-template-columns: minmax(0, 1fr) 340px;
-        }
-
         .premium-hotel-stack {
           display: flex;
           min-width: 0;
@@ -592,11 +471,6 @@ export default function PremiumHotelTemplate(props: StandardTemplateProps) {
 
         .premium-slot--wide {
           width: 100%;
-        }
-        .premium-sidebar-column {
-          position: sticky;
-          top: 88px;
-          min-width: 0;
         }
 
         .premium-hotel-intro {
@@ -722,6 +596,52 @@ export default function PremiumHotelTemplate(props: StandardTemplateProps) {
           padding: 0 !important;
         }
 
+        .premium-slot--traveltime {
+          overflow: hidden;
+          border: 1px solid #e8edf2;
+          border-radius: 14px;
+          background: #ffffff;
+          box-shadow: 0 8px 24px rgba(15, 35, 62, 0.035);
+          align-self: stretch;
+        }
+
+        .premium-slot--traveltime > section {
+          height: 100%;
+          padding: 0 !important;
+        }
+
+        .premium-slot--rooms {
+          overflow: hidden;
+          border: 1px solid #e8edf2;
+          border-radius: 14px;
+          background: #ffffff;
+          box-shadow: 0 8px 24px rgba(15, 35, 62, 0.035);
+        }
+
+        .premium-slot--rooms > section {
+  padding: 0 !important;
+}
+
+        .premium-slot--nearby {
+          overflow: hidden;
+          border: 1px solid #e8edf2;
+          border-radius: 14px;
+          background: #ffffff;
+          box-shadow: 0 8px 24px rgba(15, 35, 62, 0.035);
+        }
+
+        .premium-slot--nearby > section {
+          padding: 0 !important;
+        }
+
+.premium-hotel-page .hotel-rooms-preview__all {
+  font-size: 13px !important;
+}
+
+.premium-slot--gallery {
+  align-self: start;
+}
+
         .premium-slot--gallery {
           align-self: start;
         }
@@ -784,9 +704,7 @@ export default function PremiumHotelTemplate(props: StandardTemplateProps) {
         }
         #overview,
         #rooms,
-        #facilities,
         #location,
-        #restaurants,
         #faq,
         #nearby {
           scroll-margin-top: 86px;
@@ -794,14 +712,8 @@ export default function PremiumHotelTemplate(props: StandardTemplateProps) {
 
         @media (max-width: 1080px) {
           .premium-hotel-grid--overview,
-          .premium-hotel-grid--balanced,
-          .premium-hotel-grid--location-row,
-          .premium-hotel-grid--content {
+          .premium-hotel-grid--location-row {
             grid-template-columns: 1fr;
-          }
-
-          .premium-location-row__placeholder {
-            display: none;
           }
 
           .premium-sidebar-column {

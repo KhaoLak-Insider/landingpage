@@ -1,582 +1,589 @@
 "use client";
 
+import Image from "next/image";
+import Link from "next/link";
 import {
   ArrowRight,
   BedDouble,
-  Check,
+  ImageIcon,
   Maximize2,
-  Mountain,
   Users,
+  Waves,
 } from "lucide-react";
 import type { Language } from "@/src/lib/i18n";
-import type {
-  HotelProfileRecord,
-  HotelRoomRecord,
-} from "@/src/types/spot";
+
+interface RoomImage {
+  url?: string | null;
+  alt_de?: string | null;
+  alt_en?: string | null;
+}
+
+interface PremiumRoom {
+  id?: string;
+  slug?: string;
+  name_de?: string;
+  name_en?: string;
+  short_description_de?: string;
+  short_description_en?: string;
+  description_de?: string;
+  description_en?: string;
+  size_sqm?: number | string | null;
+  max_adults?: number | string | null;
+  max_children?: number | string | null;
+  max_occupancy?: number | string | null;
+  bed_type_de?: string;
+  bed_type_en?: string;
+  view_de?: string;
+  view_en?: string;
+  image_url?: string | null;
+  images?: RoomImage[];
+  sort_order?: number | string | null;
+  status?: string | null;
+}
 
 interface HotelRoomsProps {
-  rooms: HotelRoomRecord[];
-  hotelProfile: HotelProfileRecord;
+  roomsData: unknown;
+  hotelSlug: string;
   language: Language;
-  userRole?: string | null;
+  localizedHref: (path: string) => string;
 }
 
 const labels = {
   de: {
-    eyebrow: "Zimmer & Villen",
-    title: "Unterkünfte für unterschiedliche Reisewünsche",
+    title: "Zimmer & Villen",
     subtitle:
-      "Die verfügbaren Zimmerkategorien mit ihren wichtigsten Merkmalen im Überblick.",
-    size: "Größe",
-    guests: "Belegung",
-    adults: "Erwachsene",
-    children: "Kinder",
-    bed: "Bett",
-    view: "Ausblick",
-    from: "ab",
-    perNight: "pro Nacht",
-    details: "Zimmer ansehen",
-    draft: "Redaktionelle Vorschau",
-    draftNotice:
-      "Diese Zimmerinformationen sind noch nicht zur Veröffentlichung freigegeben.",
+      "Ausgewählte Unterkunftskategorien mit den wichtigsten Merkmalen im Überblick.",
+    guests: "Bis zu",
+    people: "Personen",
+    viewRoom: "Zimmer ansehen",
+    viewAll: "Alle Zimmer ansehen",
+    noImage: "Zimmerbild folgt",
   },
   en: {
-    eyebrow: "Rooms & villas",
-    title: "Accommodation for different travel styles",
+    title: "Rooms & villas",
     subtitle:
-      "An overview of the available room categories and their key features.",
-    size: "Size",
-    guests: "Occupancy",
-    adults: "adults",
-    children: "children",
-    bed: "Bed",
-    view: "View",
-    from: "from",
-    perNight: "per night",
-    details: "View room",
-    draft: "Editorial preview",
-    draftNotice:
-      "This room information has not yet been approved for publication.",
+      "Selected accommodation categories and their key features at a glance.",
+    guests: "Up to",
+    people: "guests",
+    viewRoom: "View room",
+    viewAll: "View all rooms",
+    noImage: "Room image coming soon",
   },
 } as const;
 
+function isPremiumRoom(value: unknown): value is PremiumRoom {
+  return typeof value === "object" && value !== null;
+}
+
+function normalizeRooms(value: unknown): PremiumRoom[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .filter(isPremiumRoom)
+    .filter((room) => {
+      const status = String(room.status || "published")
+        .trim()
+        .toLowerCase();
+
+      return status === "published";
+    })
+    .sort((first, second) => {
+      const firstOrder = Number(first.sort_order || 0);
+      const secondOrder = Number(second.sort_order || 0);
+
+      return firstOrder - secondOrder;
+    });
+}
+
 function localizedValue(
-  room: HotelRoomRecord,
+  room: PremiumRoom,
   language: Language,
   field:
     | "name"
+    | "short_description"
     | "description"
     | "bed_type"
-    | "view"
+    | "view",
 ): string {
   const primary =
-    language === "en"
-      ? room[`${field}_en`]
-      : room[`${field}_de`];
+    language === "en" ? room[`${field}_en`] : room[`${field}_de`];
 
   const fallback =
-    language === "en"
-      ? room[`${field}_de`]
-      : room[`${field}_en`];
+    language === "en" ? room[`${field}_de`] : room[`${field}_en`];
 
-  if (
-    typeof primary === "string" &&
-    primary.trim() !== ""
-  ) {
+  if (typeof primary === "string" && primary.trim()) {
     return primary.trim();
   }
 
-  if (
-    typeof fallback === "string" &&
-    fallback.trim() !== ""
-  ) {
+  if (typeof fallback === "string" && fallback.trim()) {
     return fallback.trim();
   }
 
   return "";
 }
 
-function localizedHighlights(
-  room: HotelRoomRecord,
-  language: Language
-): string[] {
-  const primary =
-    language === "en"
-      ? room.highlights_en
-      : room.highlights_de;
+function toPositiveNumber(value: unknown): number | null {
+  const parsed = Number(value);
 
-  const fallback =
-    language === "en"
-      ? room.highlights_de
-      : room.highlights_en;
-
-  const source = Array.isArray(primary)
-    ? primary
-    : Array.isArray(fallback)
-      ? fallback
-      : [];
-
-  return source.filter(
-    (item): item is string =>
-      typeof item === "string" &&
-      item.trim() !== ""
-  );
-}
-
-function formatPrice(
-  price: number,
-  currency?: string | null
-): string {
-  const normalizedCurrency =
-    currency?.trim().toUpperCase() || "EUR";
-
-  try {
-    return new Intl.NumberFormat("de-DE", {
-      style: "currency",
-      currency: normalizedCurrency,
-      maximumFractionDigits: 0,
-    }).format(price);
-  } catch {
-    return `${price} ${normalizedCurrency}`;
-  }
-}
-
-export default function HotelRooms({
-  rooms,
-  hotelProfile,
-  language,
-  userRole,
-}: HotelRoomsProps) {
-  const copy = labels[language];
-
-  const normalizedRole = String(userRole || "")
-    .trim()
-    .toLowerCase();
-
-  const isEditor =
-    normalizedRole === "admin" ||
-    normalizedRole === "editor";
-
-  const isPublished =
-    hotelProfile.status === "published";
-
-  if (!isPublished && !isEditor) {
+  if (!Number.isFinite(parsed) || parsed <= 0) {
     return null;
   }
 
-  if (rooms.length === 0) {
+  return parsed;
+}
+
+function getRoomImage(
+  room: PremiumRoom,
+  language: Language,
+): { src: string; alt: string } | null {
+  const firstImage = Array.isArray(room.images)
+    ? room.images.find(
+        (image) =>
+          typeof image?.url === "string" && image.url.trim() !== "",
+      )
+    : undefined;
+
+  const src =
+    firstImage?.url?.trim() ||
+    (typeof room.image_url === "string" ? room.image_url.trim() : "");
+
+  if (!src) {
+    return null;
+  }
+
+  const name = localizedValue(room, language, "name");
+
+  const alt =
+    language === "en"
+      ? firstImage?.alt_en?.trim() || firstImage?.alt_de?.trim() || name
+      : firstImage?.alt_de?.trim() || firstImage?.alt_en?.trim() || name;
+
+  return {
+    src,
+    alt: alt || name,
+  };
+}
+
+export default function HotelRooms({
+  roomsData,
+  hotelSlug,
+  language,
+  localizedHref,
+}: HotelRoomsProps) {
+  const copy = labels[language];
+  const rooms = normalizeRooms(roomsData);
+  const featuredRooms = rooms.slice(0, 3);
+
+  if (featuredRooms.length === 0) {
     return null;
   }
 
   return (
-    <section
-      style={{
-        maxWidth: 1180,
-        margin: "0 auto 48px",
-        padding: "0 28px",
-      }}
-    >
-      <div
-        style={{
-          marginBottom: 26,
-          display: "flex",
-          alignItems: "flex-end",
-          justifyContent: "space-between",
-          gap: 24,
-          flexWrap: "wrap",
-        }}
-      >
-        <div style={{ maxWidth: 760 }}>
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              marginBottom: 10,
-              color: "#0f766e",
-              fontSize: 11,
-              fontWeight: 800,
-              textTransform: "uppercase",
-              letterSpacing: "0.13em",
-            }}
-          >
-            <BedDouble size={17} />
-            {copy.eyebrow}
-          </div>
-
-          <h2
-            style={{
-              margin: 0,
-              color: "#0f172a",
-              fontSize: "clamp(28px, 4vw, 42px)",
-              lineHeight: 1.12,
-              fontWeight: 800,
-              letterSpacing: "-0.04em",
-            }}
-          >
-            {copy.title}
-          </h2>
-
-          <p
-            style={{
-              margin: "12px 0 0",
-              maxWidth: 720,
-              color: "#64748b",
-              fontSize: 15,
-              lineHeight: 1.75,
-            }}
-          >
-            {copy.subtitle}
-          </p>
+    <section className="hotel-rooms-preview">
+      <header className="hotel-rooms-preview__header">
+        <div>
+          <h2>{copy.title}</h2>
+          <p>{copy.subtitle}</p>
         </div>
+      </header>
 
-        {!isPublished && isEditor && (
-          <div
-            style={{
-              maxWidth: 290,
-              padding: "12px 14px",
-              borderRadius: 16,
-              background: "#fff7ed",
-              border: "1px solid #fed7aa",
-              color: "#9a3412",
-            }}
-          >
-            <div
-              style={{
-                marginBottom: 4,
-                fontSize: 10,
-                fontWeight: 800,
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-              }}
-            >
-              {copy.draft}
-            </div>
+      <div className="hotel-rooms-preview__list">
+        {featuredRooms.map((room, index) => {
+          const slug =
+            typeof room.slug === "string" && room.slug.trim()
+              ? room.slug.trim()
+              : `room-${index + 1}`;
 
-            <div
-              style={{
-                fontSize: 11,
-                fontWeight: 600,
-                lineHeight: 1.5,
-              }}
-            >
-              {copy.draftNotice}
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns:
-            "repeat(auto-fit, minmax(280px, 1fr))",
-          gap: 18,
-        }}
-      >
-        {rooms.map((room) => {
           const name =
-            localizedValue(room, language, "name");
+            localizedValue(room, language, "name") || `Room ${index + 1}`;
 
           const description =
-            localizedValue(
-              room,
-              language,
-              "description"
-            );
+            localizedValue(room, language, "short_description") ||
+            localizedValue(room, language, "description");
 
-          const bedType =
-            localizedValue(
-              room,
-              language,
-              "bed_type"
-            );
+          const view = localizedValue(room, language, "view");
+          const bedType = localizedValue(room, language, "bed_type");
+          const size = toPositiveNumber(room.size_sqm);
 
-          const view =
-            localizedValue(room, language, "view");
+          const occupancy =
+            toPositiveNumber(room.max_occupancy) ||
+            ((toPositiveNumber(room.max_adults) || 0) +
+              (toPositiveNumber(room.max_children) || 0) ||
+              null);
 
-          const highlights =
-            localizedHighlights(room, language);
+          const image = getRoomImage(room, language);
 
-          const totalGuests =
-            (room.max_adults || 0) +
-            (room.max_children || 0);
+          const roomHref = localizedHref(
+            `/spot/${encodeURIComponent(hotelSlug)}/zimmer/${encodeURIComponent(
+              slug,
+            )}`,
+          );
 
           return (
             <article
-              key={room.id}
-              style={{
-                overflow: "hidden",
-                borderRadius: 24,
-                background: "#ffffff",
-                border: "1px solid #e2e8f0",
-                boxShadow:
-                  "0 16px 40px rgba(15,23,42,0.08)",
-              }}
+              className="hotel-rooms-preview__card"
+              key={room.id || slug}
             >
-              {room.image_url && (
-                <div
-                  style={{
-                    height: 210,
-                    overflow: "hidden",
-                    background: "#e2e8f0",
-                  }}
-                >
-                  <img
-                    src={room.image_url}
-                    alt={name}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  />
-                </div>
-              )}
-
-              <div style={{ padding: 24 }}>
-                <h3
-                  style={{
-                    margin: 0,
-                    color: "#0f172a",
-                    fontSize: 22,
-                    lineHeight: 1.2,
-                    fontWeight: 800,
-                    letterSpacing: "-0.03em",
-                  }}
-                >
-                  {name}
-                </h3>
-
-                {description && (
-                  <p
-                    style={{
-                      margin: "12px 0 0",
-                      color: "#64748b",
-                      fontSize: 13,
-                      lineHeight: 1.7,
-                    }}
-                  >
-                    {description}
-                  </p>
-                )}
-
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns:
-                      "repeat(2, minmax(0, 1fr))",
-                    gap: 10,
-                    marginTop: 20,
-                  }}
-                >
-                  {room.size_sqm && (
-                    <RoomFact
-                      icon={<Maximize2 size={16} />}
-                      label={copy.size}
-                      value={`${room.size_sqm} m²`}
-                    />
-                  )}
-
-                  {totalGuests > 0 && (
-                    <RoomFact
-                      icon={<Users size={16} />}
-                      label={copy.guests}
-                      value={[
-                        room.max_adults
-                          ? `${room.max_adults} ${copy.adults}`
-                          : "",
-                        room.max_children
-                          ? `${room.max_children} ${copy.children}`
-                          : "",
-                      ]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    />
-                  )}
-
-                  {bedType && (
-                    <RoomFact
-                      icon={<BedDouble size={16} />}
-                      label={copy.bed}
-                      value={bedType}
-                    />
-                  )}
-
-                  {view && (
-                    <RoomFact
-                      icon={<Mountain size={16} />}
-                      label={copy.view}
-                      value={view}
-                    />
+              <Link
+                href={roomHref}
+                className="hotel-rooms-preview__image-link"
+                aria-label={`${copy.viewRoom}: ${name}`}
+              >
+                <div className="hotel-rooms-preview__image-frame">
+                  {image ? (
+                    <>
+                      <Image
+                        src={image.src}
+                        alt={image.alt}
+                        fill
+                        sizes="(max-width: 560px) 100vw, (max-width: 900px) 42vw, 245px"
+                        className="hotel-rooms-preview__image"
+                      />
+                      <span className="hotel-rooms-preview__image-shade" />
+                    </>
+                  ) : (
+                    <span className="hotel-rooms-preview__placeholder">
+                      <ImageIcon size={24} />
+                      {copy.noImage}
+                    </span>
                   )}
                 </div>
+              </Link>
 
-                {highlights.length > 0 && (
-                  <div
-                    style={{
-                      display: "flex",
-                      flexWrap: "wrap",
-                      gap: 8,
-                      marginTop: 18,
-                    }}
-                  >
-                    {highlights.map((highlight) => (
-                      <span
-                        key={highlight}
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: 6,
-                          padding: "7px 10px",
-                          borderRadius: 999,
-                          background: "#f0fdfa",
-                          color: "#115e59",
-                          fontSize: 10,
-                          fontWeight: 700,
-                        }}
-                      >
-                        <Check size={13} />
-                        {highlight}
+              <div className="hotel-rooms-preview__body">
+                <div className="hotel-rooms-preview__content">
+                  <h3>{name}</h3>
+
+                  {description && <p>{description}</p>}
+
+                  <div className="hotel-rooms-preview__facts">
+                    {size && (
+                      <span>
+                        <Maximize2 size={14} />
+                        {size} m²
                       </span>
-                    ))}
-                  </div>
-                )}
+                    )}
 
-                {(room.price_from ||
-                  room.booking_url) && (
-                  <div
-                    style={{
-                      marginTop: 22,
-                      paddingTop: 18,
-                      borderTop: "1px solid #e2e8f0",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      gap: 16,
-                    }}
+                    {occupancy && (
+                      <span>
+                        <Users size={14} />
+                        {copy.guests} {occupancy} {copy.people}
+                      </span>
+                    )}
+
+                    {bedType && (
+                      <span>
+                        <BedDouble size={14} />
+                        {bedType}
+                      </span>
+                    )}
+
+                    {view && (
+                      <span>
+                        <Waves size={14} />
+                        {view}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="hotel-rooms-preview__footer">
+                  <Link
+                    href={roomHref}
+                    className="hotel-rooms-preview__cta"
+                    aria-label={`${copy.viewRoom}: ${name}`}
                   >
-                    {room.price_from ? (
-                      <div>
-                        <div
-                          style={{
-                            color: "#64748b",
-                            fontSize: 10,
-                            fontWeight: 700,
-                          }}
-                        >
-                          {copy.from}
-                        </div>
-
-                        <div
-                          style={{
-                            color: "#0f172a",
-                            fontSize: 19,
-                            fontWeight: 800,
-                          }}
-                        >
-                          {formatPrice(
-                            room.price_from,
-                            room.currency
-                          )}
-                        </div>
-
-                        <div
-                          style={{
-                            color: "#94a3b8",
-                            fontSize: 9,
-                          }}
-                        >
-                          {copy.perNight}
-                        </div>
-                      </div>
-                    ) : (
-                      <div />
-                    )}
-
-                    {room.booking_url && (
-                      <a
-                        href={room.booking_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: 7,
-                          padding: "10px 13px",
-                          borderRadius: 12,
-                          background: "#0f766e",
-                          color: "#ffffff",
-                          textDecoration: "none",
-                          fontSize: 11,
-                          fontWeight: 800,
-                        }}
-                      >
-                        {copy.details}
-                        <ArrowRight size={15} />
-                      </a>
-                    )}
-                  </div>
-                )}
+                    {copy.viewRoom} <span aria-hidden="true">→</span>
+                  </Link>
+                </div>
               </div>
             </article>
           );
         })}
       </div>
+
+      <Link
+        href={localizedHref(
+          `/spot/${encodeURIComponent(hotelSlug)}/zimmer`,
+        )}
+        className="hotel-rooms-preview__all"
+      >
+        {copy.viewAll} <span aria-hidden="true">→</span>
+      </Link>
+
+      <style jsx>{`
+        .hotel-rooms-preview {
+          padding: 18px;
+        }
+
+        .hotel-rooms-preview__header {
+          margin: 8px 0 16px 8px;
+        }
+
+        h2 {
+          margin: 0;
+          color: #10233f;
+          font-size: 18px;
+          line-height: 1.3;
+          font-weight: 700;
+          letter-spacing: -0.025em;
+        }
+
+        .hotel-rooms-preview__header p {
+          max-width: 620px;
+          margin: 5px 0 0;
+          color: #66768a;
+          font-size: 11px;
+          line-height: 1.55;
+        }
+
+        .hotel-rooms-preview__list {
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+        }
+
+        .hotel-rooms-preview__card {
+          display: grid;
+          grid-template-columns: 245px minmax(0, 1fr);
+          min-height: 174px;
+          overflow: hidden;
+          border: 1px solid #e5ebef;
+          border-radius: 16px;
+          background: #ffffff;
+          box-shadow: 0 6px 20px rgba(15, 35, 62, 0.035);
+          transition:
+            transform 200ms ease,
+            box-shadow 200ms ease,
+            border-color 200ms ease;
+        }
+
+        .hotel-rooms-preview__card:hover {
+          transform: translateY(-2px);
+          border-color: #d4e3e6;
+          box-shadow: 0 16px 34px rgba(15, 35, 62, 0.09);
+        }
+
+        .hotel-rooms-preview__image-link {
+          display: block;
+          min-width: 0;
+          height: 100%;
+          color: inherit;
+          text-decoration: none;
+        }
+
+        .hotel-rooms-preview__image-frame {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          min-height: 174px;
+          overflow: hidden;
+          border-radius: 14px 0 0 14px;
+          background: #edf4f4;
+        }
+
+        .hotel-rooms-preview__image {
+          object-fit: cover;
+          transition: transform 420ms ease;
+        }
+
+        .hotel-rooms-preview__card:hover .hotel-rooms-preview__image {
+          transform: scale(1.03);
+        }
+
+        .hotel-rooms-preview__image-shade {
+          position: absolute;
+          inset: auto 0 0;
+          height: 44%;
+          pointer-events: none;
+          background: linear-gradient(
+            to top,
+            rgba(9, 26, 47, 0.22),
+            rgba(9, 26, 47, 0)
+          );
+        }
+
+        .hotel-rooms-preview__placeholder {
+          display: flex;
+          width: 100%;
+          height: 100%;
+          min-height: 174px;
+          align-items: center;
+          justify-content: center;
+          flex-direction: column;
+          gap: 8px;
+          color: #7f929f;
+          font-size: 10px;
+          font-weight: 600;
+        }
+
+        .hotel-rooms-preview__body {
+          display: flex;
+          min-width: 0;
+          flex-direction: column;
+          justify-content: space-between;
+          padding: 19px 20px 17px;
+        }
+
+        .hotel-rooms-preview__content {
+          min-width: 0;
+        }
+
+        h3 {
+          margin: 0;
+          color: #10233f;
+          font-size: 16px;
+          line-height: 1.3;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+        }
+
+        .hotel-rooms-preview__body p {
+          display: -webkit-box;
+          margin: 8px 0 0;
+          overflow: hidden;
+          color: #66768a;
+          font-size: 13px;
+          line-height: 1.65;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 2;
+        }
+
+        .hotel-rooms-preview__facts {
+          display: flex;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 7px;
+          margin-top: 20px;
+        }
+
+        .hotel-rooms-preview__facts span {
+          display: inline-flex;
+          min-width: 0;
+          align-items: center;
+          gap: 5px;
+          padding: 6px 9px;
+          border: 1px solid #e3ecee;
+          border-radius: 999px;
+          background: #f7fbfb;
+          color: #43536a;
+          font-size: 9px;
+          line-height: 1.2;
+          font-weight: 650;
+          white-space: nowrap;
+        }
+
+        .hotel-rooms-preview__facts span :global(svg) {
+          flex: 0 0 auto;
+          color: #0f8f91;
+        }
+
+        .hotel-rooms-preview__footer {
+          display: flex;
+          justify-content: flex-end;
+          margin-top: 14px;
+        }
+
+        .hotel-rooms-preview__cta {
+          display: inline-flex !important;
+          align-items: center;
+          flex-wrap: nowrap;
+          flex-shrink: 0;
+          gap: 6px;
+          color: #078f98;
+          font-size: 10px;
+          line-height: 1.3;
+          font-weight: 750;
+          text-decoration: none;
+          white-space: nowrap;
+        }
+
+        .hotel-rooms-preview__cta span {
+          display: inline;
+          flex: 0 0 auto;
+          font-size: 14px;
+          line-height: 1;
+          transition: transform 180ms ease;
+        }
+
+        .hotel-rooms-preview__cta:hover {
+          color: #056d75;
+        }
+
+        .hotel-rooms-preview__cta:hover span {
+          transform: translateX(3px);
+        }
+
+        .hotel-rooms-preview__all {
+          display: inline-flex !important;
+          align-items: center;
+          flex-wrap: nowrap;
+          gap: 6px;
+          margin-top: 14px;
+          color: #079ca5;
+          font-size: 10px;
+          line-height: 1.4;
+          font-weight: 700;
+          text-decoration: none;
+          white-space: nowrap;
+        }
+
+        .hotel-rooms-preview__all span {
+          display: inline;
+          flex: 0 0 auto;
+          font-size: 14px;
+          line-height: 1;
+          transition: transform 180ms ease;
+        }
+
+        .hotel-rooms-preview__all:hover {
+          text-decoration: underline;
+        }
+
+        .hotel-rooms-preview__all:hover span {
+          transform: translateX(3px);
+        }
+
+        @media (max-width: 820px) {
+          .hotel-rooms-preview__card {
+            grid-template-columns: 205px minmax(0, 1fr);
+          }
+        }
+
+        @media (max-width: 620px) {
+          .hotel-rooms-preview {
+            padding: 14px;
+          }
+
+          .hotel-rooms-preview__header {
+            margin-left: 4px;
+          }
+
+          .hotel-rooms-preview__card {
+            grid-template-columns: 1fr;
+            border-radius: 14px;
+          }
+
+          .hotel-rooms-preview__image-frame,
+          .hotel-rooms-preview__placeholder {
+            min-height: 220px;
+          }
+
+          .hotel-rooms-preview__image-frame {
+            border-radius: 14px 14px 0 0;
+          }
+
+          .hotel-rooms-preview__body {
+            padding: 16px;
+          }
+
+          .hotel-rooms-preview__footer {
+            justify-content: flex-start;
+          }
+        }
+      `}</style>
     </section>
-  );
-}
-
-function RoomFact({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div
-      style={{
-        padding: "11px 12px",
-        borderRadius: 14,
-        background: "#f8fafc",
-        border: "1px solid #f1f5f9",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-          color: "#0f766e",
-          marginBottom: 5,
-        }}
-      >
-        {icon}
-        <span
-          style={{
-            fontSize: 9,
-            fontWeight: 800,
-            textTransform: "uppercase",
-            letterSpacing: "0.07em",
-          }}
-        >
-          {label}
-        </span>
-      </div>
-
-      <div
-        style={{
-          color: "#334155",
-          fontSize: 11,
-          fontWeight: 700,
-          lineHeight: 1.4,
-        }}
-      >
-        {value}
-      </div>
-    </div>
   );
 }

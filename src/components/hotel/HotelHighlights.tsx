@@ -9,10 +9,10 @@ import {
   Waves,
 } from "lucide-react";
 import type { Language } from "@/src/lib/i18n";
-import type { HotelProfileRecord } from "@/src/types/spot";
+import type { PremiumHotelRecord } from "@/src/types/spot";
 
 interface HotelHighlightsProps {
-  hotelProfile: HotelProfileRecord;
+  premiumHotel: PremiumHotelRecord;
   language: Language;
   userRole?: string | null;
 }
@@ -68,25 +68,25 @@ function formatCount(
 }
 
 export default function HotelHighlights({
-  hotelProfile,
+  premiumHotel,
   language,
   userRole,
 }: HotelHighlightsProps) {
   const text = copy[language];
   const role = String(userRole || "").trim().toLowerCase();
   const isEditor = role === "admin" || role === "editor";
-  const isPublished = hotelProfile.status === "published";
+  const isPublished = premiumHotel.status === "published";
 
   if (!isPublished && !isEditor) return null;
 
-  const familyFriendly = hotelProfile.suitable_for_families === true;
+  const familyFriendly = premiumHotel.suitable_for_families === true;
 
   const highlights: HighlightCard[] = [
     {
       key: "pools",
       title: text.pools,
       description: formatCount(
-        hotelProfile.pool_count,
+        premiumHotel.pool_count,
         language === "en" ? "pool" : "Pool",
         language === "en" ? "pools" : "Pools",
         text.noData,
@@ -97,7 +97,7 @@ export default function HotelHighlights({
       key: "rooms",
       title: text.rooms,
       description: formatCount(
-        hotelProfile.room_count,
+        premiumHotel.room_count,
         language === "en" ? "room" : "Zimmer",
         language === "en" ? "rooms" : "Zimmer",
         text.noData,
@@ -108,7 +108,7 @@ export default function HotelHighlights({
       key: "restaurants",
       title: text.restaurants,
       description: formatCount(
-        hotelProfile.restaurant_count,
+        premiumHotel.restaurant_count,
         "Restaurant",
         language === "en" ? "restaurants" : "Restaurants",
         text.noData,
@@ -119,7 +119,7 @@ export default function HotelHighlights({
       key: "bars",
       title: text.bars,
       description: formatCount(
-        hotelProfile.bar_count,
+        premiumHotel.bar_count,
         "Bar",
         "Bars",
         text.noData,

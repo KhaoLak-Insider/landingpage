@@ -13,6 +13,8 @@ import type {
   HotelProfileRecord,
   HotelRestaurantRecord,
   HotelRoomRecord,
+  PremiumHotelRecord,
+  PremiumRoomRecord,
 } from "@/src/types/spot";
 import SpotHero from "@/src/components/spot/SpotHero";
 import SpotGallery from "@/src/components/spot/SpotGallery";
@@ -26,6 +28,8 @@ import { getLocalizedConfigField } from "@/src/lib/spot/localization";
 
 export interface StandardTemplateProps {
   spot: any;
+  premiumHotel?: PremiumHotelRecord | null;
+  premiumRooms?: PremiumRoomRecord[];
   hotelProfile?: HotelProfileRecord | null;
   hotelImages?: HotelImageRecord[];
   hotelRooms?: HotelRoomRecord[];

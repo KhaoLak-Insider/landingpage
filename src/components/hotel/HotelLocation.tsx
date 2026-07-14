@@ -23,6 +23,7 @@ interface HotelLocationWithDistances extends HotelLocationRecord {
   distance_memories_beach_m?: number | string | null;
   distance_nang_thong_center_m?: number | string | null;
   distance_nearest_exchange_m?: number | string | null;
+  distance_nearest_7eleven_m?: number | string | null;
   distance_phuket_airport_m?: number | string | null;
 }
 
@@ -54,6 +55,7 @@ const labels = {
     coconutBeach: "Coconut Beach",
     memoriesBeach: "Memories Beach",
     nangThongCenter: "Zentrum von Khao Lak",
+    nearest7Eleven: "Nächster 7-Eleven",
     nearestExchange: "Nächste Wechselstube",
     phuketAirport: "Flughafen Phuket",
     showOnMap: "Auf Karte anzeigen",
@@ -67,6 +69,7 @@ const labels = {
     coconutBeach: "Coconut Beach",
     memoriesBeach: "Memories Beach",
     nangThongCenter: "Khao Lak centre",
+    nearest7Eleven: "Nearest 7-Eleven",
     nearestExchange: "Nearest currency exchange",
     phuketAirport: "Phuket Airport",
     showOnMap: "View on map",
@@ -168,6 +171,14 @@ export default function HotelLocation({
   const summary = getLocalizedSummary(location, language);
 
   const distanceItems: DistanceItem[] = [
+    {
+      key: "nearest-7eleven",
+      label: copy.nearest7Eleven,
+      distanceInMeters: normalizeDistance(
+        location.distance_nearest_7eleven_m,
+      ),
+      icon: MapPin,
+    },
     {
       key: "bang-niang-market",
       label: copy.bangNiangMarket,
@@ -312,12 +323,12 @@ export default function HotelLocation({
         }
 
         .hotel-location-card__heading {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 16px;
-          margin-bottom: 12px;
-        }
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 8px 0 12px 8px;
+}
 
         h2 {
           margin: 0;

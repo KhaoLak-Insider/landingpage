@@ -8,6 +8,7 @@ import {
   Star,
 } from "lucide-react";
 import type { Language } from "@/src/lib/i18n";
+import type { PremiumHotelRecord } from "@/src/types/spot";
 import { t } from "@/src/lib/translations";
 
 interface HotelHeroProps {
@@ -15,6 +16,7 @@ interface HotelHeroProps {
   language: Language;
   title: string;
   description: string;
+  premiumHotel?: PremiumHotelRecord | null;
   category: string;
   backHref: string;
 }
@@ -24,6 +26,7 @@ export default function HotelHero({
   language,
   title,
   description,
+  premiumHotel,
   category,
   backHref,
 }: HotelHeroProps) {
@@ -32,6 +35,21 @@ export default function HotelHero({
     spot.address ||
     spot.location ||
     "Khao Lak, Phang Nga";
+
+  const localizedHeroSummary =
+    language === "en"
+      ? premiumHotel?.hero_summary_en
+      : premiumHotel?.hero_summary_de;
+
+  const fallbackHeroSummary =
+    language === "en"
+      ? premiumHotel?.hero_summary_de
+      : premiumHotel?.hero_summary_en;
+
+  const heroDescription =
+    localizedHeroSummary?.trim() ||
+    fallbackHeroSummary?.trim() ||
+    description;
 
   return (
     <section
@@ -187,7 +205,7 @@ export default function HotelHero({
             {title}
           </h1>
 
-          {description && (
+          {heroDescription && (
             <p
               style={{
                 margin: 0,
@@ -199,7 +217,7 @@ export default function HotelHero({
                 textShadow: "0 2px 12px rgba(0,0,0,0.28)",
               }}
             >
-              {description}
+              {heroDescription}
             </p>
           )}
 

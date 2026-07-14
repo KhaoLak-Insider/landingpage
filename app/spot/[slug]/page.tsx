@@ -359,309 +359,63 @@ export default async function Page({
       .toLowerCase()
       .replace(/_/g, "-") === "premium-hotel";
 
-  let hotelProfile: SpotClientPageProps["initialHotelProfile"] = null;
+  let premiumHotel: SpotClientPageProps["initialPremiumHotel"] = null;
+  let premiumRooms: SpotClientPageProps["initialPremiumRooms"] = [];
 
   if (isPremiumHotel) {
     const {
-      data: hotelProfileData,
-      error: hotelProfileError,
+      data: premiumHotelData,
+      error: premiumHotelError,
     } = await supabase
-      .from("hotel_profiles")
+      .from("premium_hotels")
       .select("*")
       .eq("spot_id", spotData.id)
       .maybeSingle();
 
-    if (hotelProfileError) {
+    if (premiumHotelError) {
       console.error(
-        "Fehler beim Laden des Premium-Hotelprofils:",
-        hotelProfileError
+        "Fehler beim Laden des neuen Premium-Hotelprofils:",
+        premiumHotelError
       );
     }
 
-    hotelProfile = hotelProfileData;
-  }
+    premiumHotel = premiumHotelData;
 
-  let hotelImages: SpotClientPageProps["initialHotelImages"] = [];
+    if (premiumHotelData?.id) {
+      const {
+        data: premiumRoomData,
+        error: premiumRoomError,
+      } = await supabase
+        .from("premium_rooms")
+        .select("*")
+        .eq("premium_hotel_id", premiumHotelData.id)
+        .eq("status", "published")
+        .order("sort_order", { ascending: true })
+        .order("name_de", { ascending: true });
 
-  if (hotelProfile?.id) {
-    const {
-      data: hotelImageData,
-      error: hotelImageError,
-    } = await supabase
-      .from("hotel_images")
-      .select(`
-        id,
-        hotel_profile_id,
-        image_url,
-        category,
-        title_de,
-        title_en,
-        alt_de,
-        alt_en,
-        credit_name,
-        credit_url,
-        sort_order,
-        is_cover,
-        is_featured,
-        status,
-        created_at,
-        updated_at
-      `)
-      .eq("hotel_profile_id", hotelProfile.id)
-      .eq("status", "published")
-      .order("is_cover", { ascending: false })
-      .order("is_featured", { ascending: false })
-      .order("sort_order", { ascending: true });
+      if (premiumRoomError) {
+        console.error(
+          "Fehler beim Laden der neuen Premium-Zimmer:",
+          premiumRoomError
+        );
+      }
 
-    if (hotelImageError) {
-      console.error(
-        "Fehler beim Laden der Premium-Hotelbilder:",
-        hotelImageError
-      );
+      premiumRooms = premiumRoomData || [];
     }
-
-    hotelImages = hotelImageData || [];
   }
 
-  let hotelRooms: SpotClientPageProps["initialHotelRooms"] = [];
-
-  if (hotelProfile?.id) {
-    const {
-      data: hotelRoomData,
-      error: hotelRoomError,
-    } = await supabase
-      .from("hotel_rooms")
-      .select(`
-        id,
-        hotel_profile_id,
-        name_de,
-        name_en,
-        description_de,
-        description_en,
-        image_url,
-        size_sqm,
-        max_adults,
-        max_children,
-        bed_type_de,
-        bed_type_en,
-        view_de,
-        view_en,
-        highlights_de,
-        highlights_en,
-        price_from,
-        currency,
-        booking_url,
-        sort_order,
-        status,
-        verified_at,
-        source_id,
-        created_at,
-        updated_at
-      `)
-      .eq("hotel_profile_id", hotelProfile.id)
-      .eq("status", "published")
-      .order("sort_order", { ascending: true });
-
-    if (hotelRoomError) {
-      console.error(
-        "Fehler beim Laden der Hotelzimmer:",
-        hotelRoomError
-      );
-    }
-
-    hotelRooms = hotelRoomData || [];
-  }
-
-  let hotelRestaurants: SpotClientPageProps["initialHotelRestaurants"] = [];
-
-  if (hotelProfile?.id) {
-    const {
-      data: hotelRestaurantData,
-      error: hotelRestaurantError,
-    } = await supabase
-      .from("hotel_restaurants")
-      .select(`
-        id,
-        hotel_profile_id,
-        venue_type,
-        name_de,
-        name_en,
-        description_de,
-        description_en,
-        image_url,
-        cuisine_de,
-        cuisine_en,
-        location_de,
-        location_en,
-        opening_hours_de,
-        opening_hours_en,
-        serves_breakfast,
-        serves_lunch,
-        serves_dinner,
-        serves_drinks,
-        highlights_de,
-        highlights_en,
-        menu_url,
-        reservation_url,
-        sort_order,
-        status,
-        verified_at,
-        source_id,
-        created_at,
-        updated_at
-      `)
-      .eq("hotel_profile_id", hotelProfile.id)
-      .eq("status", "published")
-      .order("sort_order", { ascending: true });
-
-    if (hotelRestaurantError) {
-      console.error(
-        "Fehler beim Laden der Hotelgastronomie:",
-        hotelRestaurantError
-      );
-    }
-
-    hotelRestaurants = hotelRestaurantData || [];
-  }
-
-  let hotelAmenities: SpotClientPageProps["initialHotelAmenities"] = [];
-
-  if (hotelProfile?.id) {
-    const {
-      data: hotelAmenityData,
-      error: hotelAmenityError,
-    } = await supabase
-      .from("hotel_amenities")
-      .select(`
-        id,
-        hotel_profile_id,
-        amenity_type,
-        name_de,
-        name_en,
-        description_de,
-        description_en,
-        image_url,
-        location_de,
-        location_en,
-        opening_hours_de,
-        opening_hours_en,
-        highlights_de,
-        highlights_en,
-        details,
-        sort_order,
-        status,
-        verified_at,
-        source_id,
-        created_at,
-        updated_at
-      `)
-      .eq("hotel_profile_id", hotelProfile.id)
-      .eq("status", "published")
-      .order("sort_order", { ascending: true });
-
-    if (hotelAmenityError) {
-      console.error(
-        "Fehler beim Laden der Hotelausstattung:",
-        hotelAmenityError
-      );
-    }
-
-    hotelAmenities = hotelAmenityData || [];
-  }
-
-  let hotelLocation: SpotClientPageProps["initialHotelLocation"] = null;
-
-  if (hotelProfile?.id) {
-    const {
-      data: hotelLocationData,
-      error: hotelLocationError,
-    } = await supabase
-      .from("hotel_location")
-      .select(`
-        id,
-        hotel_profile_id,
-        setting_de,
-        setting_en,
-        editorial_summary_de,
-        editorial_summary_en,
-        beach_access_de,
-        beach_access_en,
-        terrain_de,
-        terrain_en,
-        noise_level_de,
-        noise_level_en,
-        walkability_de,
-        walkability_en,
-        transport_recommendation_de,
-        transport_recommendation_en,
-        sunset_view,
-        swimming_conditions_de,
-        swimming_conditions_en,
-        nearby_services_de,
-        nearby_services_en,
-        distance_bang_niang_market_m,
-        distance_coconut_beach_m,
-        distance_memories_beach_m,
-        distance_nang_thong_center_m,
-        distance_nearest_exchange_m,
-        distance_phuket_airport_m,
-        distances,
-        status,
-        verified_at,
-        source_id,
-        created_at,
-        updated_at
-      `)
-      .eq("hotel_profile_id", hotelProfile.id)
-      .eq("status", "published")
-      .maybeSingle();
-
-    if (hotelLocationError) {
-      console.error(
-        "Fehler beim Laden der Hotellage:",
-        hotelLocationError
-      );
-    }
-
-    hotelLocation = hotelLocationData;
-  }
-
-  let hotelFaqs: SpotClientPageProps["initialHotelFaqs"] = [];
-
-  if (hotelProfile?.id) {
-    const {
-      data: hotelFaqData,
-      error: hotelFaqError,
-    } = await supabase
-      .from("hotel_faqs")
-      .select(`
-        id,
-        hotel_profile_id,
-        question_de,
-        question_en,
-        answer_de,
-        answer_en,
-        category,
-        sort_order,
-        status,
-        verified_at,
-        source_id,
-        created_at,
-        updated_at
-      `)
-      .eq("hotel_profile_id", hotelProfile.id)
-      .eq("status", "published")
-      .order("sort_order", { ascending: true });
-
-    if (hotelFaqError) {
-      console.error(
-        "Fehler beim Laden der Hotel-FAQ:",
-        hotelFaqError
-      );
-    }
-
-    hotelFaqs = hotelFaqData || [];
-  }
+  /*
+   * Übergangsphase:
+   * Die alten Props bleiben bis Schritt 3 und 4 vorhanden, werden aber
+   * nicht mehr aus den bisherigen Hotel-Tabellen geladen.
+   */
+  const hotelProfile: SpotClientPageProps["initialHotelProfile"] = null;
+  const hotelImages: SpotClientPageProps["initialHotelImages"] = [];
+  const hotelRooms: SpotClientPageProps["initialHotelRooms"] = [];
+  const hotelRestaurants: SpotClientPageProps["initialHotelRestaurants"] = [];
+  const hotelAmenities: SpotClientPageProps["initialHotelAmenities"] = [];
+  const hotelLocation: SpotClientPageProps["initialHotelLocation"] = null;
+  const hotelFaqs: SpotClientPageProps["initialHotelFaqs"] = [];
 
   const { data: randomData, error: randomError } =
     await supabase
@@ -875,6 +629,8 @@ export default async function Page({
       <SpotClientPage
         initialSpot={spotData}
         initialRandomSpots={filteredRandom}
+        initialPremiumHotel={premiumHotel}
+        initialPremiumRooms={premiumRooms}
         initialHotelProfile={hotelProfile}
         initialHotelImages={hotelImages}
         initialHotelRooms={hotelRooms}

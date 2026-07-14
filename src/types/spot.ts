@@ -37,6 +37,123 @@ export interface SpotRecord {
   [key: string]: unknown;
 }
 
+
+export type PremiumContentStatus =
+  | "draft"
+  | "published"
+  | "archived";
+
+export interface PremiumHotelGalleryImage {
+  id?: string;
+  image_url: string;
+  title_de?: string | null;
+  title_en?: string | null;
+  alt_de?: string | null;
+  alt_en?: string | null;
+  credit_name?: string | null;
+  credit_url?: string | null;
+  sort_order?: number | null;
+  is_cover?: boolean | null;
+  is_featured?: boolean | null;
+  status?: PremiumContentStatus | null;
+}
+
+export interface PremiumHotelFaqItem {
+  id?: string;
+  question_de: string;
+  question_en?: string | null;
+  answer_de: string;
+  answer_en?: string | null;
+  category?: string | null;
+  sort_order?: number | null;
+  status?: PremiumContentStatus | null;
+  verified_at?: string | null;
+}
+
+export interface PremiumHotelRecord {
+  id: string;
+  spot_id: string;
+  status: PremiumContentStatus;
+
+  intro_features_de: string[];
+  intro_features_en: string[];
+
+  pool_count?: number | null;
+  room_count?: number | null;
+  restaurant_count?: number | null;
+  bar_count?: number | null;
+  suitable_for_families: boolean;
+  adults_only: boolean;
+
+  hero_summary_de?: string | null;
+  hero_summary_en?: string | null;
+
+  editorial_summary_de?: string | null;
+  editorial_summary_en?: string | null;
+
+  distance_bang_niang_market_m?: number | null;
+  distance_coconut_beach_m?: number | null;
+  distance_memories_beach_m?: number | null;
+  distance_nang_thong_center_m?: number | null;
+  distance_nearest_exchange_m?: number | null;
+  distance_nearest_7eleven_m?: number | null;
+  distance_phuket_airport_m?: number | null;
+
+  gallery_images: PremiumHotelGalleryImage[];
+  faq_items: PremiumHotelFaqItem[];
+
+  source_url?: string | null;
+  verified_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface PremiumRoomImage {
+  url: string;
+  alt_de?: string | null;
+  alt_en?: string | null;
+  sort_order?: number | null;
+}
+
+export interface PremiumRoomRecord {
+  id: string;
+  premium_hotel_id: string;
+  slug: string;
+  status: PremiumContentStatus;
+  sort_order: number;
+
+  name_de: string;
+  name_en?: string | null;
+  short_description_de?: string | null;
+  short_description_en?: string | null;
+  description_de?: string | null;
+  description_en?: string | null;
+
+  size_sqm?: number | null;
+  max_adults?: number | null;
+  max_children?: number | null;
+  max_occupancy?: number | null;
+
+  bed_type_de?: string | null;
+  bed_type_en?: string | null;
+  view_de?: string | null;
+  view_en?: string | null;
+  bathroom_de?: string | null;
+  bathroom_en?: string | null;
+
+  cover_image_url?: string | null;
+  images: PremiumRoomImage[];
+  highlights_de: string[];
+  highlights_en: string[];
+  amenities_de: string[];
+  amenities_en: string[];
+
+  source_url?: string | null;
+  verified_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface HotelProfileRecord {
   id: string;
   spot_id: string;
@@ -306,6 +423,13 @@ export interface HotelFaqRecord {
 export interface SpotClientPageProps {
   initialSpot: SpotRecord;
   initialRandomSpots: SpotRecord[];
+
+  // Neue Premium-Architektur. Während der kontrollierten Migration
+  // bleiben die bisherigen Hotel-Props noch vorübergehend erhalten.
+  initialPremiumHotel?: PremiumHotelRecord | null;
+  initialPremiumRooms?: PremiumRoomRecord[];
+
+  // Alte Hotel-Architektur – wird nach erfolgreicher Umstellung entfernt.
   initialHotelProfile: HotelProfileRecord | null;
   initialHotelImages: HotelImageRecord[];
   initialHotelRooms: HotelRoomRecord[];

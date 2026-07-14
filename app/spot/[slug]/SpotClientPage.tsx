@@ -15,6 +15,8 @@ import type { SpotClientPageProps } from "@/src/types/spot";
 export default function SpotClientPage({
   initialSpot,
   initialRandomSpots,
+  initialPremiumHotel,
+  initialPremiumRooms,
   initialHotelProfile,
   initialHotelImages,
   initialHotelRooms,
@@ -108,7 +110,7 @@ export default function SpotClientPage({
           .then((data) => setTours(data.result || []))
           .catch((e) => console.error("Tour Ladefehler:", e));
 
-        // Wenn es ein Strand ist, laden wir passende Spots im direkten Umkreis.
+        // Für Strände und Premium-Hotels laden wir passende Spots in der Nähe.
         const normalizedSpotCategory = String(spot.category || "")
           .trim()
           .toLowerCase()
@@ -117,13 +119,25 @@ export default function SpotClientPage({
           .replace(/ü/g, "ue")
           .replace(/ß/g, "ss");
 
+        const normalizedTemplate = String(spot.template || "")
+          .trim()
+          .toLowerCase()
+          .replace(/_/g, "-");
+
         const isBeachCategory =
           normalizedSpotCategory === "strand" ||
           normalizedSpotCategory === "straende" ||
           normalizedSpotCategory === "beach" ||
           normalizedSpotCategory === "beaches";
 
-        if (isBeachCategory && spot.latitude && spot.longitude) {
+        const isPremiumHotel =
+          normalizedTemplate === "premium-hotel";
+
+        if (
+          (isBeachCategory || isPremiumHotel) &&
+          spot.latitude &&
+          spot.longitude
+        ) {
           setNearbySpots([]);
 
           const { data: candidates, error: nearbyError } = await supabase
@@ -153,7 +167,7 @@ export default function SpotClientPage({
           }
 
           if (candidates) {
-            const allowedCategories = new Set([
+            const beachAllowedCategories = new Set([
               "restaurant",
               "restaurants",
               "strandbar",
@@ -170,6 +184,37 @@ export default function SpotClientPage({
               "accommodations",
             ]);
 
+            const hotelAllowedCategories = new Set([
+              "restaurant",
+              "restaurants",
+              "strandbar",
+              "strandbars",
+              "bar",
+              "bars",
+              "strand",
+              "straende",
+              "beach",
+              "beaches",
+              "markt",
+              "maerkte",
+              "market",
+              "markets",
+              "sehenswuerdigkeit",
+              "sehenswuerdigkeiten",
+              "attraction",
+              "attractions",
+              "tempel",
+              "temple",
+              "natur",
+              "nature",
+            ]);
+
+            const allowedCategories = isPremiumHotel
+              ? hotelAllowedCategories
+              : beachAllowedCategories;
+
+            const radiusKm = isPremiumHotel ? 10 : nearbyRadiusKm;
+
             const filtered = candidates
               .filter((candidate) => {
                 const normalizedCandidateCategory = String(
@@ -182,11 +227,7 @@ export default function SpotClientPage({
                   .replace(/ü/g, "ue")
                   .replace(/ß/g, "ss");
 
-                if (
-                  !allowedCategories.has(
-                    normalizedCandidateCategory
-                  )
-                ) {
+                if (!allowedCategories.has(normalizedCandidateCategory)) {
                   return false;
                 }
 
@@ -197,7 +238,7 @@ export default function SpotClientPage({
                   candidate.longitude
                 );
 
-                return distance <= nearbyRadiusKm;
+                return distance <= radiusKm;
               })
               .sort((first, second) => {
                 const firstDistance = getRawDistance(
@@ -215,7 +256,8 @@ export default function SpotClientPage({
                 );
 
                 return firstDistance - secondDistance;
-              });
+              })
+              .slice(0, 20);
 
             setNearbySpots(filtered);
           }
@@ -323,10 +365,13 @@ export default function SpotClientPage({
       ? userProfile?.hotels?.[0]?.lng
       : userProfile?.hotels?.lng);
 
+
   return (
     <TemplateRenderer
       template={spot.template}
       spot={spot}
+      premiumHotel={initialPremiumHotel}
+      premiumRooms={initialPremiumRooms}
       hotelProfile={initialHotelProfile}
       hotelImages={initialHotelImages}
       hotelRooms={initialHotelRooms}
