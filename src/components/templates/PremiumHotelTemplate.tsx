@@ -105,7 +105,7 @@ function toLegacyImages(
       id: String(image.id || `premium-gallery-${index + 1}`),
       hotel_profile_id: hotel.id,
       image_url: image.image_url.trim(),
-      category: String(image.category || "gallery"),
+      category: "gallery",
       title_de: image.title_de ?? null,
       title_en: image.title_en ?? null,
       alt_de: image.alt_de ?? null,
@@ -278,16 +278,15 @@ export default function PremiumHotelTemplate(props: StandardTemplateProps) {
               )}
             </section>
 
-            {hotelProfile && (
+            {hotelProfile && premiumHotel && (
               <>
                 <div className="premium-slot premium-slot--highlights">
                   <HotelHighlights
-  premiumHotel={premiumHotel}
-  language={props.language}
-  userRole={props.userProfile?.role}
-/>
+                    premiumHotel={premiumHotel}
+                    language={props.language}
+                    userRole={props.userProfile?.role}
+                  />
                 </div>
-
               </>
             )}
           </div>

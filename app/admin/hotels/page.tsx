@@ -114,7 +114,14 @@ export default function AdminHotelsPage() {
         );
         setHotels([]);
       } else {
-        setHotels((data || []) as PremiumHotelListItem[]);
+        const normalizedHotels: PremiumHotelListItem[] = (data ?? []).map((hotel: any) => ({
+          ...hotel,
+          spots: Array.isArray(hotel.spots)
+            ? hotel.spots[0] ?? null
+            : hotel.spots ?? null,
+        }));
+
+        setHotels(normalizedHotels);
       }
 
       setIsLoading(false);
