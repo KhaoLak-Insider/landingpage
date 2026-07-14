@@ -5,6 +5,12 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
+      disallow: [
+        "/admin",
+        "/admin/",
+        "/editor",
+        "/editor/",
+      ],
     },
     sitemap: "https://www.khaolak.app/sitemap.xml",
   };

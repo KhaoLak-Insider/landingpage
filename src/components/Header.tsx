@@ -242,6 +242,13 @@ export default function Header() {
                     <div className="my-1 border-t border-slate-100" />
 
                     <Link
+                      href="/admin"
+                      className="block rounded-lg px-4 py-2 text-sm font-bold text-teal-700 hover:bg-teal-50"
+                    >
+                      Admin-CMS
+                    </Link>
+
+                    <Link
                       href={localizedHref("/editor")}
                       className="block rounded-lg px-4 py-2 text-sm font-bold text-teal-600 hover:bg-teal-50"
                     >
