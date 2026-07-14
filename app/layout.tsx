@@ -70,6 +70,7 @@ export default async function RootLayout({
         <Footer />
 
         <Analytics />
+        <SpeedInsights />
 
         <Script
           id="gyg-analytics"
