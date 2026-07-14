@@ -6,6 +6,7 @@ import { Analytics } from "@vercel/analytics/next";
 import Header from "@/src/components/Header";
 import Footer from "@/src/components/Footer";
 import Script from "next/script";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const poppins = Poppins({
   subsets: ["latin"],
