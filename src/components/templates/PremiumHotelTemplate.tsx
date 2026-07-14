@@ -1,6 +1,6 @@
 "use client";
 
-import { Check } from "lucide-react";
+import { Check, Heart } from "lucide-react";
 import HotelHero from "@/src/components/hotel/HotelHero";
 import HotelHighlights from "@/src/components/hotel/HotelHighlights";
 import HotelRooms from "@/src/components/hotel/HotelRooms";
@@ -225,12 +225,49 @@ export default function PremiumHotelTemplate(props: StandardTemplateProps) {
       <nav className="premium-hotel-tabs" aria-label="Hotelbereiche">
         <div className="premium-hotel-tabs__inner">
           <a className="is-active" href="#overview">
-            Überblick
+            {props.language === "en" ? "Overview" : "Überblick"}
           </a>
-          <a href="#rooms">Zimmer</a>
-          <a href="#location">Lage</a>
+          <a href="#location">
+            {props.language === "en" ? "Location" : "Lage"}
+          </a>
+          <a href="#rooms">
+            {props.language === "en" ? "Rooms" : "Zimmer"}
+          </a>
           <a href="#faq">FAQ</a>
-          <a href="#nearby">In der Nähe</a>
+          <a href="#nearby">
+            {props.language === "en" ? "Nearby" : "In der Nähe"}
+          </a>
+          <button
+            type="button"
+            className="premium-hotel-tabs__favorite"
+            onClick={props.onToggleFavorite}
+            aria-pressed={props.isFavorite}
+            aria-label={
+              props.language === "en"
+                ? props.isFavorite
+                  ? "Remove from favorites"
+                  : "Add to favorites"
+                : props.isFavorite
+                  ? "Aus Favoriten entfernen"
+                  : "Zu Favoriten hinzufügen"
+            }
+            title={
+              props.language === "en"
+                ? props.isFavorite
+                  ? "Remove from favorites"
+                  : "Add to favorites"
+                : props.isFavorite
+                  ? "Aus Favoriten entfernen"
+                  : "Zu Favoriten hinzufügen"
+            }
+          >
+            <Heart
+              size={19}
+              strokeWidth={2}
+              fill={props.isFavorite ? "#ef4444" : "none"}
+              color={props.isFavorite ? "#ef4444" : "#64748b"}
+            />
+          </button>
         </div>
       </nav>
 
@@ -424,6 +461,42 @@ export default function PremiumHotelTemplate(props: StandardTemplateProps) {
         .premium-hotel-tabs a.is-active::after {
           background: #0eb4bb;
         }
+        .premium-hotel-tabs__favorite {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 52px;
+          min-width: 52px;
+          margin-left: auto;
+          padding: 0;
+          border: 0;
+          background: transparent;
+          cursor: pointer;
+          flex: 0 0 auto;
+        }
+
+        .premium-hotel-tabs__favorite::after {
+          display: none;
+        }
+
+        .premium-hotel-tabs__favorite svg {
+          transition:
+            color 0.18s ease,
+            fill 0.18s ease,
+            transform 0.18s ease;
+        }
+
+        .premium-hotel-tabs__favorite:hover svg {
+          color: #ef4444;
+          transform: scale(1.12);
+        }
+
+        .premium-hotel-tabs__favorite:focus-visible {
+          outline: 2px solid #0eb4bb;
+          outline-offset: -4px;
+          border-radius: 8px;
+        }
+
 
         .premium-hotel-shell {
           display: flex;
