@@ -67,12 +67,15 @@ export default function SpotDescription({
   };
 
   return (
-    <section>
+    <section className="spot-description">
+      <span className="spot-description__eyebrow">{language === "en" ? "Insider portrait" : "Insider-Porträt"}</span>
       <h2
         style={{
-          fontSize: 24,
+          fontSize: 25,
           fontWeight: 800,
-          marginBottom: "20px",
+          margin: "0 0 22px",
+          color: "#10233f",
+          letterSpacing: "-0.03em",
         }}
       >
         {t(language, "about")} {title}
@@ -107,6 +110,9 @@ export default function SpotDescription({
             : t(language, "learnMore")}
         </button>
       )}
+      <style jsx>{`
+        .spot-description__eyebrow{display:block;margin-bottom:6px;color:#079ca5;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.spot-description :global(p){max-width:760px}.spot-description :global(button){display:inline-flex!important;margin-top:4px!important;padding:9px 12px!important;border:1px solid #cde7e8!important;border-radius:9px!important;background:#eefafa!important;color:#078f96!important;font-size:10px!important;text-decoration:none!important}
+      `}</style>
     </section>
   );
 }
