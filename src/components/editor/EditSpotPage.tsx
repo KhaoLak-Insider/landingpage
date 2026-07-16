@@ -8,6 +8,7 @@ import ImageUpload from "@/src/components/ImageUpload";
 import GalleryUpload from "@/src/components/GalleryUpload";
 import { iconNames, iconMap } from "@/src/components/IconLibrary";
 import { ArrowLeft, ExternalLink, Save } from "lucide-react";
+import { mergeSpotCategoryDetails } from "@/src/lib/spot-category-details";
 import "./spot-editor.css";
 
 // HELPER: Text zu JSON konvertieren
@@ -29,7 +30,7 @@ export default function EditSpotPage() {
   const params = useParams();
   const id = params.id as string;
   const router = useRouter();
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -90,42 +91,55 @@ export default function EditSpotPage() {
 
   useEffect(() => {
     async function fetchData() {
-      const { data: catData } = await supabase.from("categories").select("name");
-      if (catData) setCategories(catData.map(item => item.name));
+      const { data: catData } = await supabase
+        .from("categories")
+        .select("id, name")
+        .eq("is_active", true)
+        .order("sort_order")
+        .order("name");
+      if (catData) setCategories(catData);
 
       if (id) {
-        const { data } = await supabase.from("spots").select("*").eq("id", id).single();
+        const [{ data }, { data: categoryDetails }] = await Promise.all([
+          supabase.from("spots").select("*").eq("id", id).single(),
+          supabase
+            .from("spot_category_details")
+            .select("*")
+            .eq("spot_id", id)
+            .maybeSingle(),
+        ]);
         if (data) {
+          const resolvedData = mergeSpotCategoryDetails(data, categoryDetails);
           let textDesc = "";
-          if (Array.isArray(data.long_description)) {
-            textDesc = data.long_description.map((block: unknown) => {
+          if (Array.isArray(resolvedData.long_description)) {
+            textDesc = resolvedData.long_description.map((block: unknown) => {
               const value = block as { type?: unknown; content?: unknown };
               const content = typeof value.content === "string" ? value.content : "";
               return value.type === "heading" ? `### ${content}` : content;
             }).join('\n\n');
           } else {
-            textDesc = data.long_description || "";
+            textDesc = resolvedData.long_description || "";
           }
 
           setFormData({
-            title: data.title || "",
-            image_url: data.image_url || "",
-            category: data.category || "",
-            description: data.description || "",
+            title: resolvedData.title || "",
+            image_url: resolvedData.image_url || "",
+            category: resolvedData.category || "",
+            description: resolvedData.description || "",
             long_description: textDesc,
-            latitude: data.latitude?.toString() || "",
-            longitude: data.longitude?.toString() || "",
-            price_level: data.price_level?.toString() || "",
-            stars: data.stars?.toString() || "",
-            opening_hours: data.opening_hours || "",
-            youtube_url: data.youtube_url || "",
-            youtube_timestamp: data.youtube_timestamp?.toString() || "",
-            tour_link: data.tour_link || "",
-            booking_link: data.booking_link || "",
-            features: data.details_config?.features || [{ label: "", value: "", icon: "Sparkles" }],
-            best_months: data.best_months || [],
-            galleryUrlsText: data.gallery_urls?.join("\n") || "",
-            parking_info: data.parking_info || { name: "", price: "", details: "", lat: "", lng: "" },
+            latitude: resolvedData.latitude?.toString() || "",
+            longitude: resolvedData.longitude?.toString() || "",
+            price_level: resolvedData.price_level?.toString() || "",
+            stars: resolvedData.stars?.toString() || "",
+            opening_hours: resolvedData.opening_hours || "",
+            youtube_url: resolvedData.youtube_url || "",
+            youtube_timestamp: resolvedData.youtube_timestamp?.toString() || "",
+            tour_link: resolvedData.tour_link || "",
+            booking_link: resolvedData.booking_link || "",
+            features: resolvedData.details_config?.features || [{ label: "", value: "", icon: "Sparkles" }],
+            best_months: resolvedData.best_months || [],
+            galleryUrlsText: resolvedData.gallery_urls?.join("\n") || "",
+            parking_info: resolvedData.parking_info || { name: "", price: "", details: "", lat: "", lng: "" },
           });
         }
       }
@@ -151,12 +165,16 @@ export default function EditSpotPage() {
     
     const toNum = (val: string) => (val && val.trim() !== "" ? parseFloat(val) : null);
     const toIntForce = (val: string) => (val && val.trim() !== "" ? parseInt(val) : 0);
+    const categoryId = categories.find(
+      (category) => category.name === formData.category,
+    )?.id ?? null;
 
     const updatePayload = {
       title: formData.title || null,
       image_url: formData.image_url || null,
       slug: slug,
       category: formData.category || null,
+      category_id: categoryId,
       description: formData.description || null,
       long_description: jsonDescription,
       parking_info: formData.parking_info || null,
@@ -218,7 +236,9 @@ export default function EditSpotPage() {
             <label className="block text-sm font-bold mb-3 text-slate-700">Kategorie:</label>
             <select className="w-full p-3 border rounded-xl bg-white" value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})}>
               <option value="">Kategorie auswählen...</option>
-              {categories.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
+              {categories.map((category) => (
+                <option key={category.id} value={category.name}>{category.name}</option>
+              ))}
             </select>
           </div>
         </section>

@@ -28,7 +28,7 @@ function convertTextToJson(text: string) {
 }
 
 export default function SpotEditorPage() {
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
   const [searchQuery, setSearchQuery] = useState("");
   
   const [formData, setFormData] = useState({
@@ -96,8 +96,13 @@ export default function SpotEditorPage() {
 
   useEffect(() => {
     async function fetchCategories() {
-      const { data } = await supabase.from("categories").select("name");
-      if (data) setCategories(data.map(item => item.name));
+      const { data } = await supabase
+        .from("categories")
+        .select("id, name")
+        .eq("is_active", true)
+        .order("sort_order")
+        .order("name");
+      if (data) setCategories(data);
     }
     fetchCategories();
   }, []);
@@ -117,11 +122,15 @@ export default function SpotEditorPage() {
 
     const slug = formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
     const jsonDescription = convertTextToJson(formData.long_description);
+    const categoryId = categories.find(
+      (category) => category.name === formData.category,
+    )?.id ?? null;
 
     // Zurück zum alten, funktionierenden Insert ohne zickiges .select().single()
     const { error } = await supabase.from("spots").insert([{
       title: formData.title, image_url: formData.image_url, slug: slug,
-      category: formData.category, description: formData.description,
+      category: formData.category, category_id: categoryId,
+      description: formData.description,
       long_description: jsonDescription,
       parking_info: formData.parking_info,
       latitude: parseFloat(formData.latitude) || null,
@@ -213,7 +222,9 @@ export default function SpotEditorPage() {
             <label className="block text-sm font-bold mb-3 text-slate-700">Kategorie:</label>
             <select className="w-full p-4 border rounded-xl bg-white" value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})}>
               <option value="">Kategorie wählen...</option>
-              {categories.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
+              {categories.map((category) => (
+                <option key={category.id} value={category.name}>{category.name}</option>
+              ))}
             </select>
           </div>
         </section>

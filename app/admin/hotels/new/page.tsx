@@ -447,6 +447,15 @@ export default function NewPremiumHotelPage() {
         throw new Error(`Der Slug „${resolvedSlug}“ existiert bereits.`);
       }
 
+      const { data: accommodationCategory, error: categoryError } =
+        await supabase
+          .from("categories")
+          .select("id")
+          .eq("slug", "unterkunft")
+          .single();
+
+      if (categoryError) throw categoryError;
+
       const { data: spotData, error: spotError } = await supabase
         .from("spots")
         .insert({
@@ -454,6 +463,7 @@ export default function NewPremiumHotelPage() {
           title_en: nullableText(form.title_en),
           slug: resolvedSlug,
           category: "Unterkunft",
+          category_id: accommodationCategory.id,
           category_en: "Accommodation",
           template: "premium-hotel",
           description: nullableText(form.description),

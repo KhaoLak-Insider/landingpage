@@ -3,6 +3,7 @@ import SpotClientPage from "./SpotClientPage";
 import type { SpotClientPageProps } from "@/src/types/spot";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { mergeSpotCategoryDetails } from "@/src/lib/spot-category-details";
 
 export const dynamic = "force-dynamic";
 
@@ -335,7 +336,7 @@ export default async function Page({
     resolvedSearchParams.lng
   );
 
-  const { data: spotData, error: spotError } =
+  const { data: rawSpotData, error: spotError } =
     await supabase
       .from("spots")
       .select("*")
@@ -349,9 +350,28 @@ export default async function Page({
     );
   }
 
-  if (!spotData) {
+  if (!rawSpotData) {
     notFound();
   }
+
+  const { data: categoryDetails, error: categoryDetailsError } =
+    await supabase
+      .from("spot_category_details")
+      .select("*")
+      .eq("spot_id", rawSpotData.id)
+      .maybeSingle();
+
+  if (categoryDetailsError) {
+    console.error(
+      "Fehler beim Laden der Kategorie-Details:",
+      categoryDetailsError
+    );
+  }
+
+  const spotData = mergeSpotCategoryDetails(
+    rawSpotData,
+    categoryDetails
+  );
 
   const isPremiumHotel =
     String(spotData.template || "")
