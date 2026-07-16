@@ -4,8 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/src/lib/supabase";
-import ImageUpload from "@/src/components/ImageUpload";
-import GalleryUpload from "@/src/components/GalleryUpload";
+import SpotImageManager from "@/src/components/editor/SpotImageManager";
 import { iconNames, iconMap } from "@/src/components/IconLibrary";
 import { ArrowLeft, ExternalLink, Save } from "lucide-react";
 import { mergeSpotCategoryDetails } from "@/src/lib/spot-category-details";
@@ -222,7 +221,6 @@ export default function EditSpotPage() {
         <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
           <h2 className="text-lg font-bold text-slate-800 border-b pb-2">Basis-Informationen</h2>
           <input className="w-full p-4 border rounded-xl" placeholder="Titel des Spots" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} />
-          <ImageUpload slug={formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') || "temp"} onUpload={(url) => setFormData({...formData, image_url: url})} />
           <div className="grid grid-cols-2 gap-4">
               <input className="w-full p-3 border rounded-xl" placeholder="YouTube URL" value={formData.youtube_url} onChange={(e) => setFormData({...formData, youtube_url: e.target.value})} />
               <input className="w-full p-3 border rounded-xl" placeholder="Startzeit (Sekunden)" type="number" value={formData.youtube_timestamp} onChange={(e) => setFormData({...formData, youtube_timestamp: e.target.value})} />
@@ -302,8 +300,14 @@ export default function EditSpotPage() {
           </div>
         </section>
 
-        <GalleryUpload slug={formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') || "temp"} onUpload={(urls) => setFormData(prev => ({...prev, galleryUrlsText: prev.galleryUrlsText ? prev.galleryUrlsText + "\n" + urls.join("\n") : urls.join("\n")}))} />
-        <textarea className="w-full p-3 border rounded-xl font-mono text-xs" value={formData.galleryUrlsText} onChange={(e) => setFormData({...formData, galleryUrlsText: e.target.value})} placeholder="Galerie-URLs..." rows={3} />
+        <SpotImageManager
+          category={formData.category}
+          slug={formData.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")}
+          heroUrl={formData.image_url}
+          galleryUrls={formData.galleryUrlsText.split("\n").map((url) => url.trim()).filter(Boolean)}
+          onHeroChange={(url) => setFormData((current) => ({ ...current, image_url: url }))}
+          onGalleryChange={(urls) => setFormData((current) => ({ ...current, galleryUrlsText: urls.join("\n") }))}
+        />
 
         <div className="admin-spot-editor__action-bar">
           <div className="admin-spot-editor__actions">
