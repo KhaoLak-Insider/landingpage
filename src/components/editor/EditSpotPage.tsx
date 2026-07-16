@@ -2,48 +2,46 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/src/lib/supabase";
 import ImageUpload from "@/src/components/ImageUpload";
 import GalleryUpload from "@/src/components/GalleryUpload";
 import { iconNames, iconMap } from "@/src/components/IconLibrary";
-import { ArrowLeft, Eye, MapPin, Save } from "lucide-react";
-import "@/src/components/editor/spot-editor.css";
-import "@/src/components/editor/spot-create-editor.css";
-
-// HIER DEINEN ECHTEN DISCORD WEBHOOK LINK REINKLEBEN:
-
-const DISCORD_WEBHOOK_URL = process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_URL;
+import { ArrowLeft, ExternalLink, Save } from "lucide-react";
+import "./spot-editor.css";
 
 // HELPER: Text zu JSON konvertieren
 function convertTextToJson(text: string) {
   if (!text) return [];
-  return text.split('\n').map(line => {
-    const trimmedLine = line.trim();
-    if (trimmedLine.startsWith('###')) {
-      return { type: 'heading', content: trimmedLine.replace(/###\s*/, '') };
+  const lines = text.split('\n').filter(line => line.trim() !== '');
+  return lines.map(line => {
+    if (line.trim().startsWith('###')) {
+      return { 
+        type: 'heading', 
+        content: line.trim().replace(/###\s*/, '') 
+      };
     }
-    if (trimmedLine === '') return null;
-    return { type: 'paragraph', content: trimmedLine };
-  }).filter((block): block is { type: string; content: string } => block !== null);
+    return { type: 'paragraph', content: line.trim() };
+  });
 }
 
-export default function SpotEditorPage() {
+export default function EditSpotPage() {
+  const params = useParams();
+  const id = params.id as string;
+  const router = useRouter();
   const [categories, setCategories] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  
+  const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     title: "", image_url: "", category: "", description: "", long_description: "",
     latitude: "", longitude: "", price_level: "", stars: "", opening_hours: "", youtube_url: "",
-    youtube_timestamp: "", tour_link: "", booking_link: "",
-    features: [{ label: "", value: "", icon: "Sparkles" as keyof typeof iconMap }],
-    best_months: [] as number[],
-    galleryUrlsText: "",
+    youtube_timestamp: "", tour_link: "", booking_link: "", features: [{ label: "", value: "", icon: "Sparkles" as keyof typeof iconMap }],
+    best_months: [] as number[], galleryUrlsText: "",
     parking_info: { name: "", price: "", details: "", lat: "", lng: "" },
   });
-  const [loading, setLoading] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
 
-  // Google Places Suche via Proxy
+  // GOOGLE PLACES IMPORT
   const searchGooglePlace = async () => {
     if (!searchQuery) return;
     try {
@@ -70,7 +68,7 @@ export default function SpotEditorPage() {
     } catch (e) { console.error("Google Import Fehler:", e); }
   };
 
-  // KI Beschreibung generieren
+  // KI BESCHREIBUNG GENERIEREN
   const generateDescription = async () => {
     setLoading(true);
     try {
@@ -79,7 +77,6 @@ export default function SpotEditorPage() {
         body: JSON.stringify({ spotData: formData }),
       });
       const data = await res.json();
-      
       setFormData(prev => ({
         ...prev,
         description: data.description || prev.description,
@@ -87,20 +84,54 @@ export default function SpotEditorPage() {
         stars: data.stars || prev.stars,
         features: data.features && data.features.length > 0 ? data.features : prev.features
       }));
-    } catch {
-      alert("Fehler bei der KI-Generierung");
-    } finally {
-      setLoading(false);
-    }
+    } catch { alert("Fehler bei der KI-Generierung"); }
+    finally { setLoading(false); }
   };
 
   useEffect(() => {
-    async function fetchCategories() {
-      const { data } = await supabase.from("categories").select("name");
-      if (data) setCategories(data.map(item => item.name));
+    async function fetchData() {
+      const { data: catData } = await supabase.from("categories").select("name");
+      if (catData) setCategories(catData.map(item => item.name));
+
+      if (id) {
+        const { data } = await supabase.from("spots").select("*").eq("id", id).single();
+        if (data) {
+          let textDesc = "";
+          if (Array.isArray(data.long_description)) {
+            textDesc = data.long_description.map((block: unknown) => {
+              const value = block as { type?: unknown; content?: unknown };
+              const content = typeof value.content === "string" ? value.content : "";
+              return value.type === "heading" ? `### ${content}` : content;
+            }).join('\n\n');
+          } else {
+            textDesc = data.long_description || "";
+          }
+
+          setFormData({
+            title: data.title || "",
+            image_url: data.image_url || "",
+            category: data.category || "",
+            description: data.description || "",
+            long_description: textDesc,
+            latitude: data.latitude?.toString() || "",
+            longitude: data.longitude?.toString() || "",
+            price_level: data.price_level?.toString() || "",
+            stars: data.stars?.toString() || "",
+            opening_hours: data.opening_hours || "",
+            youtube_url: data.youtube_url || "",
+            youtube_timestamp: data.youtube_timestamp?.toString() || "",
+            tour_link: data.tour_link || "",
+            booking_link: data.booking_link || "",
+            features: data.details_config?.features || [{ label: "", value: "", icon: "Sparkles" }],
+            best_months: data.best_months || [],
+            galleryUrlsText: data.gallery_urls?.join("\n") || "",
+            parking_info: data.parking_info || { name: "", price: "", details: "", lat: "", lng: "" },
+          });
+        }
+      }
     }
-    fetchCategories();
-  }, []);
+    fetchData();
+  }, [id]);
 
   const toggleMonth = (monthIndex: number) => {
     setFormData(prev => ({
@@ -114,63 +145,40 @@ export default function SpotEditorPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
+    
     const slug = formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
     const jsonDescription = convertTextToJson(formData.long_description);
+    
+    const toNum = (val: string) => (val && val.trim() !== "" ? parseFloat(val) : null);
+    const toIntForce = (val: string) => (val && val.trim() !== "" ? parseInt(val) : 0);
 
-    // Zurück zum alten, funktionierenden Insert ohne zickiges .select().single()
-    const { error } = await supabase.from("spots").insert([{
-      title: formData.title, image_url: formData.image_url, slug: slug,
-      category: formData.category, description: formData.description,
+    const updatePayload = {
+      title: formData.title || null,
+      image_url: formData.image_url || null,
+      slug: slug,
+      category: formData.category || null,
+      description: formData.description || null,
       long_description: jsonDescription,
-      parking_info: formData.parking_info,
-      latitude: parseFloat(formData.latitude) || null,
-      longitude: parseFloat(formData.longitude) || null,
-      price_level: parseInt(formData.price_level) || null,
-      stars: parseInt(formData.stars) || null,
-      opening_hours: formData.opening_hours,
-      youtube_url: formData.youtube_url,
-      youtube_timestamp: formData.youtube_timestamp,
-      tour_link: formData.tour_link,
-      booking_link: formData.booking_link,
-      best_months: formData.best_months,
+      parking_info: formData.parking_info || null,
+      latitude: toNum(formData.latitude),
+      longitude: toNum(formData.longitude),
+      price_level: formData.price_level ? parseInt(formData.price_level) : null,
+      stars: formData.stars ? parseInt(formData.stars) : null,
+      opening_hours: formData.opening_hours || null,
+      youtube_url: formData.youtube_url && formData.youtube_url.trim() !== "" ? formData.youtube_url : null,
+      youtube_timestamp: toIntForce(formData.youtube_timestamp),
+      tour_link: formData.tour_link || null,
+      booking_link: formData.booking_link || null,
+      best_months: formData.best_months || [],
       details_config: { features: formData.features.filter(f => f.label !== "") },
-      gallery_urls: formData.galleryUrlsText.split("\n").filter(u => u.trim() !== ""),
-      is_published: true
-    }]);
+      gallery_urls: formData.galleryUrlsText ? formData.galleryUrlsText.split("\n").filter(u => u.trim() !== "") : [],
+    };
+
+    const { error } = await supabase.from("spots").update(updatePayload).eq("id", id);
 
     setLoading(false);
-
-    if (error) {
-      alert("Fehler: " + error.message);
-    } else {
-      // KORRIGIERT: Wir prüfen jetzt nur noch, ob überhaupt eine Webhook-URL vorhanden ist!
-      if (DISCORD_WEBHOOK_URL) {
-        try {
-          await fetch(DISCORD_WEBHOOK_URL, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              // ACHTUNG: Hier nutzen wir /spot/ (Singular), weil dein Ordner im Projekt laut VS-Code im Singular liegt!
-              content: `🌴 **Neuer Insider-Tipp!** Es wurde *${formData.title}* als neuer Spot auf Khaolak.app hinzugefügt. Schaue Dir jetzt den Spot unter https://khaolak.app/spot/${slug} an!`
-            }),
-          });
-        } catch (discordError) {
-          console.error("Discord Benachrichtigung fehlgeschlagen:", discordError);
-        }
-      }
-
-      alert("Spot erfolgreich angelegt!");
-      setFormData({
-        title: "", image_url: "", category: "", description: "", long_description: "",
-        latitude: "", longitude: "", price_level: "", stars: "", opening_hours: "", 
-        youtube_url: "", youtube_timestamp: "", tour_link: "", booking_link: "",
-        features: [{ label: "", value: "", icon: "Sparkles" }], 
-        best_months: [], galleryUrlsText: "", parking_info: { name: "", price: "", details: "", lat: "", lng: "" }
-      });
-    }
+    if (error) { alert("Fehler bei der Übertragung: " + error.message); }
+    else { alert("Spot erfolgreich aktualisiert!"); router.push(`/spot/${slug}`); }
   };
 
   return (
@@ -180,39 +188,36 @@ export default function SpotEditorPage() {
           <ArrowLeft size={15} /> Zurück zu allen Spots
         </Link>
         <span className="admin-spot-editor__eyebrow">Content-Verwaltung</span>
-        <h1>Neuen Spot anlegen</h1>
-        <p>Erstelle einen neuen Ort für den Khao Lak Insider.</p>
+        <h1>{formData.title || "Spot bearbeiten"}</h1>
+        <p>Basisdaten, Inhalte, Medien und Standortinformationen verwalten.</p>
       </header>
 
       <form onSubmit={handleSubmit} className="admin-spot-editor__form">
-        
         <section className="bg-teal-50 p-6 rounded-2xl border-2 border-teal-200">
           <h2 className="text-lg font-bold text-teal-800 mb-4">Google Places Import</h2>
           <div className="flex gap-2">
-            <input className="flex-1 p-4 border rounded-xl" placeholder="Ort suchen (z.B. Big Buddha Phuket)..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+            <input className="flex-1 p-4 border rounded-xl" placeholder="Ort suchen..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
             <button type="button" onClick={searchGooglePlace} className="bg-teal-500 text-white px-6 py-4 rounded-xl font-bold hover:bg-teal-600">Daten laden</button>
           </div>
         </section>
-        
+
         <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
           <h2 className="text-lg font-bold text-slate-800 border-b pb-2">Basis-Informationen</h2>
-          <input className="w-full p-4 border rounded-xl focus:ring-2 focus:ring-teal-500 outline-none" placeholder="Titel des Spots" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} />
+          <input className="w-full p-4 border rounded-xl" placeholder="Titel des Spots" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} />
           <ImageUpload slug={formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') || "temp"} onUpload={(url) => setFormData({...formData, image_url: url})} />
-          
           <div className="grid grid-cols-2 gap-4">
               <input className="w-full p-3 border rounded-xl" placeholder="YouTube URL" value={formData.youtube_url} onChange={(e) => setFormData({...formData, youtube_url: e.target.value})} />
-              <input className="w-full p-3 border rounded-xl" placeholder="Startzeit (Sekunden)" value={formData.youtube_timestamp} onChange={(e) => setFormData({...formData, youtube_timestamp: e.target.value})} />
+              <input className="w-full p-3 border rounded-xl" placeholder="Startzeit (Sekunden)" type="number" value={formData.youtube_timestamp} onChange={(e) => setFormData({...formData, youtube_timestamp: e.target.value})} />
               <input className="w-full p-3 border rounded-xl" placeholder="Preis-Level" value={formData.price_level} onChange={(e) => setFormData({...formData, price_level: e.target.value})} />
               <input className="w-full p-3 border rounded-xl" placeholder="Sterne (0-5)" value={formData.stars} onChange={(e) => setFormData({...formData, stars: e.target.value})} />
               <input className="w-full p-3 border rounded-xl" placeholder="Öffnungszeiten" value={formData.opening_hours} onChange={(e) => setFormData({...formData, opening_hours: e.target.value})} />
           </div>
           <input className="w-full p-3 border rounded-xl" placeholder="GetYourGuide Tour-Link" value={formData.tour_link} onChange={(e) => setFormData({...formData, tour_link: e.target.value})} />
           <input className="w-full p-3 border rounded-xl" placeholder="Booking.com Affiliate-Link" value={formData.booking_link} onChange={(e) => setFormData({...formData, booking_link: e.target.value})} />
-
           <div>
             <label className="block text-sm font-bold mb-3 text-slate-700">Kategorie:</label>
-            <select className="w-full p-4 border rounded-xl bg-white" value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})}>
-              <option value="">Kategorie wählen...</option>
+            <select className="w-full p-3 border rounded-xl bg-white" value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})}>
+              <option value="">Kategorie auswählen...</option>
               {categories.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
             </select>
           </div>
@@ -222,17 +227,17 @@ export default function SpotEditorPage() {
           <h2 className="text-lg font-bold text-slate-800 border-b pb-2">Parkplatz-Informationen</h2>
           <input className="w-full p-4 border rounded-xl" placeholder="Name/Ort des Parkplatzes" value={formData.parking_info.name} onChange={(e) => setFormData({...formData, parking_info: {...formData.parking_info, name: e.target.value}})} />
           <div className="grid grid-cols-2 gap-4">
-            <input className="w-full p-3 border rounded-xl" placeholder="Gebühr (z.B. kostenlos)" value={formData.parking_info.price} onChange={(e) => setFormData({...formData, parking_info: {...formData.parking_info, price: e.target.value}})} />
-            <input className="w-full p-3 border rounded-xl" placeholder="Weitere Details" value={formData.parking_info.details} onChange={(e) => setFormData({...formData, parking_info: {...formData.parking_info, details: e.target.value}})} />
-            <input className="w-full p-3 border rounded-xl" placeholder="Parkplatz Breitengrad" value={formData.parking_info.lat} onChange={(e) => setFormData({...formData, parking_info: {...formData.parking_info, lat: e.target.value}})} />
-            <input className="w-full p-3 border rounded-xl" placeholder="Parkplatz Längengrad" value={formData.parking_info.lng} onChange={(e) => setFormData({...formData, parking_info: {...formData.parking_info, lng: e.target.value}})} />
+            <input className="w-full p-3 border rounded-xl" placeholder="Gebühr" value={formData.parking_info.price} onChange={(e) => setFormData({...formData, parking_info: {...formData.parking_info, price: e.target.value}})} />
+            <input className="w-full p-3 border rounded-xl" placeholder="Details" value={formData.parking_info.details} onChange={(e) => setFormData({...formData, parking_info: {...formData.parking_info, details: e.target.value}})} />
+            <input className="w-full p-3 border rounded-xl" placeholder="Breitengrad" value={formData.parking_info.lat} onChange={(e) => setFormData({...formData, parking_info: {...formData.parking_info, lat: e.target.value}})} />
+            <input className="w-full p-3 border rounded-xl" placeholder="Längengrad" value={formData.parking_info.lng} onChange={(e) => setFormData({...formData, parking_info: {...formData.parking_info, lng: e.target.value}})} />
           </div>
         </section>
 
         <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
           <h2 className="text-lg font-bold text-slate-800 border-b pb-2">Beschreibungen</h2>
           <textarea className="w-full p-4 border rounded-xl" placeholder="Kurze Beschreibung" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} />
-          <textarea className="w-full p-4 border rounded-xl" rows={4} placeholder="Lange Beschreibung (Nutze ### für Überschriften)" value={formData.long_description} onChange={(e) => setFormData({...formData, long_description: e.target.value})} />
+          <textarea className="w-full p-4 border rounded-xl" rows={4} placeholder="Lange Beschreibung (### für Überschriften)" value={formData.long_description} onChange={(e) => setFormData({...formData, long_description: e.target.value})} />
           <button type="button" onClick={generateDescription} className="text-teal-600 font-bold hover:underline">
             {loading ? "Schreibe Text..." : "KI-Beschreibung generieren"}
           </button>
@@ -259,13 +264,13 @@ export default function SpotEditorPage() {
           <div className="space-y-2">
             <label className="block text-sm font-bold text-slate-700">Features hinzufügen:</label>
             {formData.features.map((f, i) => {
-               const IconComponent = iconMap[f.icon];
+               const IconComponent = iconMap[f.icon] || iconMap["MapPin"];
                return (
                  <div key={i} className="flex gap-2 items-center bg-slate-50 p-2 rounded-xl">
                     <input className="p-2 border rounded-lg w-1/4" placeholder="Label" value={f.label} onChange={(e) => { const n = [...formData.features]; n[i].label = e.target.value; setFormData({...formData, features: n}); }} />
                     <input className="p-2 border rounded-lg w-1/4" placeholder="Wert" value={f.value} onChange={(e) => { const n = [...formData.features]; n[i].value = e.target.value; setFormData({...formData, features: n}); }} />
                     <div className="flex items-center gap-2 w-1/2">
-                      <div className="p-2 bg-white border rounded-lg shrink-0">{IconComponent ? <IconComponent size={20} className="text-teal-600" /> : null}</div>
+                      <div className="p-2 bg-white border rounded-lg shrink-0"><IconComponent size={20} className="text-teal-600" /></div>
                       <select className="p-2 border rounded-lg w-full bg-white text-sm truncate" value={f.icon} onChange={(e) => { const n = [...formData.features]; n[i].icon = e.target.value as keyof typeof iconMap; setFormData({...formData, features: n}); }}>
                         {iconNames.map(name => <option key={name} value={name}>{name}</option>)}
                       </select>
@@ -282,77 +287,14 @@ export default function SpotEditorPage() {
 
         <div className="admin-spot-editor__action-bar">
           <div className="admin-spot-editor__actions">
-              <button type="button" onClick={() => setShowPreview(true)} className="admin-spot-editor__preview"><Eye size={16} />Vorschau</button>
+              <Link href={`/spot/${formData.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`} target="_blank"><ExternalLink size={16} />Live-Ansicht</Link>
               <button disabled={loading} type="submit">
                 <Save size={16} />
-                {loading ? "Wird gespeichert ..." : "Spot veröffentlichen"}
+                {loading ? "Wird gespeichert ..." : "Änderungen speichern"}
               </button>
           </div>
         </div>
       </form>
-
-      {showPreview && (
-        <div className="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl relative shadow-2xl">
-            <button onClick={() => setShowPreview(false)} className="absolute top-4 right-4 z-50 p-2 bg-white/80 rounded-full hover:bg-slate-100">✕</button>
-            <div className="relative w-full h-[300px] bg-slate-900">
-              {formData.youtube_url ? (
-                <iframe className="w-full h-full" src={`https://www.youtube.com/embed/${formData.youtube_url.split('v=')[1]?.split('&')[0]}?start=${formData.youtube_timestamp}`} allowFullScreen />
-              ) : formData.image_url ? (
-                <img src={formData.image_url} alt={formData.title || "Spot-Vorschau"} className="w-full h-full object-cover" />
-              ) : <div className="w-full h-full bg-slate-200 flex items-center justify-center">Kein Bild</div>}
-              <div className="absolute bottom-6 left-8 bg-[#14b8a6] text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider">{formData.category || "Kategorie"}</div>
-            </div>
-            <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-12">
-              <div>
-                <h1 className="text-4xl font-black mb-2">{formData.title || "Titel..."}</h1>
-                <p className="text-lg text-slate-600 mb-8">{formData.description}</p>
-                <div className="mb-8 text-slate-600">
-                    {convertTextToJson(formData.long_description).map((block, i: number) => (
-                      block.type === 'heading' 
-                        ? <h3 key={i} className="text-xl font-bold mt-6 mb-3">{block.content}</h3>
-                        : <p key={i} className="mb-4">{block.content}</p>
-                    ))}
-                </div>
-                <div className="grid grid-cols-2 gap-4 mb-8">
-                  {formData.features.map((f, i) => f.label && (
-                    <div key={i} className="flex gap-3 items-center bg-slate-50 p-3 rounded-xl border">
-                      {(() => { const Icon = iconMap[f.icon]; return Icon ? <Icon size={20} className="text-teal-600" /> : null; })()}
-                      <div><div className="text-[10px] font-bold text-slate-400 uppercase">{f.label}</div><div className="text-sm font-bold">{f.value}</div></div>
-                    </div>
-                  ))}
-                </div>
-                {formData.best_months.length > 0 && (
-                  <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 mb-8">
-                    <h3 className="text-sm font-bold text-slate-800 mb-4 uppercase tracking-wider">Beste Reisezeit</h3>
-                    <div className="grid grid-cols-6 gap-2">
-                      {["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"].map((monat, index) => {
-                        const isSelected = formData.best_months.includes(index);
-                        return (<div key={monat} className={`p-2 rounded-lg text-xs font-bold text-center ${isSelected ? "bg-[#14b8a6] text-white" : "bg-white text-slate-300 border border-slate-200"}`}>{monat}</div>);
-                      })}
-                    </div>
-                  </div>
-                )}
-                {formData.galleryUrlsText.trim() && (
-                  <div>
-                    <h3 className="text-sm font-bold text-slate-800 mb-4 uppercase tracking-wider">Galerie</h3>
-                    <div className="grid grid-cols-4 gap-2">
-                      {formData.galleryUrlsText.split("\n").filter(u => u.trim() !== "").map((url, i) => (
-                        <div key={i} className="aspect-square rounded-xl overflow-hidden border"><img src={url} alt={`Galeriebild ${i + 1}`} className="w-full h-full object-cover" /></div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-              <div className="bg-slate-50 rounded-2xl border-2 border-dashed h-64 flex flex-col items-center justify-center text-slate-400 p-6 text-center">
-                <MapPin size={40} className="mb-2 text-slate-300" />
-                <p className="text-sm font-bold text-slate-500 mb-1">Vorschau für Karte</p>
-                <p className="text-xs">Koordinaten: {formData.latitude || "0.00"}, {formData.longitude || "0.00"}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

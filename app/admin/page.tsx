@@ -7,6 +7,8 @@ import {
   Building2,
   FileText,
   MapPin,
+  PencilLine,
+  Plus,
 } from "lucide-react";
 import { supabase } from "@/src/lib/supabase";
 
@@ -124,6 +126,14 @@ export default function AdminDashboardPage() {
             Khao Lak Insider.
           </p>
         </div>
+
+        <Link
+          href="/admin/hotels/new"
+          className="admin-dashboard__create-hotel"
+        >
+          <Plus size={17} strokeWidth={2} />
+          Neues Premium-Hotel anlegen
+        </Link>
       </header>
 
       <section className="admin-dashboard__stats">
@@ -173,11 +183,19 @@ export default function AdminDashboardPage() {
             </span>
           </Link>
 
-          <Link href="/admin/spots">
-            <MapPin size={21} />
-            <strong>Spots verwalten</strong>
+          <Link href="/admin/editor">
+            <Plus size={21} />
+            <strong>Spot anlegen</strong>
             <span>
-              Bestehende Spots ansehen und später bearbeiten.
+              Einen neuen Ort mit Inhalten, Medien und Standort erfassen.
+            </span>
+          </Link>
+
+          <Link href="/admin/editor/list">
+            <PencilLine size={21} />
+            <strong>Spots bearbeiten</strong>
+            <span>
+              Bestehende Spots auswählen und ihre Inhalte aktualisieren.
             </span>
           </Link>
         </div>
@@ -199,6 +217,13 @@ export default function AdminDashboardPage() {
           text-transform: uppercase;
         }
 
+        .admin-dashboard__header {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 24px;
+        }
+
         .admin-dashboard__header h1 {
           margin: 0;
           color: #10233f;
@@ -213,6 +238,32 @@ export default function AdminDashboardPage() {
           color: #68778a;
           font-size: 13px;
           line-height: 1.7;
+        }
+
+        .admin-dashboard__create-hotel {
+          display: inline-flex;
+          flex: 0 0 auto;
+          align-items: center;
+          gap: 8px;
+          padding: 11px 15px;
+          border-radius: 11px;
+          background: #079ca5;
+          color: #ffffff;
+          font-size: 12px;
+          font-weight: 750;
+          line-height: 1.4;
+          text-decoration: none;
+          box-shadow: 0 8px 20px rgba(7, 156, 165, 0.2);
+          transition:
+            background 160ms ease,
+            transform 160ms ease,
+            box-shadow 160ms ease;
+        }
+
+        .admin-dashboard__create-hotel:hover {
+          transform: translateY(-1px);
+          background: #078b93;
+          box-shadow: 0 11px 24px rgba(7, 156, 165, 0.25);
         }
 
         .admin-dashboard__stats {
@@ -299,7 +350,7 @@ export default function AdminDashboardPage() {
 
         .admin-dashboard__quick-grid {
           display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
+          grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 12px;
           margin-top: 18px;
         }
@@ -348,6 +399,10 @@ export default function AdminDashboardPage() {
         }
 
         @media (max-width: 680px) {
+          .admin-dashboard__header {
+            flex-direction: column;
+          }
+
           .admin-dashboard__stats,
           .admin-dashboard__quick-grid {
             grid-template-columns: 1fr;

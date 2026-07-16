@@ -41,8 +41,10 @@ export default function AdminAccessGuard({
   useEffect(() => {
     let isMounted = true;
 
-    async function checkAccess() {
-      setAccessState("checking");
+    async function checkAccess(showLoadingState = true) {
+      if (showLoadingState) {
+        setAccessState("checking");
+      }
 
       const {
         data: { user },
@@ -101,7 +103,7 @@ export default function AdminAccessGuard({
           return;
         }
 
-        void checkAccess();
+        void checkAccess(false);
       },
     );
 

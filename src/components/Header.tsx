@@ -15,13 +15,23 @@ import {
 } from "@/src/lib/i18n";
 import { User } from "@supabase/supabase-js";
 
+interface HeaderProfile {
+  id?: string;
+  username?: string | null;
+  first_name?: string | null;
+  avatar_url?: string | null;
+  role?: string | null;
+}
+
 export default function Header() {
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<HeaderProfile | null>(null);
 
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const isAdminPath =
+    pathname === "/admin" || pathname.startsWith("/admin/");
 
   const language = getLanguage({
     lng: searchParams.get("lng") ?? undefined,
@@ -113,7 +123,11 @@ export default function Header() {
   }, [user?.id, profile?.id]);
 
   return (
-    <nav className="relative z-50 flex items-center px-8 py-6 bg-white border-b border-slate-100 text-slate-900">
+    <nav
+      className={`relative z-50 flex items-center border-b border-slate-100 bg-white px-8 py-6 text-slate-900 ${
+        isAdminPath ? "min-[901px]:ml-[248px]" : ""
+      }`}
+    >
       <div className="flex items-center gap-12">
         <Link href={localizedHref("/")}>
           <Image
@@ -246,27 +260,6 @@ export default function Header() {
                       className="block rounded-lg px-4 py-2 text-sm font-bold text-teal-700 hover:bg-teal-50"
                     >
                       Admin-CMS
-                    </Link>
-
-                    <Link
-                      href={localizedHref("/editor")}
-                      className="block rounded-lg px-4 py-2 text-sm font-bold text-teal-600 hover:bg-teal-50"
-                    >
-                      Spot einpflegen
-                    </Link>
-
-                    <Link
-                      href={localizedHref("/editor/blog")}
-                      className="block rounded-lg px-4 py-2 text-sm font-bold text-teal-600 hover:bg-teal-50"
-                    >
-                      Blogbeitrag schreiben
-                    </Link>
-
-                    <Link
-                      href={localizedHref("/editor/list")}
-                      className="block rounded-lg px-4 py-2 text-sm font-bold text-teal-600 hover:bg-teal-50"
-                    >
-                      Spots bearbeiten
                     </Link>
                   </>
                 )}

@@ -99,6 +99,63 @@ async function loadRoom(slug: string, roomSlug: string) {
     return null;
   }
 
+  const { data: premiumHotel, error: premiumHotelError } = await supabase
+    .from("premium_hotels")
+    .select("id")
+    .eq("spot_id", spot.id)
+    .maybeSingle();
+
+  if (premiumHotelError) {
+    console.error(
+      "Fehler beim Laden des Premium-Hotelprofils:",
+      premiumHotelError,
+    );
+  }
+
+  if (premiumHotel?.id) {
+    const { data: premiumRoom, error: premiumRoomError } = await supabase
+      .from("premium_rooms")
+      .select("*")
+      .eq("premium_hotel_id", premiumHotel.id)
+      .ilike("slug", roomSlug)
+      .eq("status", "published")
+      .maybeSingle();
+
+    if (premiumRoomError) {
+      console.error(
+        "Fehler beim Laden des Premium-Zimmers:",
+        premiumRoomError,
+      );
+    }
+
+    if (premiumRoom) {
+      const {
+        data: comparisonRoomData,
+        error: comparisonRoomsError,
+      } = await supabase
+        .from("premium_rooms")
+        .select("*")
+        .eq("premium_hotel_id", premiumHotel.id)
+        .eq("status", "published")
+        .neq("id", premiumRoom.id)
+        .order("sort_order", { ascending: true })
+        .order("name_de", { ascending: true });
+
+      if (comparisonRoomsError) {
+        console.error(
+          "Fehler beim Laden weiterer Premium-Zimmer:",
+          comparisonRoomsError,
+        );
+      }
+
+      return {
+        spot,
+        room: premiumRoom as PremiumRoomDetail,
+        comparisonRooms: normalizeRooms(comparisonRoomData || []),
+      };
+    }
+  }
+
   const { data: hotelProfile, error: profileError } = await supabase
     .from("hotel_profiles")
     .select("id, rooms_data")

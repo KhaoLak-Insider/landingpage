@@ -103,7 +103,7 @@ export default function BlogEditPage() {
       } catch (e: any) {
         console.error("Fehler beim Initialisieren:", e);
         alert("Fehler beim Laden des Blogbeitrags: " + e.message);
-        router.push("/editor/blog"); 
+        router.push("/admin/editor/blog");
       } finally {
         setLoading(false);
       }

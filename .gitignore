@@ -43,3 +43,4 @@ next-env.d.ts
 .history
 .open-next
 .wrangler
+.vscode/mcp.json

@@ -75,6 +75,43 @@ async function loadHotelRooms(slug: string) {
     return null;
   }
 
+  const { data: premiumHotel, error: premiumHotelError } = await supabase
+    .from("premium_hotels")
+    .select("id")
+    .eq("spot_id", spot.id)
+    .maybeSingle();
+
+  if (premiumHotelError) {
+    console.error(
+      "Fehler beim Laden des Premium-Hotelprofils:",
+      premiumHotelError,
+    );
+  }
+
+  if (premiumHotel?.id) {
+    const { data: premiumRooms, error: premiumRoomsError } = await supabase
+      .from("premium_rooms")
+      .select("*")
+      .eq("premium_hotel_id", premiumHotel.id)
+      .eq("status", "published")
+      .order("sort_order", { ascending: true })
+      .order("name_de", { ascending: true });
+
+    if (premiumRoomsError) {
+      console.error(
+        "Fehler beim Laden der Premium-Zimmer:",
+        premiumRoomsError,
+      );
+    }
+
+    if (premiumRooms && premiumRooms.length > 0) {
+      return {
+        spot,
+        rooms: normalizeRooms(premiumRooms),
+      };
+    }
+  }
+
   const { data: hotelProfile, error: profileError } = await supabase
     .from("hotel_profiles")
     .select("id, rooms_data")

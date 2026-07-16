@@ -7,10 +7,12 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   BedDouble,
   Building2,
+  FilePlus2,
   FileText,
   LayoutDashboard,
   LogOut,
   MapPin,
+  PencilLine,
   Menu,
   Settings,
   Utensils,
@@ -32,15 +34,27 @@ const navigation = [
   { label: "Hotels", href: "/admin/hotels", icon: Building2 },
   { label: "Zimmer", href: "/admin/rooms", icon: BedDouble },
   { label: "Spots", href: "/admin/spots", icon: MapPin },
+  { label: "Spot anlegen", href: "/admin/editor", icon: FilePlus2 },
+  { label: "Spots bearbeiten", href: "/admin/editor/list", icon: PencilLine },
+  { label: "Blogbeitrag schreiben", href: "/admin/editor/blog", icon: FileText },
   { label: "Restaurants", href: "/admin/restaurants", icon: Utensils },
   { label: "Blog", href: "/admin/blog", icon: FileText },
   { label: "Einstellungen", href: "/admin/settings", icon: Settings },
 ];
 
 function isActivePath(pathname: string, href: string): boolean {
-  return href === "/admin"
-    ? pathname === "/admin"
-    : pathname === href || pathname.startsWith(`${href}/`);
+  if (href === "/admin" || href === "/admin/editor") {
+    return pathname === href;
+  }
+
+  if (href === "/admin/editor/list") {
+    return (
+      pathname === href ||
+      pathname.startsWith("/admin/editor/edit/")
+    );
+  }
+
+  return pathname === href || pathname.startsWith(`${href}/`);
 }
 
 export default function AdminShell({
