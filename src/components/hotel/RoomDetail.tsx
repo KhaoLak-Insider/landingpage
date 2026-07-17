@@ -2,10 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import {
   Bath,
   BedDouble,
   Check,
+  ChevronLeft,
+  ChevronRight,
+  Expand,
   Maximize2,
   Users,
   Waves,
@@ -74,6 +78,8 @@ const labels = {
     compareSubtitle: "Vergleiche weitere Zimmerkategorien des Hotels.",
     viewRoom: "Zimmer ansehen",
     noImage: "Zimmerbild folgt",
+    gallery: "Zimmergalerie",
+    openImage: "Bild vergrößern",
   },
   en: {
     back: "Back to hotel",
@@ -87,6 +93,8 @@ const labels = {
     compareSubtitle: "Compare other room categories at the hotel.",
     viewRoom: "View room",
     noImage: "Room image coming soon",
+    gallery: "Room gallery",
+    openImage: "Enlarge image",
   },
 } as const;
 
@@ -180,12 +188,7 @@ function getImages(
 }
 
 function getOccupancy(room: PremiumRoomDetail): number | null {
-  return (
-    toPositiveNumber(room.max_occupancy) ||
-    ((toPositiveNumber(room.max_adults) || 0) +
-      (toPositiveNumber(room.max_children) || 0) ||
-      null)
-  );
+  return toPositiveNumber(room.max_occupancy);
 }
 
 export default function RoomDetail({
@@ -214,7 +217,15 @@ export default function RoomDetail({
   const highlights = localizedArray(room, language, "highlights");
   const amenities = localizedArray(room, language, "amenities");
   const images = getImages(room, language);
-  const mainImage = images[0];
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const safeImageIndex = selectedImageIndex < images.length ? selectedImageIndex : 0;
+  const mainImage = images[safeImageIndex];
+
+  function selectRelativeImage(direction: -1 | 1) {
+    if (images.length < 2) return;
+    setSelectedImageIndex((current) => (current + direction + images.length) % images.length);
+  }
 
   const roomHref = (slug: string) =>
     localizePath(
@@ -260,12 +271,55 @@ export default function RoomDetail({
 
         <div className="room-detail__overlay" />
 
+        {mainImage && (
+          <button
+            type="button"
+            className="room-detail__expand"
+            onClick={() => setIsLightboxOpen(true)}
+            aria-label={copy.openImage}
+          >
+            <Expand size={17} />
+          </button>
+        )}
+
+        {images.length > 1 && (
+          <>
+            <button type="button" className="room-detail__gallery-arrow room-detail__gallery-arrow--left" onClick={() => selectRelativeImage(-1)} aria-label="Vorheriges Bild">
+              <ChevronLeft size={21} />
+            </button>
+            <button type="button" className="room-detail__gallery-arrow room-detail__gallery-arrow--right" onClick={() => selectRelativeImage(1)} aria-label="Nächstes Bild">
+              <ChevronRight size={21} />
+            </button>
+          </>
+        )}
+
         <div className="room-detail__hero-content">
           <span className="room-detail__eyebrow">{hotelTitle}</span>
           <h1 id="room-detail-title">{name}</h1>
           {shortDescription && <p>{shortDescription}</p>}
         </div>
       </div>
+
+      {images.length > 1 && (
+        <section className="room-detail__gallery" aria-label={copy.gallery}>
+          {images.map((image, index) => (
+            <button key={`${image.src}-${index}`} type="button" className={index === safeImageIndex ? "is-active" : ""} onClick={() => setSelectedImageIndex(index)}>
+              <Image src={image.src} alt={image.alt} fill sizes="120px" />
+            </button>
+          ))}
+        </section>
+      )}
+
+      {isLightboxOpen && mainImage && (
+        <div className="room-detail__lightbox" role="dialog" aria-modal="true" aria-label={copy.gallery} onClick={() => setIsLightboxOpen(false)}>
+          <button type="button" className="room-detail__lightbox-close" onClick={() => setIsLightboxOpen(false)} aria-label={copy.close}><X size={22} /></button>
+          {images.length > 1 && <button type="button" className="room-detail__lightbox-arrow room-detail__lightbox-arrow--left" onClick={(event) => { event.stopPropagation(); selectRelativeImage(-1); }} aria-label="Vorheriges Bild"><ChevronLeft size={28} /></button>}
+          <div className="room-detail__lightbox-image" onClick={(event) => event.stopPropagation()}>
+            <Image src={mainImage.src} alt={mainImage.alt} fill sizes="95vw" />
+          </div>
+          {images.length > 1 && <button type="button" className="room-detail__lightbox-arrow room-detail__lightbox-arrow--right" onClick={(event) => { event.stopPropagation(); selectRelativeImage(1); }} aria-label="Nächstes Bild"><ChevronRight size={28} /></button>}
+        </div>
+      )}
 
       <div className="room-detail__content">
         <div className="room-detail__main">
@@ -505,6 +559,12 @@ export default function RoomDetail({
         .room-detail__hero-image {
           object-fit: cover;
         }
+
+        .room-detail__expand,.room-detail__gallery-arrow{position:absolute;z-index:3;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.35);background:rgba(8,25,45,.55);color:#fff;backdrop-filter:blur(8px);cursor:pointer}.room-detail__expand{top:18px;right:18px;width:40px;height:40px;border-radius:11px}.room-detail__gallery-arrow{top:50%;width:42px;height:42px;border-radius:999px;transform:translateY(-50%)}.room-detail__gallery-arrow--left{left:18px}.room-detail__gallery-arrow--right{right:18px}.room-detail__expand:hover,.room-detail__gallery-arrow:hover{background:rgba(7,156,165,.9)}
+
+        .room-detail__gallery{display:flex;max-width:1180px;gap:10px;margin:12px auto 0;overflow-x:auto;padding:2px 1px 5px}.room-detail__gallery button{position:relative;width:118px;min-width:118px;aspect-ratio:4/3;overflow:hidden;padding:0;border:2px solid transparent;border-radius:11px;background:#edf4f4;cursor:pointer;opacity:.72}.room-detail__gallery button.is-active{border-color:#079ca5;opacity:1;box-shadow:0 0 0 2px rgba(7,156,165,.12)}.room-detail__gallery :global(img){object-fit:cover}
+
+        .room-detail__lightbox{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:30px;background:rgba(3,12,22,.94);backdrop-filter:blur(10px)}.room-detail__lightbox-image{position:relative;width:min(1200px,88vw);height:min(820px,86vh)}.room-detail__lightbox-image :global(img){object-fit:contain}.room-detail__lightbox-close,.room-detail__lightbox-arrow{position:absolute;z-index:2;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:#fff;cursor:pointer}.room-detail__lightbox-close{top:20px;right:20px;width:44px;height:44px;border-radius:999px}.room-detail__lightbox-arrow{top:50%;width:48px;height:48px;border-radius:999px;transform:translateY(-50%)}.room-detail__lightbox-arrow--left{left:22px}.room-detail__lightbox-arrow--right{right:22px}.room-detail__lightbox-close:hover,.room-detail__lightbox-arrow:hover{background:#079ca5}
 
         .room-detail__overlay {
           position: absolute;
@@ -809,6 +869,8 @@ export default function RoomDetail({
             min-height: 470px;
             border-radius: 16px;
           }
+
+          .room-detail__gallery{margin-top:8px}.room-detail__gallery button{width:88px;min-width:88px}.room-detail__gallery-arrow{width:36px;height:36px}.room-detail__gallery-arrow--left{left:10px}.room-detail__gallery-arrow--right{right:10px}.room-detail__expand{top:10px;right:10px}.room-detail__lightbox{padding:12px}.room-detail__lightbox-image{width:100%;height:80vh}.room-detail__lightbox-arrow{width:40px;height:40px}.room-detail__lightbox-arrow--left{left:8px}.room-detail__lightbox-arrow--right{right:8px}
 
           .room-detail__hero-content {
             padding: 24px;

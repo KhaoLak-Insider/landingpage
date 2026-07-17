@@ -105,9 +105,14 @@ function getOwnedKey(urlValue: string, publicUrl: string): string | null {
     const url = new URL(urlValue);
     const base = new URL(publicUrl);
     const basePath = base.pathname.replace(/\/$/, "");
-    const expectedPrefix = `${basePath}/spots/`.replace(/\/+/g, "/");
+    const ownedPrefixes = ["spots", "hotels"].map((folder) =>
+      `${basePath}/${folder}/`.replace(/\/+/g, "/"),
+    );
 
-    if (url.origin !== base.origin || !url.pathname.startsWith(expectedPrefix)) {
+    if (
+      url.origin !== base.origin ||
+      !ownedPrefixes.some((prefix) => url.pathname.startsWith(prefix))
+    ) {
       return null;
     }
 
@@ -125,16 +130,29 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const file = formData.get("file");
+    const scope = String(formData.get("scope") || "spot");
     const category = String(formData.get("category") || "");
     const slug = String(formData.get("slug") || "");
+    const hotelSlug = String(formData.get("hotelSlug") || "");
+    const roomSlug = String(formData.get("roomSlug") || "");
     const imageKind = String(formData.get("kind") || "gallery");
 
-    if (
-      !(file instanceof File) ||
-      !category.trim() ||
-      !slug.trim() ||
-      !["hero", "gallery"].includes(imageKind)
-    ) {
+    const validSpot =
+      scope === "spot" &&
+      Boolean(category.trim()) &&
+      Boolean(slug.trim()) &&
+      ["hero", "gallery"].includes(imageKind);
+    const validHotel =
+      scope === "hotel" &&
+      Boolean(hotelSlug.trim()) &&
+      ["hero", "gallery"].includes(imageKind);
+    const validRoom =
+      scope === "room" &&
+      Boolean(hotelSlug.trim()) &&
+      Boolean(roomSlug.trim()) &&
+      ["cover", "gallery"].includes(imageKind);
+
+    if (!(file instanceof File) || (!validSpot && !validHotel && !validRoom)) {
       return NextResponse.json(
         { error: "Datei, Kategorie, Slug und Bildtyp werden benötigt." },
         { status: 400 },
@@ -156,10 +174,22 @@ export async function POST(request: NextRequest) {
     }
 
     const { client, bucket, publicUrl } = getR2Config();
-    const categoryPath = pathSegment(category, "ohne-kategorie");
-    const spotPath = pathSegment(slug, "temp");
     const shortId = crypto.randomUUID().split("-")[0];
-    const key = `spots/${categoryPath}/${spotPath}/${spotPath}-${imageKind}-${shortId}.${fileExtension(file)}`;
+    const extension = fileExtension(file);
+    let key: string;
+
+    if (scope === "hotel") {
+      const hotelPath = pathSegment(hotelSlug, "temp-hotel");
+      key = `hotels/${hotelPath}/${imageKind}/${hotelPath}-${imageKind}-${shortId}.${extension}`;
+    } else if (scope === "room") {
+      const hotelPath = pathSegment(hotelSlug, "temp-hotel");
+      const roomPath = pathSegment(roomSlug, "temp-room");
+      key = `hotels/${hotelPath}/rooms/${roomPath}/${imageKind}/${roomPath}-${imageKind}-${shortId}.${extension}`;
+    } else {
+      const categoryPath = pathSegment(category, "ohne-kategorie");
+      const spotPath = pathSegment(slug, "temp");
+      key = `spots/${categoryPath}/${spotPath}/${spotPath}-${imageKind}-${shortId}.${extension}`;
+    }
 
     await client.send(
       new PutObjectCommand({

@@ -45,6 +45,49 @@ export async function uploadR2Image(
   return data.url;
 }
 
+async function uploadScopedImage(
+  file: File,
+  fields: Record<string, string>,
+): Promise<string> {
+  const uploadFile = await convertJpegToWebp(file);
+  const formData = new FormData();
+  formData.append("file", uploadFile);
+  Object.entries(fields).forEach(([key, value]) => formData.append(key, value));
+
+  const response = await fetch("/api/upload", {
+    method: "POST",
+    headers: await authorizationHeaders(),
+    body: formData,
+  });
+
+  if (!response.ok) throw new Error(await responseError(response));
+  const data = (await response.json()) as { url?: string };
+  if (!data.url) throw new Error("Der Upload lieferte keine Bild-URL.");
+  return data.url;
+}
+
+export function uploadHotelImage(
+  file: File,
+  hotelSlug: string,
+  kind: "hero" | "gallery",
+): Promise<string> {
+  return uploadScopedImage(file, { scope: "hotel", hotelSlug, kind });
+}
+
+export function uploadRoomImage(
+  file: File,
+  hotelSlug: string,
+  roomSlug: string,
+  kind: "cover" | "gallery",
+): Promise<string> {
+  return uploadScopedImage(file, {
+    scope: "room",
+    hotelSlug,
+    roomSlug,
+    kind,
+  });
+}
+
 async function convertJpegToWebp(file: File): Promise<File> {
   if (!new Set(["image/jpeg", "image/jpg"]).has(file.type)) return file;
 

@@ -43,6 +43,9 @@ export default function RoomCapacity({ room, setRoom }: Props) {
           </label>
         ))}
       </div>
+      <p className="admin-room-capacity-hint">
+        Die Gesamtbelegung bitte ausdrücklich eintragen. Erwachsene und Kinder werden nicht addiert, da es sich um alternative Belegungsvarianten handeln kann.
+      </p>
     </section>
   );
 }

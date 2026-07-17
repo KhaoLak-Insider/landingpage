@@ -605,7 +605,7 @@ export default function AdminHotelEditorPage() {
           <HotelHighlights hotel={hotel} setHotel={setHotel} />
           <HotelRooms spotId={spotId} rooms={rooms} />
           <HotelDistances hotel={hotel} setHotel={setHotel} />
-          <HotelGallery hotel={hotel} setHotel={setHotel} />
+          <HotelGallery hotel={hotel} hotelSlug={spot.slug} setHotel={setHotel} />
           <HotelFaq hotel={hotel} setHotel={setHotel} />
           <HotelSeo spot={spot} setSpot={setSpot} />
         </main>

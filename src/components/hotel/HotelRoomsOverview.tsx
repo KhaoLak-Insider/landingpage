@@ -192,11 +192,7 @@ export default function HotelRoomsOverview({
             const bedType = localizedValue(room, language, "bed_type");
             const size = toPositiveNumber(room.size_sqm);
 
-            const occupancy =
-              toPositiveNumber(room.max_occupancy) ||
-              ((toPositiveNumber(room.max_adults) || 0) +
-                (toPositiveNumber(room.max_children) || 0) ||
-                null);
+            const occupancy = toPositiveNumber(room.max_occupancy);
 
             const highlights =
               language === "en"

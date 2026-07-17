@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, Save } from "lucide-react";
+import { Loader2, Save, Trash2 } from "lucide-react";
 import type {
   ContentStatus,
   HotelReference,
@@ -13,6 +13,8 @@ interface Props {
   hotel: HotelReference | null;
   spot: SpotReference | null;
   isSaving: boolean;
+  isDeleting: boolean;
+  onDelete: () => void;
   setRoom: React.Dispatch<React.SetStateAction<RoomForm>>;
 }
 
@@ -21,6 +23,8 @@ export default function RoomSidebar({
   hotel,
   spot,
   isSaving,
+  isDeleting,
+  onDelete,
   setRoom,
 }: Props) {
   return (
@@ -109,6 +113,15 @@ export default function RoomSidebar({
           <Save size={16} />
         )}
         {isSaving ? "Wird gespeichert …" : "Alles speichern"}
+      </button>
+      <button
+        type="button"
+        className="admin-room-editor__delete-room"
+        disabled={isSaving || isDeleting}
+        onClick={onDelete}
+      >
+        {isDeleting ? <Loader2 size={16} className="admin-room-editor__spinner" /> : <Trash2 size={16} />}
+        {isDeleting ? "Zimmer wird gelöscht …" : "Zimmer löschen"}
       </button>
     </aside>
   );

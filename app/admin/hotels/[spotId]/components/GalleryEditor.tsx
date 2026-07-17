@@ -3,10 +3,17 @@
 import {
   ArrowDown,
   ArrowUp,
+  Check,
   ImageIcon,
   Plus,
+  Loader2,
   Trash2,
+  Upload,
+  Sparkles,
 } from "lucide-react";
+import { useState } from "react";
+import { uploadHotelImage } from "@/src/lib/r2-images";
+import { generateImageAltTexts } from "@/src/lib/admin/image-alt";
 import type {
   ContentStatus,
   HotelGalleryImage,
@@ -15,10 +22,126 @@ import { createId } from "../utils";
 
 interface Props {
   images: HotelGalleryImage[];
+  hotelSlug: string;
   onChange: (images: HotelGalleryImage[]) => void;
 }
 
-export default function GalleryEditor({ images, onChange }: Props) {
+export default function GalleryEditor({ images, hotelSlug, onChange }: Props) {
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [generatingAltIndex, setGeneratingAltIndex] = useState<number | null>(null);
+  const [altMessage, setAltMessage] = useState<{ index: number; type: "success" | "error"; text: string } | null>(null);
+  const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | null>(null);
+
+  async function generateAllImageTexts() {
+    const targets = images.map((image, index) => ({ image, index })).filter(({ image }) => image.image_url.trim());
+    if (!targets.length) {
+      setUploadError("Es sind keine Bilder mit einer gültigen URL vorhanden.");
+      return;
+    }
+    if (!window.confirm(`Für ${targets.length} Bilder Titel und Alt-Texte neu erstellen? Vorhandene Bildtexte werden überschrieben.`)) return;
+
+    setBulkProgress({ done: 0, total: targets.length });
+    setUploadError(null);
+    setAltMessage(null);
+    const nextImages = images.map((image) => ({ ...image }));
+    let cursor = 0;
+    let completed = 0;
+    let failed = 0;
+
+    async function worker() {
+      while (cursor < targets.length) {
+        const target = targets[cursor++];
+        try {
+          const generated = await generateImageAltTexts(target.image.image_url, `${hotelSlug}; ${target.image.title_de || target.image.title_en || "Hotelbild"}`);
+          nextImages[target.index] = {
+            ...nextImages[target.index],
+            title_de: generated.title_de,
+            title_en: generated.title_en,
+            alt_de: generated.de,
+            alt_en: generated.en,
+          };
+        } catch {
+          failed += 1;
+        } finally {
+          completed += 1;
+          setBulkProgress({ done: completed, total: targets.length });
+        }
+      }
+    }
+
+    await Promise.all(Array.from({ length: Math.min(3, targets.length) }, () => worker()));
+    onChange(nextImages);
+    setBulkProgress(null);
+    setUploadError(failed > 0 ? `${targets.length - failed} Bilder bearbeitet, ${failed} fehlgeschlagen. Die erfolgreichen Texte wurden übernommen.` : null);
+    if (failed === 0) setAltMessage({ index: -1, type: "success", text: `${targets.length} Bilder vollständig bearbeitet. Bitte Hotel speichern.` });
+  }
+
+  function publishAllDrafts() {
+    const draftCount = images.filter((image) => image.status === "draft").length;
+    if (draftCount === 0) {
+      setUploadError("Es gibt keine Galeriebilder mit dem Status Entwurf.");
+      return;
+    }
+    if (!window.confirm(`${draftCount} Galeriebilder von Entwurf auf Veröffentlicht setzen?`)) return;
+    onChange(images.map((image) => image.status === "draft" ? { ...image, status: "published" as ContentStatus } : image));
+    setUploadError(null);
+    setAltMessage({ index: -1, type: "success", text: `${draftCount} Bilder wurden auf Veröffentlicht gesetzt. Bitte Hotel speichern.` });
+  }
+
+  async function generateAlt(index: number) {
+    const image = images[index];
+    if (!image?.image_url) return;
+    setGeneratingAltIndex(index);
+    setUploadError(null);
+    setAltMessage(null);
+    try {
+      const alt = await generateImageAltTexts(image.image_url, image.title_de || image.title_en);
+      updateImage(index, { alt_de: alt.de, alt_en: alt.en });
+      setAltMessage({ index, type: "success", text: "Beide Alt-Texte wurden übernommen. Bitte Hotel speichern." });
+    } catch (error) {
+      setAltMessage({ index, type: "error", text: error instanceof Error ? error.message : "Alt-Texte konnten nicht erstellt werden." });
+    } finally {
+      setGeneratingAltIndex(null);
+    }
+  }
+
+  async function uploadImages(files: FileList) {
+    if (!hotelSlug.trim()) {
+      setUploadError("Bitte zuerst einen Hotel-Slug eintragen.");
+      return;
+    }
+    setIsUploading(true);
+    setUploadError(null);
+    try {
+      const urls = await Promise.all(
+        Array.from(files).map((file) => uploadHotelImage(file, hotelSlug, "gallery")),
+      );
+      const startOrder = images.length;
+      onChange([
+        ...images,
+        ...urls.map((image_url, index) => ({
+          id: createId(),
+          image_url,
+          title_de: "",
+          title_en: "",
+          alt_de: "",
+          alt_en: "",
+          credit_name: "",
+          credit_url: "",
+          status: "draft" as ContentStatus,
+          sort_order: startOrder + index + 1,
+          is_cover: images.length === 0 && index === 0,
+          is_featured: false,
+        })),
+      ]);
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : "Galeriebilder konnten nicht hochgeladen werden.");
+    } finally {
+      setIsUploading(false);
+    }
+  }
+
   function addImage() {
     const nextOrder =
       images.length > 0
@@ -103,7 +226,32 @@ export default function GalleryEditor({ images, onChange }: Props) {
           <Plus size={14} />
           Bild hinzufügen
         </button>
+        <label className="admin-hotel-upload">
+          {isUploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+          <span>{isUploading ? "Upload läuft …" : "Bilder hochladen"}</span>
+          <input
+            type="file"
+            multiple
+            accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+            disabled={isUploading}
+            hidden
+            onChange={(event) => {
+              if (event.target.files?.length) void uploadImages(event.target.files);
+              event.target.value = "";
+            }}
+          />
+        </label>
+        <button type="button" disabled={bulkProgress !== null || isUploading} onClick={() => void generateAllImageTexts()}>
+          {bulkProgress ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+          {bulkProgress ? `${bulkProgress.done} / ${bulkProgress.total}` : "KI-Titel & Alt-Texte für alle"}
+        </button>
+        <button type="button" disabled={bulkProgress !== null || isUploading} onClick={publishAllDrafts}>
+          <Check size={14} />
+          Alle Entwürfe veröffentlichen
+        </button>
       </div>
+      {uploadError && <small>{uploadError}</small>}
+      {altMessage?.index === -1 && <small className="admin-ai-message admin-ai-message--success">{altMessage.text}</small>}
 
       <div className="hotel-gallery-editor__grid">
         {images.map((image, index) => (
@@ -177,6 +325,19 @@ export default function GalleryEditor({ images, onChange }: Props) {
                   }
                 />
               </label>
+
+              <button
+                type="button"
+                className="admin-hotel-upload"
+                disabled={!image.image_url || generatingAltIndex === index}
+                onClick={() => void generateAlt(index)}
+              >
+                {generatingAltIndex === index ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                KI-Alt-Texte DE + EN
+              </button>
+              {altMessage?.index === index && (
+                <small className={`admin-ai-message admin-ai-message--${altMessage.type}`}>{altMessage.text}</small>
+              )}
 
               <label className="admin-hotel-field">
                 <span>Bildnachweis</span>

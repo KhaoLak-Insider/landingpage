@@ -8,7 +8,7 @@ import {
   useState,
 } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Check,
@@ -18,6 +18,7 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import { supabase } from "@/src/lib/supabase";
+import { deleteR2Image } from "@/src/lib/r2-images";
 
 import { emptyRoom } from "./constants";
 import type {
@@ -48,6 +49,7 @@ import RoomSidebar from "./components/RoomSidebar";
 import "./room-editor.css";
 
 export default function AdminRoomEditorPage() {
+  const router = useRouter();
   const params = useParams<{ spotId: string; roomId: string }>();
 
   const spotId = useMemo(
@@ -66,6 +68,7 @@ export default function AdminRoomEditorPage() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<FeedbackState | null>(null);
 
@@ -246,9 +249,7 @@ export default function AdminRoomEditorPage() {
         }))
         .filter((image) => Boolean(image.url));
 
-      const { error } = await supabase
-        .from("premium_rooms")
-        .update({
+      const roomPayload = {
           slug: nullableText(room.slug),
           status: room.status,
           sort_order: nullableNumber(room.sort_order),
@@ -285,11 +286,16 @@ export default function AdminRoomEditorPage() {
           amenities_de: cleanStringArray(room.amenities_de),
           amenities_en: cleanStringArray(room.amenities_en),
 
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", room.id);
-
-      if (error) throw error;
+        };
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) throw new Error("Die Admin-Anmeldung ist abgelaufen.");
+      const response = await fetch(`/api/admin/premium-rooms/${encodeURIComponent(room.id)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify(roomPayload),
+      });
+      const result = (await response.json()) as { error?: string };
+      if (!response.ok) throw new Error(result.error || "Zimmer konnte nicht gespeichert werden.");
 
       setRoom((current) => ({
         ...current,
@@ -316,6 +322,29 @@ export default function AdminRoomEditorPage() {
       });
     } finally {
       setIsSaving(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!room.id || !window.confirm(`Zimmer „${room.name_de || room.name_en}“ wirklich dauerhaft löschen?`)) return;
+    setIsDeleting(true);
+    setFeedback(null);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) throw new Error("Die Admin-Anmeldung ist abgelaufen.");
+      const response = await fetch(`/api/admin/premium-rooms/${encodeURIComponent(room.id)}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      const result = (await response.json()) as { error?: string };
+      if (!response.ok) throw new Error(result.error || "Zimmer konnte nicht gelöscht werden.");
+      const imageUrls = [room.cover_image_url, ...room.images.map((image) => image.url)].filter(Boolean);
+      await Promise.allSettled(imageUrls.map((url) => deleteR2Image(url)));
+      router.push(`/admin/hotels/${encodeURIComponent(spotId)}`);
+      router.refresh();
+    } catch (error) {
+      setFeedback({ type: "error", message: `Löschen fehlgeschlagen: ${getErrorMessage(error)}` });
+      setIsDeleting(false);
     }
   }
 
@@ -421,7 +450,7 @@ export default function AdminRoomEditorPage() {
           <RoomDetails room={room} setRoom={setRoom} />
           <RoomHighlights room={room} setRoom={setRoom} />
           <RoomAmenities room={room} setRoom={setRoom} />
-          <RoomGallery room={room} setRoom={setRoom} />
+          <RoomGallery room={room} hotelSlug={spot?.slug || ""} setRoom={setRoom} />
         </main>
 
         <RoomSidebar
@@ -429,6 +458,8 @@ export default function AdminRoomEditorPage() {
           hotel={hotel}
           spot={spot}
           isSaving={isSaving}
+          isDeleting={isDeleting}
+          onDelete={() => void handleDelete()}
           setRoom={setRoom}
         />
       </div>

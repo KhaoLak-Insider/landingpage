@@ -1,6 +1,7 @@
 "use client";
 
-import { Check, Heart } from "lucide-react";
+import Link from "next/link";
+import { Check, Heart, PencilLine } from "lucide-react";
 import HotelHero from "@/src/components/hotel/HotelHero";
 import HotelHighlights from "@/src/components/hotel/HotelHighlights";
 import HotelRooms from "@/src/components/hotel/HotelRooms";
@@ -210,6 +211,8 @@ export default function PremiumHotelTemplate(props: StandardTemplateProps) {
     premiumHotel,
     props.language,
   );
+  const role = String(props.userProfile?.role || "").trim().toLowerCase();
+  const canEdit = role === "admin" || role === "editor";
 
   return (
     <main className="premium-hotel-page">
@@ -224,7 +227,7 @@ export default function PremiumHotelTemplate(props: StandardTemplateProps) {
       />
 
       <nav className="premium-hotel-tabs" aria-label="Hotelbereiche">
-        <div className="premium-hotel-tabs__inner">
+        <div className={`premium-hotel-tabs__inner${canEdit ? " has-editor" : ""}`}>
           <a className="is-active" href="#overview">
             {props.language === "en" ? "Overview" : "Überblick"}
           </a>
@@ -243,6 +246,16 @@ export default function PremiumHotelTemplate(props: StandardTemplateProps) {
           <a href="#nearby">
             {props.language === "en" ? "Nearby" : "In der Nähe"}
           </a>
+          {canEdit && (
+            <Link
+              href={`/admin/hotels/${props.spot.id}`}
+              className="premium-hotel-tabs__edit"
+              title={props.language === "en" ? "Edit spot" : "Spot bearbeiten"}
+            >
+              <PencilLine size={15} />
+              <span>{props.language === "en" ? "Edit spot" : "Spot bearbeiten"}</span>
+            </Link>
+          )}
           <button
             type="button"
             className="premium-hotel-tabs__favorite"
@@ -494,6 +507,34 @@ export default function PremiumHotelTemplate(props: StandardTemplateProps) {
           background: transparent;
           cursor: pointer;
           flex: 0 0 auto;
+        }
+
+        .premium-hotel-tabs__inner.has-editor .premium-hotel-tabs__favorite {
+          margin-left: 0;
+        }
+
+        .premium-hotel-tabs a.premium-hotel-tabs__edit {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          margin-left: auto;
+          padding: 8px 12px;
+          border: 1px solid #dce7e9;
+          border-radius: 9px;
+          background: #f7fbfb;
+          color: #087f86;
+          font-size: 11px;
+          font-weight: 700;
+        }
+
+        .premium-hotel-tabs a.premium-hotel-tabs__edit::after {
+          display: none;
+        }
+
+        .premium-hotel-tabs a.premium-hotel-tabs__edit:hover {
+          border-color: #8bd0d4;
+          background: #edf9f9;
+          color: #066d73;
         }
 
         .premium-hotel-tabs__favorite::after {

@@ -60,6 +60,12 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/images/**",
       },
+      {
+        protocol: "https",
+        hostname: "webbox.imgix.net",
+        port: "",
+        pathname: "/images/**",
+      },
     ],
   },
 };

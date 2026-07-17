@@ -7,7 +7,7 @@ export async function GET() {
     // 1. Deine originale Abfrage bleibt exakt so, wie sie war
     const { data: spots, error: spotsError } = await supabase
       .from("spots")
-      .select("id, title, slug, category, description, image_url, latitude, longitude, price_level, stars")
+      .select("id, title, title_en, slug, category, category_en, category_id, description, description_en, image_url, latitude, longitude, price_level, stars")
       .eq("is_published", true);
 
     if (spotsError) throw spotsError;
@@ -15,7 +15,10 @@ export async function GET() {
     // 2. Wir holen einfach parallel die Farben und Icons aus der categories-Tabelle
     const { data: categories, error: catsError } = await supabase
       .from("categories")
-      .select("name, icon, color");
+      .select("id, name, name_en, slug, icon, color, parent_id, sort_order")
+      .eq("is_active", true)
+      .order("sort_order")
+      .order("name");
 
     // Falls es bei den Kategorien einen Fehler gibt, loggen wir ihn nur, 
     // damit die Spots trotzdem geladen werden!
@@ -27,7 +30,9 @@ export async function GET() {
     const enrichedSpots = (spots || []).map((spot) => {
       // Findet die passende Kategorie anhand des Namens (z.B. "Strand")
       const matchingCategory = (categories || []).find(
-        (cat) => cat.name?.toLowerCase() === spot.category?.toLowerCase()
+        (cat) =>
+          cat.id === spot.category_id ||
+          cat.name?.toLowerCase() === spot.category?.toLowerCase()
       );
 
       return {
@@ -35,15 +40,24 @@ export async function GET() {
         // Wir packen das Objekt genau so hinein, wie die Planen-Page es erwartet
         categories: matchingCategory ? {
           name: matchingCategory.name,
+          name_en: matchingCategory.name_en,
+          slug: matchingCategory.slug,
           icon: matchingCategory.icon,
-          color: matchingCategory.color
+          color: matchingCategory.color,
+          parent_id: matchingCategory.parent_id,
+          sort_order: matchingCategory.sort_order,
         } : null
       };
     });
 
     // Wir geben die angereicherten Spots zurück
-    return NextResponse.json({ success: true, result: enrichedSpots });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({
+      success: true,
+      result: enrichedSpots,
+      categories: categories || [],
+    });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

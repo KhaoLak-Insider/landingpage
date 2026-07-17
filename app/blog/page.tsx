@@ -287,9 +287,9 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                 <div className="p-8 lg:p-12 lg:pl-4 lg:col-span-9 flex flex-col justify-between bg-white">
                   <div className="space-y-4 max-w-xl">
                     <div className="flex items-center gap-3 text-xs font-semibold text-slate-400">
-                      <span>{new Date(featuredPost.created_at).toLocaleDateString("de-DE", { day: '2-digit', month: 'long', year: 'numeric' })}</span>
+                      <span>{new Date(featuredPost.created_at).toLocaleDateString(language === "en" ? "en-GB" : "de-DE", { day: '2-digit', month: 'long', year: 'numeric' })}</span>
                       <span>•</span>
-                      <span>⏱️ {featuredPost.reading_time || 5} Min. Lesezeit</span>
+                      <span>⏱️ {featuredPost.reading_time || 5} {copy.minutes}</span>
                     </div>
                     <h2 className="text-2xl md:text-3xl font-bold text-[#10233f] group-hover:text-[#079ca5] transition-colors duration-300 leading-tight tracking-tight">
                     {value(featuredPost, "title")}

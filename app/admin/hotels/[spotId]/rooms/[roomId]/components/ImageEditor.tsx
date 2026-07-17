@@ -1,19 +1,65 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowDown, ArrowUp, ImageIcon, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, ImageIcon, Loader2, Plus, Sparkles, Trash2, Upload } from "lucide-react";
+import { uploadRoomImage } from "@/src/lib/r2-images";
+import { generateImageAltTexts } from "@/src/lib/admin/image-alt";
 import type { RoomImage } from "../types";
 
 interface ImageEditorProps {
   images: RoomImage[];
+  hotelSlug: string;
+  roomSlug: string;
   onChange: (images: RoomImage[]) => void;
 }
 
 export default function ImageEditor({
   images,
+  hotelSlug,
+  roomSlug,
   onChange,
 }: ImageEditorProps) {
   const [draftUrl, setDraftUrl] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [generatingAltIndex, setGeneratingAltIndex] = useState<number | null>(null);
+  const [altMessage, setAltMessage] = useState<{ index: number; type: "success" | "error"; text: string } | null>(null);
+
+  async function generateAlt(index: number) {
+    const image = images[index];
+    if (!image?.url) return;
+    setGeneratingAltIndex(index);
+    setUploadError(null);
+    setAltMessage(null);
+    try {
+      const alt = await generateImageAltTexts(image.url, roomSlug);
+      updateImage(index, { alt_de: alt.de, alt_en: alt.en });
+      setAltMessage({ index, type: "success", text: "Beide Alt-Texte wurden übernommen. Bitte Zimmer speichern." });
+    } catch (error) {
+      setAltMessage({ index, type: "error", text: error instanceof Error ? error.message : "Alt-Texte konnten nicht erstellt werden." });
+    } finally {
+      setGeneratingAltIndex(null);
+    }
+  }
+
+  async function uploadImages(files: FileList) {
+    if (!hotelSlug.trim() || !roomSlug.trim()) {
+      setUploadError("Hotel- und Zimmer-Slug werden für den Upload benötigt.");
+      return;
+    }
+    setIsUploading(true);
+    setUploadError(null);
+    try {
+      const urls = await Promise.all(
+        Array.from(files).map((file) => uploadRoomImage(file, hotelSlug, roomSlug, "gallery")),
+      );
+      onChange([...images, ...urls.map((url) => ({ url, alt_de: "", alt_en: "" }))]);
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : "Galeriebilder konnten nicht hochgeladen werden.");
+    } finally {
+      setIsUploading(false);
+    }
+  }
 
   function addImage() {
     const url = draftUrl.trim();
@@ -69,6 +115,23 @@ export default function ImageEditor({
           Bild hinzufügen
         </button>
       </div>
+
+      <label className="admin-hotel-upload">
+        {isUploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+        <span>{isUploading ? "Bilder werden in R2 geladen …" : "Galeriebilder hochladen"}</span>
+        <input
+          type="file"
+          multiple
+          accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+          disabled={isUploading}
+          hidden
+          onChange={(event) => {
+            if (event.target.files?.length) void uploadImages(event.target.files);
+            event.target.value = "";
+          }}
+        />
+      </label>
+      {uploadError && <small>{uploadError}</small>}
 
       <div className="image-editor__grid">
         {images.map((image, index) => (
@@ -137,6 +200,18 @@ export default function ImageEditor({
                 Löschen
               </button>
             </div>
+            <button
+              type="button"
+              className="admin-hotel-upload"
+              disabled={generatingAltIndex === index}
+              onClick={() => void generateAlt(index)}
+            >
+              {generatingAltIndex === index ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+              KI-Alt-Texte DE + EN
+            </button>
+            {altMessage?.index === index && (
+              <small className={`admin-ai-message admin-ai-message--${altMessage.type}`}>{altMessage.text}</small>
+            )}
           </article>
         ))}
       </div>

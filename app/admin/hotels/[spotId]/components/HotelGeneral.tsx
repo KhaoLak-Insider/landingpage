@@ -1,5 +1,8 @@
 "use client";
 
+import { useState } from "react";
+import { ImageIcon, Loader2, Upload } from "lucide-react";
+import { uploadHotelImage } from "@/src/lib/r2-images";
 import type { HotelForm, SpotForm } from "../types";
 
 interface Props {
@@ -15,6 +18,29 @@ export default function HotelGeneral({
   setSpot,
   setHotel,
 }: Props) {
+  const [isUploadingHero, setIsUploadingHero] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  async function uploadHero(file: File) {
+    if (!spot.slug.trim()) {
+      setUploadError("Bitte zuerst einen Hotel-Slug eintragen.");
+      return;
+    }
+
+    setIsUploadingHero(true);
+    setUploadError(null);
+    try {
+      const imageUrl = await uploadHotelImage(file, spot.slug, "hero");
+      setSpot((current) => ({ ...current, image_url: imageUrl }));
+    } catch (error) {
+      setUploadError(
+        error instanceof Error ? error.message : "Hero-Bild konnte nicht hochgeladen werden.",
+      );
+    } finally {
+      setIsUploadingHero(false);
+    }
+  }
+
   return (
     <section className="admin-hotel-card">
       <div className="admin-hotel-card__header">
@@ -39,6 +65,32 @@ export default function HotelGeneral({
             required
           />
         </label>
+
+        <div className="admin-hotel-field">
+          <span>Hero-Bild hochladen</span>
+          <label className="admin-hotel-upload">
+            {isUploadingHero ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+            <span>{isUploadingHero ? "Wird in R2 geladen …" : "Bild auswählen"}</span>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+              disabled={isUploadingHero}
+              hidden
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file) void uploadHero(file);
+                event.target.value = "";
+              }}
+            />
+          </label>
+          {uploadError && <small>{uploadError}</small>}
+          {spot.image_url && (
+            <div className="admin-hotel-hero-preview">
+              <img src={spot.image_url} alt={spot.title || "Hotel Hero"} />
+            </div>
+          )}
+          {!spot.image_url && <small><ImageIcon size={14} /> Noch kein Hero-Bild hinterlegt.</small>}
+        </div>
 
         <label className="admin-hotel-field">
           <span>Hotelname Englisch</span>

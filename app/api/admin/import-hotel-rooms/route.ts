@@ -490,11 +490,9 @@ function parseRoomPage(
     size_sqm: sizeSqm,
     max_adults: maxAdults,
     max_children: maxChildren,
-    max_occupancy:
-      maxOccupancy ??
-      (maxAdults !== null || maxChildren !== null
-        ? (maxAdults || 0) + (maxChildren || 0)
-        : null),
+    // Erwachsenen- und Kinderlimits beschreiben oft alternative Belegungen
+    // und dürfen deshalb nicht zu einer Gesamtbelegung addiert werden.
+    max_occupancy: maxOccupancy,
     bed_type_de: bedKeywords.de.join(", "),
     bed_type_en: bedKeywords.en.join(", "),
     view_de: viewKeywords.de.join(", "),
