@@ -138,7 +138,10 @@ export default function SpotEditorPage() {
       stars: parseInt(formData.stars) || null,
       opening_hours: formData.opening_hours,
       youtube_url: formData.youtube_url,
-      youtube_timestamp: formData.youtube_timestamp,
+      youtube_timestamp:
+        formData.youtube_timestamp.trim() === ""
+          ? null
+          : Number.parseInt(formData.youtube_timestamp, 10),
       tour_link: formData.tour_link,
       booking_link: formData.booking_link,
       best_months: formData.best_months,
@@ -207,7 +210,7 @@ export default function SpotEditorPage() {
           <input className="w-full p-4 border rounded-xl focus:ring-2 focus:ring-teal-500 outline-none" placeholder="Titel des Spots" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} />
           <div className="grid grid-cols-2 gap-4">
               <input className="w-full p-3 border rounded-xl" placeholder="YouTube URL" value={formData.youtube_url} onChange={(e) => setFormData({...formData, youtube_url: e.target.value})} />
-              <input className="w-full p-3 border rounded-xl" placeholder="Startzeit (Sekunden)" value={formData.youtube_timestamp} onChange={(e) => setFormData({...formData, youtube_timestamp: e.target.value})} />
+              <input className="w-full p-3 border rounded-xl" placeholder="Startzeit (Sekunden, optional)" type="number" min="0" step="1" value={formData.youtube_timestamp} onChange={(e) => setFormData({...formData, youtube_timestamp: e.target.value})} />
               <input className="w-full p-3 border rounded-xl" placeholder="Preis-Level" value={formData.price_level} onChange={(e) => setFormData({...formData, price_level: e.target.value})} />
               <input className="w-full p-3 border rounded-xl" placeholder="Sterne (0-5)" value={formData.stars} onChange={(e) => setFormData({...formData, stars: e.target.value})} />
               <input className="w-full p-3 border rounded-xl" placeholder="Öffnungszeiten" value={formData.opening_hours} onChange={(e) => setFormData({...formData, opening_hours: e.target.value})} />
