@@ -55,7 +55,7 @@ export default async function Footer() {
           <div>
             <h4 className="mb-4 font-bold text-slate-900">{copy.app}</h4>
             <ul className="space-y-3 text-sm text-slate-600">
-              <li><Link href={href("/#features")} className="hover:text-teal-500 transition">{copy.features}</Link></li>
+              <li><Link href={href("/app#features")} className="hover:text-teal-500 transition">{copy.features}</Link></li>
               <li><Link href={href("/planen")} className="hover:text-teal-500 transition">{copy.map}</Link></li>
               <li><Link href={href("/planen")} className="hover:text-teal-500 transition">{copy.planner}</Link></li>
               <li><Link href={href("/favorites")} className="hover:text-teal-500 transition">{copy.favorites}</Link></li>
@@ -64,8 +64,8 @@ export default async function Footer() {
           <div>
             <h4 className="mb-4 font-bold text-slate-900">{copy.company}</h4>
             <ul className="space-y-3 text-sm text-slate-600">
-              <li><Link href={href("/#about")} className="hover:text-teal-500 transition">{copy.about}</Link></li>
-              <li><Link href={href("/#waitlist")} className="hover:text-teal-500 transition">{copy.waitlist}</Link></li>
+              <li><Link href={href("/ueber-uns")} className="hover:text-teal-500 transition">{copy.about}</Link></li>
+              <li><Link href={href("/app#waitlist")} className="hover:text-teal-500 transition">{copy.waitlist}</Link></li>
               <li><Link href="mailto:admin@khaolak.app" className="hover:text-teal-500 transition">{copy.contact}</Link></li>
             </ul>
           </div>

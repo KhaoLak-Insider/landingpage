@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 
 const BASE_URL = "https://www.khaolak.app";
-const PAGE_URL = `${BASE_URL}/de/home`;
+const PAGE_URL = `${BASE_URL}/de`;
 
 const germanMetadata: Metadata = {
   title: "Khao Lak Reiseführer: Strände, Ausflüge & Insider-Tipps",
@@ -37,6 +37,11 @@ const germanMetadata: Metadata = {
   ],
   alternates: {
     canonical: PAGE_URL,
+    languages: {
+      de: `${BASE_URL}/de`,
+      en: `${BASE_URL}/en`,
+      "x-default": `${BASE_URL}/de`,
+    },
   },
   robots: {
     index: true,
@@ -80,17 +85,17 @@ const englishMetadata: Metadata = {
   description:
     "Your Khao Lak travel guide to beautiful beaches, excursions, restaurants, markets and genuine insider tips for a perfectly planned Thailand holiday.",
   alternates: {
-    canonical: `${BASE_URL}/en/home`,
+    canonical: `${BASE_URL}/en`,
     languages: {
-      de: `${BASE_URL}/de/home`,
-      en: `${BASE_URL}/en/home`,
-      "x-default": `${BASE_URL}/de/home`,
+      de: `${BASE_URL}/de`,
+      en: `${BASE_URL}/en`,
+      "x-default": `${BASE_URL}/de`,
     },
   },
   robots: germanMetadata.robots,
   openGraph: {
     type: "website",
-    url: `${BASE_URL}/en/home`,
+    url: `${BASE_URL}/en`,
     siteName: "Khao Lak Insider",
     locale: "en_GB",
     title: "Discover Khao Lak like an insider",
@@ -491,8 +496,8 @@ function EnglishHomePage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    "@id": `${BASE_URL}/en/home#webpage`,
-    url: `${BASE_URL}/en/home`,
+    "@id": `${BASE_URL}/en#webpage`,
+    url: `${BASE_URL}/en`,
     name: "Khao Lak Travel Guide: Beaches, Trips & Insider Tips",
     description: "An English travel guide to Khao Lak with beaches, restaurants, excursions and insider tips.",
     inLanguage: "en-GB",
@@ -510,11 +515,37 @@ function EnglishHomePage() {
             <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-[#079ca5] px-4 py-2 text-xs font-extrabold uppercase tracking-[.16em]"><MapPin size={14} /> Your digital Khao Lak travel guide</div>
             <h1 className="text-5xl font-extrabold leading-[1.02] tracking-[-.055em] sm:text-6xl lg:text-7xl">Discover Khao Lak.<br /><span className="text-[#55d7d1]">Like an insider.</span></h1>
             <p className="mt-7 max-w-2xl text-lg leading-8 text-white/90 sm:text-xl">Beautiful beaches, favourite local restaurants, memorable excursions and practical advice for your Khao Lak holiday — carefully selected and easy to plan in one place.</p>
+            <div className="mt-9 flex flex-wrap gap-3 text-sm font-semibold text-white/90">
+              {["Carefully selected", "Practical on the go", "Made for your holiday"].map((item) => (
+                <span key={item} className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 backdrop-blur-md">
+                  <Check size={15} className="text-[#55d7d1]" /> {item}
+                </span>
+              ))}
+            </div>
             <div className="mt-10 flex flex-wrap gap-4">
               <Link href="/en/discover" className="inline-flex items-center gap-2 rounded-xl bg-[#079ca5] px-7 py-4 text-sm font-extrabold text-white">Discover Khao Lak <ArrowRight size={18} /></Link>
               <Link href="/en/plan" className="inline-flex items-center gap-2 rounded-xl border border-white/70 bg-white/10 px-7 py-4 text-sm font-extrabold text-white backdrop-blur"><Map size={18} /> Plan your trip</Link>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section aria-label="Benefits" className="relative z-20 mx-auto -mt-12 max-w-6xl px-6 lg:px-8">
+        <div className="grid overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-[0_24px_70px_rgba(16,35,63,.12)] sm:grid-cols-3">
+          {[
+            [Compass, "Genuine guidance", "Quickly find the places that genuinely suit your holiday."],
+            [Star, "Selected tips", "Spend less time searching and more time enjoying Khao Lak."],
+            [MapPin, "Everything in one place", "Places, distances and trip ideas brought together clearly."],
+          ].map(([Icon, title, text], index) => {
+            const FeatureIcon = Icon as typeof Compass;
+            return (
+              <div key={title as string} className={`p-7 sm:p-8 ${index > 0 ? "border-t border-slate-100 sm:border-l sm:border-t-0" : ""}`}>
+                <FeatureIcon size={24} className="text-[#079ca5]" />
+                <h2 className="mt-4 text-base font-extrabold">{title as string}</h2>
+                <p className="mt-2 text-sm leading-6 text-slate-500">{text as string}</p>
+              </div>
+            );
+          })}
         </div>
       </section>
 
@@ -535,8 +566,66 @@ function EnglishHomePage() {
       </section>
 
       <section className="bg-white py-28">
+        <div className="mx-auto grid max-w-7xl items-center gap-16 px-6 lg:grid-cols-[1fr_.9fr] lg:px-8">
+          <div className="relative min-h-[560px] overflow-hidden rounded-[2rem] bg-[#10233f] shadow-2xl">
+            <Image src="/images/nature.png" alt="Tropical nature and excursions around Khao Lak" fill sizes="(max-width: 1024px) 100vw, 55vw" className="object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#071727]/80 via-transparent to-transparent" />
+            <div className="absolute bottom-7 left-7 right-7 rounded-2xl border border-white/15 bg-white/10 p-6 text-white backdrop-blur-xl">
+              <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em] text-[#74e1dc]"><Sun size={16} /> Insider knowledge</div>
+              <p className="mt-3 text-lg font-bold leading-7">Be in the right place at the right time for relaxed holiday moments without unnecessary detours.</p>
+            </div>
+          </div>
+          <div>
+            <span className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#079ca5]">Plan your holiday with ease</span>
+            <h2 className="mt-4 text-4xl font-extrabold tracking-[-0.045em] sm:text-5xl">From inspiration to your perfect day in Khao Lak.</h2>
+            <p className="mt-6 text-lg leading-8 text-slate-600">Khao Lak Insider does more than help you search. Compare places, save favourites and put together days that work for you.</p>
+            <ol className="mt-9 space-y-6">
+              {[
+                [Search, "01", "Discover Khao Lak", "Browse beaches, restaurants, markets, temples and excursions by interest."],
+                [Heart, "02", "Save your favourites", "Keep the places you definitely want to visit during your holiday."],
+                [CalendarDays, "03", "Plan your days", "Combine your favourite places into relaxed days without needless travel or stress."],
+              ].map(([Icon, number, title, text]) => {
+                const StepIcon = Icon as typeof Search;
+                return (
+                  <li key={number as string} className="flex gap-5 rounded-2xl border border-slate-100 bg-[#f7faf9] p-5">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#e8f8f7] text-[#079ca5]"><StepIcon size={21} /></div>
+                    <div>
+                      <span className="text-[10px] font-extrabold tracking-[.16em] text-[#079ca5]">STEP {number as string}</span>
+                      <h3 className="mt-1 font-extrabold">{title as string}</h3>
+                      <p className="mt-1 text-sm leading-6 text-slate-500">{text as string}</p>
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+            <Link href="/en/plan" className="mt-8 inline-flex items-center gap-2 rounded-xl bg-[#10233f] px-6 py-4 text-sm font-extrabold text-white transition hover:bg-[#173b60]">Plan your holiday <ArrowRight size={17} /></Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 py-28 lg:px-8">
+        <div className="grid items-center gap-14 rounded-[2rem] bg-[#10233f] px-7 py-10 text-white sm:px-12 lg:grid-cols-[.85fr_1.15fr] lg:px-16 lg:py-16">
+          <div>
+            <span className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#74e1dc]">Made for exploring</span>
+            <h2 className="mt-4 text-4xl font-extrabold tracking-[-0.045em]">Your Khao Lak guide fits in your pocket.</h2>
+            <p className="mt-5 leading-7 text-white/70">Keep your saved places, map and travel plans close at hand while you are out and about.</p>
+            <ul className="mt-7 space-y-3 text-sm font-semibold text-white/90">
+              {["Discover places by category", "See distances from your accommodation", "Save favourite places for later"].map((item) => (
+                <li key={item} className="flex items-center gap-3"><Check size={17} className="text-[#55d7d1]" />{item}</li>
+              ))}
+            </ul>
+            <Link href="/en/register" className="mt-8 inline-flex items-center gap-2 rounded-xl bg-[#079ca5] px-6 py-4 text-sm font-extrabold text-white transition hover:bg-[#078f96]">Register for free <ArrowRight size={17} /></Link>
+          </div>
+          <div className="relative min-h-[480px]">
+            <Image src="/images/home-screen.png" alt="Khao Lak Insider app with selected destinations" width={270} height={540} className="absolute left-[5%] top-10 z-10 h-auto w-[230px] -rotate-6 drop-shadow-2xl sm:w-[270px]" />
+            <Image src="/images/map-screen.png" alt="Interactive map with places around Khao Lak" width={310} height={600} className="absolute right-[2%] top-0 z-20 h-auto w-[260px] rotate-3 drop-shadow-2xl sm:w-[310px]" />
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-white py-28">
         <div className="mx-auto max-w-4xl px-6 lg:px-8">
-          <div className="text-center"><span className="text-xs font-extrabold uppercase tracking-[.18em] text-[#079ca5]">Good to know</span><h2 className="mt-4 text-4xl font-extrabold tracking-[-.045em] sm:text-5xl">Frequently asked questions about Khao Lak</h2></div>
+          <div className="text-center"><span className="text-xs font-extrabold uppercase tracking-[.18em] text-[#079ca5]">Good to know</span><h2 className="mt-4 text-4xl font-extrabold tracking-[-.045em] sm:text-5xl">Frequently asked questions about Khao Lak</h2><p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-slate-600">Short answers to important questions when planning your Khao Lak holiday.</p></div>
           <div className="mt-12 space-y-4">{englishFaq.map(([question, answer]) => <details key={question} className="group rounded-2xl border border-slate-200 bg-[#f7faf9] p-6 open:border-[#bfe5e3] open:bg-[#eefafa]"><summary className="flex cursor-pointer list-none items-center justify-between gap-5 font-extrabold">{question}<span className="text-xl text-[#079ca5] group-open:rotate-45">+</span></summary><p className="mt-4 text-sm leading-7 text-slate-600">{answer}</p></details>)}</div>
         </div>
       </section>

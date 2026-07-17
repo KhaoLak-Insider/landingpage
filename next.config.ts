@@ -4,6 +4,11 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: "/:locale(de|en)/home",
+        destination: "/:locale",
+        permanent: true,
+      },
+      {
         source: "/editor",
         destination: "/admin/editor",
         permanent: true,

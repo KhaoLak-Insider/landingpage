@@ -80,14 +80,14 @@ function toDate(value: string | null | undefined): Date {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const bilingualStaticPages = [
-    { path: "/home", priority: 1.0 },
+    { path: "/", priority: 1.0 },
+    { path: "/app", priority: 0.7 },
     { path: "/entdecken", priority: 0.9 },
     { path: "/blog", priority: 0.9 },
     { path: "/ueber-uns", priority: 0.7 },
   ];
 
   const germanStaticPages = [
-    { path: "/", priority: 0.8 },
     { path: "/planen", priority: 0.7 },
     { path: "/community", priority: 0.6 },
     { path: "/datenschutz", priority: 0.3 },

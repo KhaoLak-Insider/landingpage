@@ -48,6 +48,7 @@ export default function Header() {
         blog: "Blog",
         community: "Community",
         about: "About us",
+        appInfo: "App Info",
         selectLanguage: "Select language",
         german: "German",
         english: "English",
@@ -62,6 +63,7 @@ export default function Header() {
         blog: "Blog",
         community: "Community",
         about: "Über uns",
+        appInfo: "App Info",
         selectLanguage: "Sprache auswählen",
         german: "Deutsch",
         english: "Englisch",
@@ -189,10 +191,17 @@ export default function Header() {
 
         <div className="hidden gap-8 text-sm font-semibold md:flex text-slate-600">
           <Link
-            href={localizedHref("/home")}
+            href={localizedHref("/")}
             className="transition hover:text-teal-500"
           >
             Home
+          </Link>
+
+          <Link
+            href={localizedHref("/app")}
+            className="transition hover:text-teal-500"
+          >
+            {copy.appInfo}
           </Link>
 
           <div className="group/discover relative flex items-center gap-1">
@@ -386,11 +395,19 @@ export default function Header() {
       >
         <div className="flex flex-col py-3 text-sm font-bold text-[#334155]">
           <Link
-            href={localizedHref("/home")}
+            href={localizedHref("/")}
             onClick={() => setIsMobileMenuOpen(false)}
             className="rounded-xl px-4 py-3 transition hover:bg-[#eefafa] hover:text-[#079ca5]"
           >
             Home
+          </Link>
+
+          <Link
+            href={localizedHref("/app")}
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="rounded-xl px-4 py-3 transition hover:bg-[#eefafa] hover:text-[#079ca5]"
+          >
+            {copy.appInfo}
           </Link>
 
           <div>

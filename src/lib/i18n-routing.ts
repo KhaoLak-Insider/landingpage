@@ -10,6 +10,7 @@ const translatedSegments: Record<
 > = {
   de: {
     home: "home",
+    app: "app",
     entdecken: "entdecken",
     planen: "planen",
     profil: "profil",
@@ -22,6 +23,7 @@ const translatedSegments: Record<
   },
   en: {
     home: "home",
+    app: "app",
     entdecken: "discover",
     planen: "plan",
     profil: "profile",

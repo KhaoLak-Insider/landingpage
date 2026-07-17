@@ -19,22 +19,67 @@ export default function RegisterPage() {
   const [usernameError, setUsernameError] = useState("");
   const router = useRouter();
   const language = getLanguageFromPathname(usePathname());
+  const copy = language === "en"
+    ? {
+        title: "Create an account",
+        username: "Username",
+        firstName: "First name (optional)",
+        password: "Password",
+        passwordHint: "At least 12 characters required.",
+        confirmPassword: "Confirm password",
+        privacyPrefix: "I accept the",
+        privacyLink: "privacy policy",
+        newsletter: "Subscribe to the newsletter (travel updates & insider tips)",
+        checking: "Checking...",
+        createAccount: "Create account",
+        existingAccount: "Already have an account?",
+        login: "Log in",
+        passwordTooShort: "The password must be at least 12 characters long.",
+        passwordsDoNotMatch: "The passwords do not match.",
+        acceptPrivacy: "Please accept our privacy policy.",
+        usernameTaken: "This username is already taken.",
+        emailRegistered: "This email address is already registered. Please log in.",
+        registrationSuccessful: "Registration successful! Please confirm your email address.",
+        welcomeEmailError: "Error sending the welcome email:",
+      }
+    : {
+        title: "Registrieren",
+        username: "Benutzername",
+        firstName: "Vorname (optional)",
+        password: "Passwort",
+        passwordHint: "Mindestens 12 Zeichen erforderlich.",
+        confirmPassword: "Passwort bestätigen",
+        privacyPrefix: "Ich akzeptiere die",
+        privacyLink: "Datenschutzerklärung",
+        newsletter: "Newsletter abonnieren (Reise-Updates & Insider Tipps)",
+        checking: "Wird geprüft...",
+        createAccount: "Konto erstellen",
+        existingAccount: "Bereits einen Account?",
+        login: "Einloggen",
+        passwordTooShort: "Das Passwort muss mindestens 12 Zeichen lang sein.",
+        passwordsDoNotMatch: "Die Passwörter stimmen nicht überein.",
+        acceptPrivacy: "Bitte akzeptiere unsere Datenschutzerklärung.",
+        usernameTaken: "Dieser Benutzername ist leider schon vergeben.",
+        emailRegistered: "Diese E-Mail-Adresse ist bereits registriert. Bitte logge dich ein.",
+        registrationSuccessful: "Registrierung erfolgreich! Bitte bestätige deine E-Mail-Adresse.",
+        welcomeEmailError: "Fehler beim Senden der Willkommens-Mail:",
+      };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (password.length < 12) {
-      setError("Das Passwort muss mindestens 12 Zeichen lang sein.");
+      setError(copy.passwordTooShort);
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Die Passwörter stimmen nicht überein.");
+      setError(copy.passwordsDoNotMatch);
       return;
     }
 
     if (!acceptedTerms) {
-      setError("Bitte akzeptiere unsere Datenschutzerklärung.");
+      setError(copy.acceptPrivacy);
       return;
     }
 
@@ -50,7 +95,7 @@ export default function RegisterPage() {
       .maybeSingle();
 
     if (existingUser) {
-      setUsernameError("Dieser Benutzername ist leider schon vergeben.");
+      setUsernameError(copy.usernameTaken);
       setLoading(false);
       return;
     }
@@ -65,14 +110,14 @@ export default function RegisterPage() {
           full_name: name, 
           newsletter: subscribeNewsletter // Newsletter Status übertragen
         },
-        emailRedirectTo: "http://localhost:3000/login",
+        emailRedirectTo: `${window.location.origin}${localizePath("/login", language)}`,
       },
     });
 
     if (error) {
       setError(error.message);
     } else if (data?.user && data.user.identities?.length === 0) {
-      setError("Diese E-Mail-Adresse ist bereits registriert. Bitte logge dich ein.");
+      setError(copy.emailRegistered);
     } else {
       // 3. Willkommens-Mail triggern, falls Newsletter gewünscht
       if (subscribeNewsletter) {
@@ -81,11 +126,11 @@ export default function RegisterPage() {
             method: "GET",
           });
         } catch (err) {
-          console.error("Fehler beim Senden der Willkommens-Mail:", err);
+          console.error(copy.welcomeEmailError, err);
         }
       }
 
-      alert("Registrierung erfolgreich! Bitte bestätige deine E-Mail-Adresse.");
+      alert(copy.registrationSuccessful);
       router.push(localizePath("/login", language));
     }
     setLoading(false);
@@ -94,7 +139,7 @@ export default function RegisterPage() {
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-6">
       <form onSubmit={handleRegister} className="w-full max-w-sm rounded-3xl bg-white p-8 shadow-xl border border-slate-100">
-        <h2 className="text-2xl font-black mb-6">Registrieren</h2>
+        <h2 className="text-2xl font-black mb-6">{copy.title}</h2>
 
         <input
           type="email"
@@ -108,7 +153,7 @@ export default function RegisterPage() {
 
         <input
           type="text"
-          placeholder="Benutzername"
+          placeholder={copy.username}
           required
           autoComplete="username"
           className={`w-full h-12 mb-2 px-4 rounded-full border ${
@@ -128,7 +173,7 @@ export default function RegisterPage() {
 
         <input
           type="text"
-          placeholder="Vorname (optional)"
+          placeholder={copy.firstName}
           className="w-full h-12 mb-4 px-4 rounded-full border border-slate-200"
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -136,7 +181,7 @@ export default function RegisterPage() {
 
         <input
           type="password"
-          placeholder="Passwort"
+          placeholder={copy.password}
           required
           autoComplete="new-password"
           className="w-full h-12 mb-1 px-4 rounded-full border border-slate-200"
@@ -144,12 +189,12 @@ export default function RegisterPage() {
           onChange={(e) => setPassword(e.target.value)}
         />
         <p className="text-[10px] text-slate-400 mb-3 ml-4">
-          Mindestens 12 Zeichen erforderlich.
+          {copy.passwordHint}
         </p>
 
         <input
           type="password"
-          placeholder="Passwort bestätigen"
+          placeholder={copy.confirmPassword}
           required
           autoComplete="new-password"
           className="w-full h-12 mb-6 px-4 rounded-full border border-slate-200"
@@ -166,8 +211,8 @@ export default function RegisterPage() {
             onChange={(e) => setAcceptedTerms(e.target.checked)}
           />
           <span>
-            Ich akzeptiere die{" "}
-            <Link href={localizePath("/datenschutz", language)} className="text-teal-500 hover:underline">Datenschutzerklärung</Link>.
+            {copy.privacyPrefix}{" "}
+            <Link href={localizePath("/datenschutz", language)} className="text-teal-500 hover:underline">{copy.privacyLink}</Link>.
           </span>
         </label>
 
@@ -177,20 +222,20 @@ export default function RegisterPage() {
             checked={subscribeNewsletter}
             onChange={(e) => setSubscribeNewsletter(e.target.checked)}
           />
-          <span>Newsletter abonnieren (Reise-Updates & Insider Tipps)</span>
+          <span>{copy.newsletter}</span>
         </label>
 
         <button
           disabled={loading}
           className="w-full h-12 rounded-full bg-teal-500 font-bold text-white hover:bg-teal-400 transition"
         >
-          {loading ? "Wird geprüft..." : "Konto erstellen"}
+          {loading ? copy.checking : copy.createAccount}
         </button>
 
         <p className="mt-6 text-center text-sm text-slate-500">
-          Bereits einen Account?{" "}
+          {copy.existingAccount}{" "}
           <Link href={localizePath("/login", language)} className="text-teal-500 font-bold hover:underline">
-            Einloggen
+            {copy.login}
           </Link>
         </p>
 
