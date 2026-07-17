@@ -6,8 +6,9 @@ import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/src/lib/supabase";
 import SpotImageManager from "@/src/components/editor/SpotImageManager";
 import { iconNames, iconMap } from "@/src/components/IconLibrary";
-import { ArrowLeft, ExternalLink, Save } from "lucide-react";
+import { ArrowLeft, ExternalLink, Languages, Save } from "lucide-react";
 import { mergeSpotCategoryDetails } from "@/src/lib/spot-category-details";
+import { translateTexts } from "@/src/lib/admin/deepl";
 import "./spot-editor.css";
 
 // HELPER: Text zu JSON konvertieren
@@ -29,12 +30,15 @@ export default function EditSpotPage() {
   const params = useParams();
   const id = params.id as string;
   const router = useRouter();
-  const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
+  const [categories, setCategories] = useState<
+    Array<{ id: string; name: string; name_en: string | null }>
+  >([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
 
   const [formData, setFormData] = useState({
-    title: "", image_url: "", category: "", description: "", long_description: "",
+    title: "", title_en: "", image_url: "", category: "", description: "", description_en: "", long_description: "", long_description_en: "",
     latitude: "", longitude: "", price_level: "", stars: "", opening_hours: "", youtube_url: "",
     youtube_timestamp: "", tour_link: "", booking_link: "", features: [{ label: "", value: "", icon: "Sparkles" as keyof typeof iconMap }],
     best_months: [] as number[], galleryUrlsText: "",
@@ -88,11 +92,44 @@ export default function EditSpotPage() {
     finally { setLoading(false); }
   };
 
+  const translateToEnglish = async () => {
+    const entries = [
+      ["title_en", formData.title],
+      ["description_en", formData.description],
+      ["long_description_en", formData.long_description],
+    ] as const;
+    const availableEntries = entries.filter(([, value]) => value.trim());
+
+    if (availableEntries.length === 0) {
+      alert("Bitte zuerst einen deutschen Titel oder Beschreibungstext eingeben.");
+      return;
+    }
+
+    setIsTranslating(true);
+    try {
+      const translations = await translateTexts(
+        availableEntries.map(([, value]) => value),
+        { sourceLang: "DE", targetLang: "EN-GB" },
+      );
+      setFormData((current) => {
+        const next = { ...current };
+        availableEntries.forEach(([field], index) => {
+          next[field] = translations[index];
+        });
+        return next;
+      });
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Die Übersetzung ist fehlgeschlagen.");
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
   useEffect(() => {
     async function fetchData() {
       const { data: catData } = await supabase
         .from("categories")
-        .select("id, name")
+        .select("id, name, name_en")
         .eq("is_active", true)
         .order("sort_order")
         .order("name");
@@ -109,23 +146,16 @@ export default function EditSpotPage() {
         ]);
         if (data) {
           const resolvedData = mergeSpotCategoryDetails(data, categoryDetails);
-          let textDesc = "";
-          if (Array.isArray(resolvedData.long_description)) {
-            textDesc = resolvedData.long_description.map((block: unknown) => {
-              const value = block as { type?: unknown; content?: unknown };
-              const content = typeof value.content === "string" ? value.content : "";
-              return value.type === "heading" ? `### ${content}` : content;
-            }).join('\n\n');
-          } else {
-            textDesc = resolvedData.long_description || "";
-          }
 
           setFormData({
             title: resolvedData.title || "",
+            title_en: resolvedData.title_en || "",
             image_url: resolvedData.image_url || "",
             category: resolvedData.category || "",
             description: resolvedData.description || "",
-            long_description: textDesc,
+            description_en: resolvedData.description_en || "",
+            long_description: convertDescriptionToText(resolvedData.long_description),
+            long_description_en: convertDescriptionToText(resolvedData.long_description_en),
             latitude: resolvedData.latitude?.toString() || "",
             longitude: resolvedData.longitude?.toString() || "",
             price_level: resolvedData.price_level?.toString() || "",
@@ -161,21 +191,29 @@ export default function EditSpotPage() {
     
     const slug = formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
     const jsonDescription = convertTextToJson(formData.long_description);
+    const jsonDescriptionEn = convertTextToJson(formData.long_description_en);
     
     const toNum = (val: string) => (val && val.trim() !== "" ? parseFloat(val) : null);
     const toIntForce = (val: string) => (val && val.trim() !== "" ? parseInt(val) : 0);
     const categoryId = categories.find(
       (category) => category.name === formData.category,
     )?.id ?? null;
+    const categoryEn = categories.find(
+      (category) => category.name === formData.category,
+    )?.name_en ?? null;
 
     const updatePayload = {
       title: formData.title || null,
+      title_en: formData.title_en || null,
       image_url: formData.image_url || null,
       slug: slug,
       category: formData.category || null,
+      category_en: categoryEn,
       category_id: categoryId,
       description: formData.description || null,
+      description_en: formData.description_en || null,
       long_description: jsonDescription,
+      long_description_en: jsonDescriptionEn,
       parking_info: formData.parking_info || null,
       latitude: toNum(formData.latitude),
       longitude: toNum(formData.longitude),
@@ -220,7 +258,10 @@ export default function EditSpotPage() {
 
         <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
           <h2 className="text-lg font-bold text-slate-800 border-b pb-2">Basis-Informationen</h2>
-          <input className="w-full p-4 border rounded-xl" placeholder="Titel des Spots" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} />
+          <div className="grid gap-4 md:grid-cols-2">
+            <input className="w-full p-4 border rounded-xl" placeholder="Titel Deutsch" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} />
+            <input className="w-full p-4 border rounded-xl" placeholder="Titel Englisch" value={formData.title_en} onChange={(e) => setFormData({...formData, title_en: e.target.value})} />
+          </div>
           <div className="grid grid-cols-2 gap-4">
               <input className="w-full p-3 border rounded-xl" placeholder="YouTube URL" value={formData.youtube_url} onChange={(e) => setFormData({...formData, youtube_url: e.target.value})} />
               <input className="w-full p-3 border rounded-xl" placeholder="Startzeit (Sekunden)" type="number" value={formData.youtube_timestamp} onChange={(e) => setFormData({...formData, youtube_timestamp: e.target.value})} />
@@ -253,11 +294,20 @@ export default function EditSpotPage() {
         </section>
 
         <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
-          <h2 className="text-lg font-bold text-slate-800 border-b pb-2">Beschreibungen</h2>
-          <textarea className="w-full p-4 border rounded-xl" placeholder="Kurze Beschreibung" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} />
-          <textarea className="w-full p-4 border rounded-xl" rows={4} placeholder="Lange Beschreibung (### für Überschriften)" value={formData.long_description} onChange={(e) => setFormData({...formData, long_description: e.target.value})} />
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-3">
+            <h2 className="text-lg font-bold text-slate-800">Beschreibungen</h2>
+            <button type="button" onClick={translateToEnglish} disabled={isTranslating} className="inline-flex items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-4 py-2 text-sm font-bold text-teal-700 hover:bg-teal-100 disabled:opacity-60">
+              <Languages size={16} /> {isTranslating ? "DeepL übersetzt …" : "Deutsch → Englisch mit DeepL"}
+            </button>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <textarea className="w-full p-4 border rounded-xl" placeholder="Kurzbeschreibung Deutsch" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} />
+            <textarea className="w-full p-4 border rounded-xl" placeholder="Kurzbeschreibung Englisch" value={formData.description_en} onChange={(e) => setFormData({...formData, description_en: e.target.value})} />
+            <textarea className="w-full p-4 border rounded-xl" rows={10} placeholder="Langbeschreibung Deutsch (### für Überschriften)" value={formData.long_description} onChange={(e) => setFormData({...formData, long_description: e.target.value})} />
+            <textarea className="w-full p-4 border rounded-xl" rows={10} placeholder="Langbeschreibung Englisch (### für Überschriften)" value={formData.long_description_en} onChange={(e) => setFormData({...formData, long_description_en: e.target.value})} />
+          </div>
           <button type="button" onClick={generateDescription} className="text-teal-600 font-bold hover:underline">
-            {loading ? "Schreibe Text..." : "KI-Beschreibung generieren"}
+            {loading ? "Schreibe Text..." : "KI-Beschreibung auf Deutsch generieren"}
           </button>
         </section>
 
@@ -321,4 +371,15 @@ export default function EditSpotPage() {
       </form>
     </div>
   );
+}
+
+function convertDescriptionToText(value: unknown): string {
+  if (Array.isArray(value)) {
+    return value.map((block: unknown) => {
+      const item = block as { type?: unknown; content?: unknown };
+      const content = typeof item.content === "string" ? item.content : "";
+      return item.type === "heading" ? `### ${content}` : content;
+    }).filter(Boolean).join("\n\n");
+  }
+  return typeof value === "string" ? value : "";
 }
