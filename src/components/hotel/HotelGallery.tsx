@@ -71,7 +71,11 @@ export default function HotelGallery({
           src: image.image_url,
           title,
           alt,
-          mediaType: image.media_type === "video" ? "video" : "image",
+          mediaType:
+            image.media_type === "video" ||
+            /\.(mp4|webm|mov)(?:$|\?)/i.test(image.image_url)
+              ? "video"
+              : "image",
         };
       });
     }

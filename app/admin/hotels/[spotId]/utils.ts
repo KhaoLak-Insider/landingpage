@@ -85,7 +85,8 @@ export function normalizeGalleryImages(value: unknown): HotelGalleryImage[] {
             : createId(),
         image_url: item.image_url,
         media_type:
-          "media_type" in item && item.media_type === "video"
+          ("media_type" in item && item.media_type === "video") ||
+          /\.(mp4|webm|mov)(?:$|\?)/i.test(item.image_url)
             ? "video"
             : "image",
         title_de:
