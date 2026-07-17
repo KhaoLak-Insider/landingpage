@@ -10,8 +10,22 @@ import {
 import type { Language } from "@/src/lib/i18n";
 import { getLocalizedField } from "@/src/lib/spot/localization";
 
+interface NearbySpot extends Record<string, unknown> {
+  id?: string;
+  slug: string;
+  title?: string | null;
+  title_en?: string | null;
+  description?: string | null;
+  description_en?: string | null;
+  category?: string | null;
+  category_en?: string | null;
+  image_url?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+}
+
 interface HotelNearbyProps {
-  spots: any[];
+  spots: NearbySpot[];
   originLatitude: number;
   originLongitude: number;
   language: Language;
@@ -266,17 +280,17 @@ export default function HotelNearby({
       >
         {preparedSpots.map(({ spot, distanceKm }) => {
           const localizedTitle =
-            getLocalizedField(spot, "title", language) ||
+            getLocalizedField<string>(spot, "title", language) ||
             spot.title ||
             "";
 
           const localizedCategory =
-            getLocalizedField(spot, "category", language) ||
+            getLocalizedField<string>(spot, "category", language) ||
             spot.category ||
             "";
 
           const localizedDescription =
-            getLocalizedField(
+            getLocalizedField<string>(
               spot,
               "description",
               language,
@@ -349,6 +363,7 @@ export default function HotelNearby({
           justify-content: space-between;
           gap: 24px;
           margin-bottom: 18px;
+          padding-inline: 8px;
         }
 
         .hotel-nearby__header > div:first-child {

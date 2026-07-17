@@ -196,7 +196,7 @@ export default function HotelGallery({
         }
 
         h2 {
-          margin: 0 0 14px;
+          margin: 0 0 14px 8px;
           color: #10233f;
           font-size: 18px;
           line-height: 1.25;
@@ -254,12 +254,13 @@ export default function HotelGallery({
           border-radius: 8px;
         }
 
-        .hotel-gallery-compact__all {
+.hotel-gallery-compact__all {
   display: inline-flex;
   align-items: center;
   align-self: flex-start;
   gap: 3px;
-  margin-top: 18px;   /* vorher 6px */
+  margin-top: 18px;
+  margin-left: 2px;
   color: #079ca5;
   font-size: 12px;
   line-height: 1.4;
@@ -273,6 +274,10 @@ export default function HotelGallery({
 
           .hotel-gallery-compact__content {
             margin-inline: 2px;
+          }
+
+          .hotel-gallery-compact__all {
+            margin-left: 6px;
           }
 
           .hotel-gallery-compact__main {
