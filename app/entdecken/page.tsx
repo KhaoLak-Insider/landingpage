@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { supabase } from "@/src/lib/supabase";
 import EntdeckenClientPage from "./EntdeckenClientPage";
+import { absoluteLocalizedUrl, localizePath } from "@/src/lib/i18n-routing";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +13,7 @@ interface Props {
 
 type Language = "de" | "en";
 
-const BASE_URL = "https://khaolak.app";
+const BASE_URL = "https://www.khaolak.app";
 
 function getLanguage(lng?: string | string[]): Language {
   const value = Array.isArray(lng) ? lng[0] : lng;
@@ -20,9 +21,7 @@ function getLanguage(lng?: string | string[]): Language {
 }
 
 function createLanguageUrl(language: Language): string {
-  const url = new URL("/entdecken", BASE_URL);
-  url.searchParams.set("lng", language);
-  return url.toString();
+  return absoluteLocalizedUrl("/entdecken", language, BASE_URL);
 }
 
 function getLocalizedValue(
@@ -146,7 +145,9 @@ export default async function EntdeckenPage({
 
     supabase
       .from("categories")
-      .select("name, icon")
+      .select("id, name, name_en, slug, icon, parent_id, sort_order")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true })
       .order("name", { ascending: true }),
   ]);
 
@@ -212,9 +213,10 @@ export default async function EntdeckenPage({
         itemListElement: spots.slice(0, 50).map((spot, index) => ({
           "@type": "ListItem",
           position: index + 1,
-          url: `${BASE_URL}/spot/${encodeURIComponent(
-            spot.slug
-          )}?lng=${language}`,
+          url: new URL(
+            localizePath(`/spot/${encodeURIComponent(spot.slug)}`, language),
+            BASE_URL
+          ).toString(),
           name: getLocalizedValue(
             spot.title,
             spot.title_en,
@@ -229,7 +231,7 @@ export default async function EntdeckenPage({
             "@type": "ListItem",
             position: 1,
             name: language === "en" ? "Home" : "Startseite",
-            item: `${BASE_URL}/?lng=${language}`,
+            item: absoluteLocalizedUrl("/", language, BASE_URL),
           },
           {
             "@type": "ListItem",

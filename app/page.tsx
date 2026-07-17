@@ -8,7 +8,6 @@ const features = [
   ["📍", "Interaktive Karte", "Alle Orte auf einen Blick – später auch offline verfügbar."],
   ["🗓️", "Reise planen", "Plane perfekte Urlaubstage mit Stränden, Märkten und Restaurants."],
   ["♡", "Favoriten", "Speichere deine Lieblingsorte für später."],
-  ["★", "Geheimtipps", "Entdecke Orte abseits der typischen Touristenpfade."],
   ["🎒", "Packliste", "Nie wieder etwas Wichtiges für Thailand vergessen."],
   ["🤖", "KI-Assistent", "Erhalte Antworten und Tipps rund um Khao Lak."],
 ];
@@ -98,7 +97,7 @@ export default function Home() {
             </h1>
 
             <p className="mt-7 max-w-2xl text-xl leading-relaxed text-white/90">
-              Die schönsten Strände, Märkte, Tempel, Restaurants und Geheimtipps
+              Die schönsten Strände, Märkte, Tempel, Restaurants und ausgewählte Tipps
               in einer App – persönlich kuratiert und perfekt für deinen Urlaub.
             </p>
 
@@ -264,7 +263,7 @@ export default function Home() {
             auf einen <span className="text-teal-500">Blick.</span>
           </h2>
           <p className="mt-6 max-w-md text-lg leading-relaxed text-slate-600">
-            Strände, Märkte, Restaurants, Tempel und Geheimtipps – alles übersichtlich
+            Strände, Märkte, Restaurants, Tempel und ausgewählte Tipps – alles übersichtlich
             auf der Karte und perfekt für deinen Urlaub sortiert.
           </p>
           <div className="mt-8 space-y-4 text-base font-semibold text-slate-700">
@@ -284,7 +283,7 @@ export default function Home() {
           </div>
           <div>
             <div className="text-5xl font-black text-teal-500">100+</div>
-            <p className="mt-3 text-slate-600">Orte, Strände, Restaurants und Geheimtipps.</p>
+            <p className="mt-3 text-slate-600">Orte, Strände, Restaurants und praktische Tipps.</p>
           </div>
           <div>
             <div className="text-5xl font-black text-teal-500">2026</div>
@@ -315,7 +314,7 @@ export default function Home() {
               </label>
               <label className={`flex items-start gap-3 rounded-2xl border p-4 cursor-pointer transition ${newsletterConsent ? "border-teal-400 bg-teal-50 shadow-sm" : "border-slate-200 bg-white"}`}>
                 <input type="checkbox" checked={newsletterConsent} onChange={(e) => setNewsletterConsent(e.target.checked)} className="mt-1 h-4 w-4 accent-teal-600" />
-                <div><p className="font-semibold text-slate-900">✨ Reise-Updates & Insider Tipps</p><p className="text-xs text-slate-500">1–2× pro Woche neue Spots, Geheimtipps und Reiseideen.</p></div>
+                <div><p className="font-semibold text-slate-900">✨ Reise-Updates & Insider Tipps</p><p className="text-xs text-slate-500">1–2× pro Woche neue Spots, Empfehlungen und Reiseideen.</p></div>
               </label>
             </div>
             <button type="submit" disabled={loading} className="mt-5 h-12 w-full rounded-full bg-gradient-to-r from-slate-900 to-slate-950 font-bold text-white shadow-lg transition hover:scale-[1.03] active:scale-[0.98] disabled:opacity-60">{loading ? "Speichern..." : "🚀 Early Access sichern"}</button>

@@ -548,7 +548,7 @@ export default function AdminHotelEditorPage() {
         <div className="admin-hotel-editor__actions">
           {spot.slug && (
             <Link
-              href={`/spot/${encodeURIComponent(spot.slug)}?lng=de`}
+              href={`/de/spot/${encodeURIComponent(spot.slug)}`}
               target="_blank"
               className="admin-hotel-editor__preview"
             >

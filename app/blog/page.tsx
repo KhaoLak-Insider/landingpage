@@ -1,6 +1,35 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { supabase } from "@/src/lib/supabase";
+import { localizePath } from "@/src/lib/i18n-routing";
+import type { Language } from "@/src/lib/i18n";
+
+import { absoluteLocalizedUrl } from "@/src/lib/i18n-routing";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const language = (await headers()).get("x-language") === "en" ? "en" : "de";
+  const title = language === "en" ? "Khao Lak Travel Blog & Insider Guides" : "Khao Lak Reiseblog & Insider-Ratgeber";
+  const description = language === "en"
+    ? "Travel guides, beach tips, excursions and practical advice for your Khao Lak holiday."
+    : "Reiseberichte, Strandtipps, Ausflüge und praktische Ratgeber für deinen Khao-Lak-Urlaub.";
+  const canonical = absoluteLocalizedUrl("/blog", language);
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical,
+      languages: {
+        de: absoluteLocalizedUrl("/blog", "de"),
+        en: absoluteLocalizedUrl("/blog", "en"),
+        "x-default": absoluteLocalizedUrl("/blog", "de"),
+      },
+    },
+    openGraph: { title, description, url: canonical, type: "website" },
+  };
+}
 
 const CATEGORIES = [
   { name: "Alle Beiträge", slug: "all", icon: (
@@ -32,6 +61,41 @@ interface BlogPageProps {
 
 export default async function BlogPage({ searchParams }: BlogPageProps) {
   const resolvedParams = await searchParams;
+  const language: Language = resolvedParams.lng === "en" ? "en" : "de";
+  const href = (path: string) => localizePath(path, language);
+  const value = (post: Record<string, unknown>, field: "title" | "excerpt" | "content" | "category") => {
+    const primaryKey = language === "en" ? `${field}_en` : field;
+    const fallbackKey = language === "en" ? field : `${field}_en`;
+    const primary = post[primaryKey];
+    const fallback = post[fallbackKey];
+    return (typeof primary === "string" && primary.trim()) ||
+      (typeof fallback === "string" && fallback.trim()) || "";
+  };
+  const copy = language === "en"
+    ? {
+        all: "All posts", back: "Back", next: "Next", guide: "Khao Lak Insider Guide",
+        heading: "Plan your perfect trip to Khao Lak", intro: "Honest reports, hand-picked hotel recommendations and routes away from the crowds — researched locally.",
+        highlight: "Featured", more: "More insider stories", page: "Page", minutes: "min read", details: "View details",
+        deal: "Insider deal", dealTitle: "Ready for Thailand? The best hotel deals", dealText: "Compare accommodation and find flexible offers for your stay in Khao Lak.", hotels: "Find hotels in Khao Lak",
+      }
+    : {
+        all: "Alle Beiträge", back: "Zurück", next: "Weiter", guide: "Khao Lak Insider Guide",
+        heading: "Plane deine perfekte Reise nach Khao Lak", intro: "Ehrliche Berichte, handverlesene Hotelempfehlungen und Routen abseits der Massen – direkt vor Ort recherchiert.",
+        highlight: "Aktuelles Highlight", more: "Weitere Insider-Berichte", page: "Seite", minutes: "Min. Lesezeit", details: "Details ansehen",
+        deal: "Insider-Deal", dealTitle: "Bereit für Thailand? Die besten Hotel-Angebote", dealText: "Vergleiche Unterkünfte und finde flexible Angebote für deinen Aufenthalt in Khao Lak.", hotels: "Hotels in Khao Lak finden",
+      };
+  const categoryLabel = (name: string) => {
+    if (language === "de") return name;
+    return ({
+      "Alle Beiträge": "All posts",
+      "Strände": "Beaches",
+      "Ausflüge": "Excursions",
+      "Essen & Trinken": "Food & drink",
+      "Unterkünfte": "Accommodation",
+      "Reiseplanung": "Trip planning",
+      "Geheimtipps": "Insider tips",
+    } as Record<string, string>)[name] || name;
+  };
   
   const categoryParam = resolvedParams.category;
   const activeCategory = typeof categoryParam === "string" ? categoryParam : "Alle Beiträge";
@@ -91,7 +155,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
     const params = new URLSearchParams();
     if (activeCategory !== "Alle Beiträge") params.set("category", activeCategory);
     params.set("page", pageNumber.toString());
-    return `/blog?${params.toString()}`;
+    return href(`/blog?${params.toString()}`);
   };
 
   // SX for the pagination bar stored in a reusable variable
@@ -106,7 +170,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
             : "border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-900 hover:shadow-sm"
         }`}
       >
-        ← Zurück
+        ← {copy.back}
       </Link>
 
       {/* Page Numbers */}
@@ -137,55 +201,55 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
             : "border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-900 hover:shadow-sm"
         }`}
       >
-        Weiter →
+        {copy.next} →
       </Link>
     </div>
   ) : null;
 
   return (
-    <main className="min-h-screen bg-[#F7F9FA] text-slate-900 font-sans selection:bg-teal-500 selection:text-white antialiased">
+    <main className="min-h-screen bg-white text-[#10233f] font-sans selection:bg-[#0eb4bb] selection:text-white antialiased">
       
       {/* HERO SECTION */}
-      <section className="relative bg-white pt-20 pb-16 overflow-hidden border-b border-slate-100">
-        <div className="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:16px_16px] opacity-40 pointer-events-none" />
-        <div className="container mx-auto px-4 max-w-7xl relative">
+      <section className="relative overflow-hidden bg-[#10233f] py-20 text-white md:py-24">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_18%,rgba(14,180,187,.24),transparent_28%),radial-gradient(circle_at_18%_85%,rgba(85,215,209,.12),transparent_30%)] pointer-events-none" />
+        <div className="relative mx-auto max-w-[1180px] px-4 sm:px-6 lg:px-10">
           <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 bg-teal-50 text-teal-700 text-xs font-bold tracking-wider uppercase px-3 py-1.5 rounded-full mb-6 border border-teal-100/60">
-              <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse" />
-              Khao Lak Insider Guide
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/8 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-[#74e1dc]">
+              <span className="h-2 w-2 rounded-full bg-[#55d7d1]" />
+              {copy.guide}
             </div>
-            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.1] mb-6">
-              Plane deine perfekte Reise nach <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-500">Khao Lak</span>
+            <h1 className="mb-6 text-4xl font-extrabold leading-[1.08] tracking-[-0.035em] text-white md:text-6xl">
+              {copy.heading.replace(" Khao Lak", "")} <span className="text-[#55d7d1]">Khao Lak</span>
             </h1>
-            <p className="text-lg md:text-xl text-slate-500 font-normal leading-relaxed max-w-2xl">
-              Ehrliche Berichte, handverlesene Hotelempfehlungen und Routen abseits der Massen – direkt von Locals recherchiert.
+            <p className="max-w-2xl text-base font-normal leading-8 text-white/72 md:text-lg">
+              {copy.intro}
             </p>
           </div>
         </div>
       </section>
 
       {/* FILTER & CONTENT AREA */}
-      <section className="container mx-auto px-4 max-w-7xl mt-10 pb-32">
+      <section className="mx-auto max-w-[1180px] px-4 pb-28 pt-6 sm:px-6 lg:px-10">
         
         {/* CATEGORY BAR */}
-        <div className="sticky top-0 z-40 bg-[#F7F9FA]/90 backdrop-blur-md pt-2 pb-6 border-b border-slate-200/60 mb-12">
+        <div className="sticky top-0 z-40 mb-10 border-b border-[#e7edf2] bg-white/95 pb-4 pt-4 backdrop-blur-xl">
           <div className="flex items-center gap-3 overflow-x-auto no-scrollbar scroll-smooth">
             {CATEGORIES.map((cat) => {
               const isActive = cat.name === activeCategory;
               return (
                 <Link
                   key={cat.name}
-                  href={cat.name === "Alle Beiträge" ? "/blog" : `/blog?category=${encodeURIComponent(cat.name)}`}
+                  href={href(cat.name === "Alle Beiträge" ? "/blog" : `/blog?category=${encodeURIComponent(cat.name)}`)}
                   className={`flex items-center gap-2.5 px-5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 shrink-0 border ${
                     isActive
-                      ? "bg-slate-900 text-white border-slate-900 shadow-md shadow-slate-900/10 scale-[1.01]"
-                      : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:text-slate-900 hover:shadow-sm"
+                      ? "border-[#10233f] bg-[#10233f] text-white shadow-sm"
+                      : "border-[#e7edf2] bg-white text-[#526176] hover:border-[#0eb4bb]/50 hover:text-[#079ca5]"
                   }`}
                 >
-                  <span className={`transition-transform duration-200 ${isActive ? "text-teal-400" : "text-slate-400 group-hover:text-slate-600"}`}>
+                  <span className={`transition-transform duration-200 ${isActive ? "text-[#55d7d1]" : "text-[#8491a3]"}`}>
                     {cat.icon}
                   </span>
-                  <span>{cat.name}</span>
+                  <span>{categoryLabel(cat.name)}</span>
                 </Link>
               );
             })}
@@ -194,17 +258,17 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
 
         {/* FEATURED POST */}
         {featuredPost && (
-          <div className="mb-14">
-            <div className="inline-flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-teal-600 mb-4">
-              <span className="w-4 h-[2px] bg-teal-500" /> Aktuelles Highlight
+          <div className="mb-12">
+            <div className="mb-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#079ca5]">
+              <span className="h-[2px] w-4 bg-[#0eb4bb]" /> {copy.highlight}
             </div>
-            <Link href={`/blog/${featuredPost.slug}`} className="group block">
-              <article className="bg-white rounded-3xl overflow-hidden border border-slate-200/60 shadow-sm group-hover:shadow-xl group-hover:border-slate-300/80 transition-all duration-500 grid grid-cols-1 lg:grid-cols-16 gap-0">
+            <Link href={href(`/blog/${featuredPost.slug}`)} className="group block">
+              <article className="grid grid-cols-1 gap-0 overflow-hidden rounded-[14px] border border-[#e8edf2] bg-white shadow-[0_8px_24px_rgba(15,35,62,.035)] transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-[0_16px_38px_rgba(15,35,62,.09)] lg:grid-cols-16">
                 <div className="relative aspect-[16/10] lg:aspect-auto lg:col-span-7 bg-white flex items-center justify-start min-h-[350px] overflow-hidden">
                   {featuredPost.image_url ? (
                     <Image
                       src={featuredPost.image_url}
-                      alt={featuredPost.title}
+                      alt={value(featuredPost, "title")}
                       fill
                       priority
                       sizes="(max-width: 1024px) 100vw, 60vw"
@@ -216,7 +280,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                     </div>
                   )}
                   <span className="absolute bottom-6 left-6 bg-slate-900/75 backdrop-blur-md text-white text-[11px] font-bold uppercase tracking-wider px-3.5 py-2 rounded-lg shadow-sm border border-white/10 z-20">
-                    {featuredPost.category}
+                    {value(featuredPost, "category")}
                   </span>
                 </div>
                 
@@ -227,15 +291,15 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                       <span>•</span>
                       <span>⏱️ {featuredPost.reading_time || 5} Min. Lesezeit</span>
                     </div>
-                    <h2 className="text-2xl md:text-3xl font-bold text-slate-900 group-hover:text-teal-600 transition-colors duration-300 leading-tight tracking-tight">
-                      {featuredPost.title}
+                    <h2 className="text-2xl md:text-3xl font-bold text-[#10233f] group-hover:text-[#079ca5] transition-colors duration-300 leading-tight tracking-tight">
+                    {value(featuredPost, "title")}
                     </h2>
                     <p className="text-slate-500 text-base font-normal leading-relaxed line-clamp-4">
-                      {featuredPost.excerpt}
+                    {value(featuredPost, "excerpt")}
                     </p>
                   </div>
-                  <div className="pt-6 border-t border-slate-100 flex items-center text-sm font-bold text-teal-600 group-hover:text-teal-700 max-w-xl">
-                    <span>Beitrag lesen</span>
+                  <div className="pt-6 border-t border-slate-100 flex items-center text-sm font-bold text-[#079ca5] group-hover:text-[#067f86] max-w-xl">
+                    <span>{language === "en" ? "Read article" : "Beitrag lesen"}</span>
                     <span className="transform group-hover:translate-x-1.5 transition-transform duration-300 ml-2">→</span>
                   </div>
                 </div>
@@ -260,7 +324,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 pb-4 border-b border-slate-200/60">
               <div className="inline-flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-slate-400">
                 <span className="w-4 h-[2px] bg-slate-300" /> 
-                {currentPage === 1 ? "Weitere Insider-Berichte" : `Insider-Berichte • Seite ${currentPage}`}
+                {currentPage === 1 ? copy.more : `${copy.more} • ${copy.page} ${currentPage}`}
               </div>
               
               {/* Upper page selector */}
@@ -270,15 +334,15 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
             </div>
             
             {/* The blog grid itself */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
               {displayPosts.map((post) => (
-                <Link href={`/blog/${post.slug}`} key={post.id} className="group block h-full">
-                  <article className="bg-white rounded-2xl overflow-hidden border border-slate-200/50 shadow-sm group-hover:shadow-xl group-hover:border-slate-300/70 transition-all duration-300 flex flex-col h-full bg-white">
+                <Link href={href(`/blog/${post.slug}`)} key={post.id} className="group block h-full">
+                  <article className="flex h-full flex-col overflow-hidden rounded-[14px] border border-[#e8edf2] bg-white shadow-[0_8px_24px_rgba(15,35,62,.035)] transition-all duration-300 group-hover:-translate-y-1 group-hover:border-[#d9e4e9] group-hover:shadow-[0_16px_36px_rgba(15,35,62,.09)]">
                     <div className="relative aspect-[16/10] bg-slate-100 overflow-hidden">
                       {post.image_url ? (
                         <Image
                           src={post.image_url}
-                          alt={post.title}
+                          alt={value(post, "title")}
                           fill
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           className="object-cover group-hover:scale-[1.02] transition-transform duration-500 ease-out"
@@ -289,27 +353,27 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                         </div>
                       )}
                       <span className="absolute bottom-4 left-4 bg-slate-900/75 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1.5 rounded-md shadow-sm border border-white/10">
-                        {post.category}
+                        {value(post, "category")}
                       </span>
                     </div>
 
                     <div className="p-6 flex flex-col flex-grow justify-between">
                       <div className="space-y-3">
                         <div className="flex items-center gap-2.5 text-[11px] font-semibold text-slate-400">
-                          <span>{new Date(post.created_at).toLocaleDateString("de-DE", { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                          <span>{new Date(post.created_at).toLocaleDateString(language === "en" ? "en-GB" : "de-DE", { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                           <span>•</span>
-                          <span>⏱️ {post.reading_time || 4} Min.</span>
+                          <span>⏱️ {post.reading_time || 4} {copy.minutes}</span>
                         </div>
-                        <h3 className="text-xl font-bold text-slate-900 group-hover:text-teal-600 transition-colors duration-200 line-clamp-2 leading-snug tracking-tight">
-                          {post.title}
+                        <h3 className="text-xl font-bold text-[#10233f] group-hover:text-[#079ca5] transition-colors duration-200 line-clamp-2 leading-snug tracking-tight">
+                          {value(post, "title")}
                         </h3>
                         <p className="text-slate-400 text-sm font-normal line-clamp-3 leading-relaxed">
-                          {post.excerpt}
+                          {value(post, "excerpt")}
                         </p>
                       </div>
 
                       <div className="flex items-center justify-between pt-4 mt-6 border-t border-slate-50 text-xs font-bold text-slate-500">
-                        <span className="text-slate-400 group-hover:text-slate-600 transition-colors">Details ansehen</span>
+                        <span className="text-slate-400 group-hover:text-slate-600 transition-colors">{copy.details}</span>
                         <span className="text-teal-500 transform group-hover:translate-x-1 transition-transform duration-200">→</span>
                       </div>
                     </div>
@@ -319,17 +383,17 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
 
               {/* HIGH-CONVERTING AFFILIATE BANNER */}
               {currentPage === 1 && (
-                <article className="bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl overflow-hidden shadow-lg p-8 flex flex-col justify-between text-white border border-slate-800 h-full relative min-h-[340px]">
+                <article className="relative flex min-h-[340px] h-full flex-col justify-between overflow-hidden rounded-[14px] border border-white/10 bg-[#10233f] p-8 text-white shadow-[0_12px_30px_rgba(16,35,63,.16)]">
                   <div className="absolute inset-0 bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:20px_20px] opacity-20" />
                   <div className="relative space-y-4">
                     <span className="bg-teal-500/10 text-teal-400 border border-teal-500/20 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1.5 rounded-md">
-                      Insider-Deal 🏨
+                      {copy.deal} 🏨
                     </span>
                     <h3 className="text-2xl font-bold tracking-tight leading-tight pt-2">
-                      Bereit für Thailand? Die besten Hotel-Angebote
+                      {copy.dealTitle}
                     </h3>
                     <p className="text-slate-400 text-sm leading-relaxed">
-                      Wir vergleichen täglich die Preise auf den größten Plattformen. Sichere dir die besten Konditionen für deinen Aufenthalt in Khao Lak mit kostenloser Stornierung.
+                      {copy.dealText}
                     </p>
                   </div>
                   <a 
@@ -338,7 +402,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                     rel="noopener noreferrer"
                     className="relative w-full bg-teal-500 hover:bg-teal-400 text-slate-950 text-center font-bold text-sm py-3.5 rounded-xl transition-all duration-300 block shadow-lg shadow-teal-500/10 hover:shadow-teal-500/20 active:scale-[0.99]"
                   >
-                    Hotels in Khao Lak finden
+                    {copy.hotels}
                   </a>
                 </article>
               )}

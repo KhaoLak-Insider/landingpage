@@ -374,9 +374,9 @@ export default function AdminRoomEditorPage() {
         <div className="admin-room-editor__actions">
           {spot?.slug && room.slug && (
             <Link
-              href={`/spot/${encodeURIComponent(
+              href={`/de/spot/${encodeURIComponent(
                 spot.slug,
-              )}/rooms/${encodeURIComponent(room.slug)}?lng=de`}
+              )}/zimmer/${encodeURIComponent(room.slug)}`}
               target="_blank"
               className="admin-room-editor__preview"
             >

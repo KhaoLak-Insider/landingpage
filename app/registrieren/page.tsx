@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { supabase } from "@/src/lib/supabase";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { getLanguageFromPathname, localizePath } from "@/src/lib/i18n-routing";
 import Link from "next/link";
 
 export default function RegisterPage() {
@@ -17,6 +18,7 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [usernameError, setUsernameError] = useState("");
   const router = useRouter();
+  const language = getLanguageFromPathname(usePathname());
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,7 +86,7 @@ export default function RegisterPage() {
       }
 
       alert("Registrierung erfolgreich! Bitte bestätige deine E-Mail-Adresse.");
-      router.push("/login");
+      router.push(localizePath("/login", language));
     }
     setLoading(false);
   };
@@ -165,7 +167,7 @@ export default function RegisterPage() {
           />
           <span>
             Ich akzeptiere die{" "}
-            <Link href="/datenschutz" className="text-teal-500 hover:underline">Datenschutzerklärung</Link>.
+            <Link href={localizePath("/datenschutz", language)} className="text-teal-500 hover:underline">Datenschutzerklärung</Link>.
           </span>
         </label>
 
@@ -187,7 +189,7 @@ export default function RegisterPage() {
 
         <p className="mt-6 text-center text-sm text-slate-500">
           Bereits einen Account?{" "}
-          <Link href="/login" className="text-teal-500 font-bold hover:underline">
+          <Link href={localizePath("/login", language)} className="text-teal-500 font-bold hover:underline">
             Einloggen
           </Link>
         </p>

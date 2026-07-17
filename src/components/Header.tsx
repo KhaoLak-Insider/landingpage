@@ -10,9 +10,13 @@ import {
 } from "next/navigation";
 import { supabase } from "@/src/lib/supabase";
 import {
-  getLanguage,
   Language,
 } from "@/src/lib/i18n";
+import {
+  getLanguageFromPathname,
+  localizePath,
+  switchLanguagePath,
+} from "@/src/lib/i18n-routing";
 import { User } from "@supabase/supabase-js";
 
 interface HeaderProfile {
@@ -33,21 +37,43 @@ export default function Header() {
   const isAdminPath =
     pathname === "/admin" || pathname.startsWith("/admin/");
 
-  const language = getLanguage({
-    lng: searchParams.get("lng") ?? undefined,
-  });
+  const language = getLanguageFromPathname(pathname);
+  const copy = language === "en"
+    ? {
+        discover: "Discover",
+        plan: "Plan",
+        experience: "Experience",
+        blog: "Blog",
+        community: "Community",
+        selectLanguage: "Select language",
+        german: "German",
+        english: "English",
+        profile: "Profile",
+        favorites: "Favorites",
+        logout: "Log out",
+        login: "Log in",
+      }
+    : {
+        discover: "Entdecken",
+        plan: "Planen",
+        experience: "Erleben",
+        blog: "Blog",
+        community: "Community",
+        selectLanguage: "Sprache auswählen",
+        german: "Deutsch",
+        english: "Englisch",
+        profile: "Profil",
+        favorites: "Favoriten",
+        logout: "Abmelden",
+        login: "Login",
+      };
 
   function changeLanguage(newLanguage: Language) {
-    const params = new URLSearchParams(searchParams.toString());
-
-    params.set("lng", newLanguage);
-
-    const queryString = params.toString();
-
     router.push(
-      queryString
-        ? `${pathname}?${queryString}`
-        : pathname,
+      switchLanguagePath(
+        `${pathname}${searchParams.size ? `?${searchParams}` : ""}`,
+        newLanguage
+      ),
       {
         scroll: false,
       }
@@ -55,9 +81,7 @@ export default function Header() {
   }
 
   function localizedHref(path: string) {
-    const separator = path.includes("?") ? "&" : "?";
-
-    return `${path}${separator}lng=${language}`;
+    return localizePath(path, language);
   }
 
   useEffect(() => {
@@ -142,38 +166,45 @@ export default function Header() {
 
         <div className="hidden gap-8 text-sm font-semibold md:flex text-slate-600">
           <Link
+            href={localizedHref("/home")}
+            className="transition hover:text-teal-500"
+          >
+            Home
+          </Link>
+
+          <Link
             href={localizedHref("/entdecken")}
             className="transition hover:text-teal-500"
           >
-            Entdecken
+            {copy.discover}
           </Link>
 
           <Link
             href={localizedHref("/planen")}
             className="transition hover:text-teal-500"
           >
-            Planen
+            {copy.plan}
           </Link>
 
           <a
             href="#"
             className="transition hover:text-teal-500"
           >
-            Erleben
+            {copy.experience}
           </a>
 
           <Link
             href={localizedHref("/blog")}
             className="transition hover:text-teal-500"
           >
-            Blog
+            {copy.blog}
           </Link>
 
           <Link
             href={localizedHref("/community")}
             className="transition hover:text-teal-500"
           >
-            Community
+            {copy.community}
           </Link>
         </div>
       </div>
@@ -188,18 +219,18 @@ export default function Header() {
               event.target.value as Language
             )
           }
-          aria-label="Sprache auswählen"
+          aria-label={copy.selectLanguage}
           className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 outline-none transition hover:border-teal-400 focus:border-teal-500"
         >
-          <option value="de">🇩🇪 Deutsch</option>
-          <option value="en">🇬🇧 English</option>
+          <option value="de">🇩🇪 {copy.german}</option>
+          <option value="en">🇬🇧 {copy.english}</option>
         </select>
 
         {user ? (
           <div className="group relative flex cursor-pointer items-center gap-2">
             <div className="flex items-center gap-2 pr-2">
               <span className="text-sm font-bold text-slate-900">
-                {profile?.username || "Profil"}
+                {profile?.username || copy.profile}
               </span>
 
               <div className="h-10 w-10 overflow-hidden rounded-full border border-slate-300 bg-slate-200">
@@ -240,14 +271,14 @@ export default function Header() {
                   href={localizedHref("/profil")}
                   className="block rounded-lg px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50"
                 >
-                  Profil
+                  {copy.profile}
                 </Link>
 
                 <Link
                   href={localizedHref("/favorites")}
                   className="block rounded-lg px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50"
                 >
-                  Favoriten
+                  {copy.favorites}
                 </Link>
 
                 {(profile?.role === "admin" ||
@@ -272,7 +303,7 @@ export default function Header() {
                   }
                   className="w-full rounded-lg px-4 py-2 text-left text-sm font-bold text-red-600 hover:bg-red-50"
                 >
-                  Abmelden
+                  {copy.logout}
                 </button>
               </div>
             </div>
@@ -282,7 +313,7 @@ export default function Header() {
             href={localizedHref("/login")}
             className="rounded-full bg-slate-900 px-6 py-3 text-sm font-bold text-white transition hover:bg-slate-800"
           >
-            Login
+            {copy.login}
           </Link>
         )}
       </div>

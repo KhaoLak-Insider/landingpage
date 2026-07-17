@@ -371,6 +371,7 @@ export default function HotelLocation({
 
         .hotel-location-card__content {
           min-width: 0;
+          padding-left: 8px;
         }
 
         .hotel-location-card__summary {

@@ -1,6 +1,45 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      {
+        source: "/editor",
+        destination: "/admin/editor",
+        permanent: true,
+      },
+      {
+        source: "/editor/list",
+        destination: "/admin/editor/list",
+        permanent: true,
+      },
+      {
+        source: "/editor/edit/:id",
+        destination: "/admin/editor/edit/:id",
+        permanent: true,
+      },
+      {
+        source: "/editor/blog",
+        destination: "/admin/blog/new",
+        permanent: true,
+      },
+      {
+        source: "/editor/blog/:id",
+        destination: "/admin/blog/:id",
+        permanent: true,
+      },
+      {
+        source: "/admin/editor/blog",
+        destination: "/admin/blog/new",
+        permanent: true,
+      },
+      {
+        source: "/admin/editor/blog/:id",
+        destination: "/admin/blog/:id",
+        permanent: true,
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {

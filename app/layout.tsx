@@ -14,7 +14,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://khaolak.app"),
+  metadataBase: new URL("https://www.khaolak.app"),
 
   title: "Khao Lak Insider",
 
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     title: "Khao Lak Insider",
     description:
       "Entdecke Khao Lak wie ein Insider – mit Stränden, Märkten, Restaurants und Geheimtipps in einer App.",
-    url: "https://khaolak.app",
+    url: "https://www.khaolak.app",
     siteName: "Khao Lak Insider",
     images: [
       {

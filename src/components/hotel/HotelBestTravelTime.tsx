@@ -9,6 +9,7 @@ import {
   WalletCards,
 } from "lucide-react";
 import type { Language } from "@/src/lib/i18n";
+import { localizePath } from "@/src/lib/i18n-routing";
 
 interface HotelBestTravelTimeProps {
   language: Language;
@@ -56,7 +57,7 @@ export default function HotelBestTravelTime({
   language,
 }: HotelBestTravelTimeProps) {
   const copy = content[language];
-  const blogHref = `${BLOG_PATH}?lng=${language}`;
+  const blogHref = localizePath(BLOG_PATH, language);
 
   return (
     <section className="hotel-best-travel-time">

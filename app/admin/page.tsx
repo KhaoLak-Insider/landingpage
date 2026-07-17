@@ -198,6 +198,14 @@ export default function AdminDashboardPage() {
               Bestehende Spots auswählen und ihre Inhalte aktualisieren.
             </span>
           </Link>
+
+          <Link href="/admin/blog">
+            <FileText size={21} />
+            <strong>Blog verwalten</strong>
+            <span>
+              Deutsche und englische Beiträge erstellen und bearbeiten.
+            </span>
+          </Link>
         </div>
       </section>
 

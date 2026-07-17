@@ -4,6 +4,7 @@ import type { SpotClientPageProps } from "@/src/types/spot";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { mergeSpotCategoryDetails } from "@/src/lib/spot-category-details";
+import { absoluteLocalizedUrl } from "@/src/lib/i18n-routing";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +24,7 @@ type SpotSchemaType =
   | "TouristAttraction"
   | "Place";
 
-const BASE_URL = "https://khaolak.app";
+const BASE_URL = "https://www.khaolak.app";
 
 function getLanguage(lng?: string | string[]): Language {
   const value = Array.isArray(lng) ? lng[0] : lng;
@@ -35,24 +36,18 @@ function createLanguageUrl(
   slug: string,
   language: Language
 ): string {
-  const url = new URL(
+  return absoluteLocalizedUrl(
     `/spot/${encodeURIComponent(slug)}`,
+    language,
     BASE_URL
   );
-
-  url.searchParams.set("lng", language);
-
-  return url.toString();
 }
 
 function createLocalizedUrl(
   path: string,
   language: Language
 ): string {
-  const url = new URL(path, BASE_URL);
-  url.searchParams.set("lng", language);
-
-  return url.toString();
+  return absoluteLocalizedUrl(path, language, BASE_URL);
 }
 
 function shortenDescription(

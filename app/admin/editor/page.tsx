@@ -1,1 +1,1 @@
-export { default } from "../../editor/page";
+export { default } from "@/src/components/editor/SpotCreatePage";

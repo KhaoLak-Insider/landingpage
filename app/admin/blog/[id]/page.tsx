@@ -1,6 +1,6 @@
 "use client";
 
-import BlogEditPage from "../../../../editor/blog/[id]/page";
+import BlogEditPage from "@/src/components/admin/blog/BlogEditPage";
 
 export default function AdminBlogEditPage() {
   return <BlogEditPage />;

@@ -14,6 +14,7 @@ interface SpotDescriptionProps {
   blocks: SpotDescriptionBlock[];
   language: Language;
   initiallyVisibleBlocks?: number;
+  seoCollapsible?: boolean;
 }
 
 export default function SpotDescription({
@@ -21,6 +22,7 @@ export default function SpotDescription({
   blocks,
   language,
   initiallyVisibleBlocks = 2,
+  seoCollapsible = false,
 }: SpotDescriptionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -85,15 +87,32 @@ export default function SpotDescription({
         renderBlock(block, `visible-${index}`)
       )}
 
-      {isExpanded &&
+      {seoCollapsible && hiddenBlocks.length > 0 ? (
+        <div
+          id="spot-description-more"
+          className={`spot-description__more ${
+            isExpanded ? "spot-description__more--expanded" : ""
+          }`}
+        >
+          <div className="spot-description__more-inner">
+            {hiddenBlocks.map((block, index) =>
+              renderBlock(block, `hidden-${index}`)
+            )}
+          </div>
+        </div>
+      ) : (
+        isExpanded &&
         hiddenBlocks.map((block, index) =>
           renderBlock(block, `hidden-${index}`)
-        )}
+        )
+      )}
 
       {hiddenBlocks.length > 0 && (
         <button
           type="button"
           onClick={() => setIsExpanded((current) => !current)}
+          aria-expanded={isExpanded}
+          aria-controls={seoCollapsible ? "spot-description-more" : undefined}
           style={{
             color: "#14b8a6",
             fontWeight: 700,
@@ -112,6 +131,37 @@ export default function SpotDescription({
       )}
       <style jsx>{`
         .spot-description__eyebrow{display:block;margin-bottom:6px;color:#079ca5;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.spot-description :global(p){max-width:760px}.spot-description :global(button){display:inline-flex!important;margin-top:4px!important;padding:9px 12px!important;border:1px solid #cde7e8!important;border-radius:9px!important;background:#eefafa!important;color:#078f96!important;font-size:10px!important;text-decoration:none!important}
+        .spot-description__more {
+          position: relative;
+          display: grid;
+          grid-template-rows: 0fr;
+          transition: grid-template-rows 320ms ease;
+        }
+        .spot-description__more::before {
+          position: absolute;
+          right: 0;
+          bottom: 0;
+          left: 0;
+          z-index: 1;
+          height: 72px;
+          background: linear-gradient(to bottom, rgba(255,255,255,0), #fff 82%);
+          content: "";
+          pointer-events: none;
+          transform: translateY(2px);
+        }
+        .spot-description__more-inner {
+          min-height: 0;
+          overflow: hidden;
+        }
+        .spot-description__more--expanded {
+          grid-template-rows: 1fr;
+        }
+        .spot-description__more--expanded::before {
+          opacity: 0;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .spot-description__more { transition: none; }
+        }
       `}</style>
     </section>
   );

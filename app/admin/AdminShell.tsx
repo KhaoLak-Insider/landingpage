@@ -36,9 +36,9 @@ const navigation = [
   { label: "Spots", href: "/admin/spots", icon: MapPin },
   { label: "Spot anlegen", href: "/admin/editor", icon: FilePlus2 },
   { label: "Spots bearbeiten", href: "/admin/editor/list", icon: PencilLine },
-  { label: "Blogbeitrag schreiben", href: "/admin/editor/blog", icon: FileText },
+  { label: "Blog verwalten", href: "/admin/blog", icon: FileText },
+  { label: "Blogbeitrag schreiben", href: "/admin/blog/new", icon: FilePlus2 },
   { label: "Restaurants", href: "/admin/restaurants", icon: Utensils },
-  { label: "Blog", href: "/admin/blog", icon: FileText },
   { label: "Einstellungen", href: "/admin/settings", icon: Settings },
 ];
 

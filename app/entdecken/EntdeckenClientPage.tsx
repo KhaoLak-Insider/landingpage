@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import * as LucideIcons from "lucide-react";
 import {
   Heart,
@@ -14,7 +14,9 @@ import {
   X,
 } from "lucide-react";
 import { supabase } from "@/src/lib/supabase";
-import { getLanguage, type Language } from "@/src/lib/i18n";
+import type { User } from "@supabase/supabase-js";
+import type { Language } from "@/src/lib/i18n";
+import { getLanguageFromPathname, localizePath } from "@/src/lib/i18n-routing";
 import { t } from "@/src/lib/translations";
 import MapBoxMini from "@/src/components/MapBoxMini";
 
@@ -33,8 +35,13 @@ interface Spot {
 }
 
 interface Category {
+  id: string;
   name: string;
+  name_en: string | null;
+  slug: string;
   icon: string | null;
+  parent_id: string | null;
+  sort_order: number;
 }
 
 interface UserProfile {
@@ -89,11 +96,7 @@ export default function EntdeckenClientPage({
   initialSpots,
   initialCategories,
 }: EntdeckenClientPageProps) {
-  const searchParams = useSearchParams();
-
-  const language = getLanguage({
-    lng: searchParams.get("lng") ?? undefined,
-  });
+  const language = getLanguageFromPathname(usePathname());
 
   const [search, setSearch] = useState("");
   const [category, setCategory] =
@@ -101,15 +104,14 @@ export default function EntdeckenClientPage({
   const [favorites, setFavorites] = useState<string[]>([]);
   const [userProfile, setUserProfile] =
     useState<UserProfile | null>(null);
-  const [session, setSession] = useState<any>(null);
+  const [session, setSession] = useState<User | null>(null);
   const [maxDistance, setMaxDistance] = useState(100);
   const [showOnlyFavs, setShowOnlyFavs] = useState(false);
   const [showMobileFilters, setShowMobileFilters] =
     useState(false);
 
   const localizedHref = (path: string) => {
-    const separator = path.includes("?") ? "&" : "?";
-    return `${path}${separator}lng=${language}`;
+    return localizePath(path, language);
   };
 
   const hotelData = Array.isArray(userProfile?.hotels)
@@ -205,25 +207,44 @@ export default function EntdeckenClientPage({
     loadUserData();
   }, []);
 
-  const categories = useMemo(() => {
-    return initialCategories.map((item) => {
+  const mappedCategories = initialCategories.map((item) => {
       const matchingSpot = initialSpots.find(
         (spot) => spot.category === item.name
       );
+      const childNames = initialCategories
+        .filter((candidate) => candidate.parent_id === item.id)
+        .map((candidate) => candidate.name);
 
       return {
+        id: item.id,
         name: item.name,
         displayName:
           language === "en"
-            ? matchingSpot?.category_en?.trim() ||
+            ? item.name_en?.trim() ||
+              matchingSpot?.category_en?.trim() ||
               item.name
             : item.name,
         icon: item.icon || "MapPin",
+        parentId: item.parent_id,
+        childNames,
+        sortOrder: item.sort_order,
       };
     });
-  }, [initialCategories, initialSpots, language]);
 
-  const statistics = useMemo(() => {
+  const categories = mappedCategories
+    .filter((item) => item.parentId === null)
+    .flatMap((parent) => [
+      parent,
+      ...mappedCategories
+        .filter((item) => item.parentId === parent.id)
+        .sort((a, b) =>
+          a.sortOrder === b.sortOrder
+            ? a.displayName.localeCompare(b.displayName)
+            : a.sortOrder - b.sortOrder
+        ),
+    ]);
+
+  const statistics = (() => {
     const normalizeCategory = (value: string | null) =>
       value
         ?.trim()
@@ -290,9 +311,9 @@ export default function EntdeckenClientPage({
         description: t(language, "statisticsAccommodationsDescription"),
       },
     ];
-  }, [initialCategories.length, initialSpots, language]);
+  })();
 
-  const filteredSpots = useMemo(() => {
+  const filteredSpots = (() => {
     const normalizedSearch = search.trim().toLowerCase();
 
     return initialSpots.filter((spot) => {
@@ -314,9 +335,13 @@ export default function EntdeckenClientPage({
         language
       ).toLowerCase();
 
+      const activeCategory = categories.find(
+        (item) => item.name === category
+      );
       const matchesCategory =
         category === ALL_CATEGORIES ||
-        spot.category === category;
+        spot.category === category ||
+        activeCategory?.childNames.includes(spot.category || "") === true;
 
       const matchesSearch =
         normalizedSearch === "" ||
@@ -344,16 +369,7 @@ export default function EntdeckenClientPage({
         matchesDistance
       );
     });
-  }, [
-    category,
-    favorites,
-    hasHotelCoordinates,
-    initialSpots,
-    language,
-    maxDistance,
-    search,
-    showOnlyFavs,
-  ]);
+  })();
 
 
   function getIconForCategory(categoryName: string | null) {
@@ -410,7 +426,7 @@ export default function EntdeckenClientPage({
   }
 
   const filterContent = (
-    <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="rounded-[14px] border border-[#e8edf2] bg-white p-5 shadow-[0_8px_24px_rgba(15,35,62,.035)]">
       <div className="mb-5 flex items-center justify-between gap-4">
         <h2 className="m-0 text-lg font-extrabold text-slate-900">
           {t(language, "filters")}
@@ -438,13 +454,14 @@ export default function EntdeckenClientPage({
         />
 
         {categories.map((item) => (
-          <CategoryButton
-            key={item.name}
-            active={category === item.name}
-            iconName={item.icon}
-            label={item.displayName}
-            onClick={() => setCategory(item.name)}
-          />
+          <div key={item.id} className={item.parentId ? "ml-4" : ""}>
+            <CategoryButton
+              active={category === item.name}
+              iconName={item.icon}
+              label={item.displayName}
+              onClick={() => setCategory(item.name)}
+            />
+          </div>
         ))}
       </div>
 
@@ -518,9 +535,9 @@ export default function EntdeckenClientPage({
   );
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 font-[Poppins] text-slate-800 md:px-6 md:py-12">
-      <div className="mx-auto max-w-[1440px]">
-        <section className="relative min-h-[360px] overflow-hidden rounded-[32px] bg-slate-950 px-6 py-10 shadow-xl md:min-h-[440px] md:px-12 md:py-16 lg:min-h-[480px]">
+    <main className="min-h-screen bg-white px-4 py-6 font-[Poppins] text-[#10233f] md:px-6 md:py-8">
+      <div className="mx-auto max-w-[1180px]">
+        <section className="relative min-h-[360px] overflow-hidden rounded-[14px] bg-[#10233f] px-6 py-10 shadow-[0_12px_32px_rgba(16,35,63,.14)] md:min-h-[420px] md:px-12 md:py-14">
           <img
             src="https://pub-e91d905941ab460b95ac5248c28e16f3.r2.dev/assets/Entdecken%20Hero.jpg"
             alt=""
@@ -579,7 +596,7 @@ export default function EntdeckenClientPage({
 
         <section
           aria-label={t(language, "statisticsOverview")}
-          className="relative z-20 -mt-7 mb-8 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl md:-mt-11"
+          className="relative z-20 -mt-7 mb-8 overflow-hidden rounded-[14px] border border-[#e8edf2] bg-white shadow-[0_12px_30px_rgba(15,35,62,.08)] md:-mt-9"
         >
           <div className="grid grid-cols-2 divide-x divide-y divide-slate-100 md:grid-cols-3 lg:grid-cols-5 lg:divide-y-0">
             {statistics.map((statistic) => (
@@ -632,7 +649,7 @@ export default function EntdeckenClientPage({
           </button>
         </div>
 
-        <div className="grid items-start gap-8 lg:grid-cols-[270px_minmax(0,1fr)_300px]">
+        <div className="grid items-start gap-6 lg:grid-cols-[240px_minmax(0,1fr)_260px]">
           <aside className="sticky top-5 hidden lg:block">
             {filterContent}
           </aside>
@@ -653,7 +670,7 @@ export default function EntdeckenClientPage({
             </div>
 
             {filteredSpots.length > 0 ? (
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                 {filteredSpots.map((spot) => {
                   const localizedTitle =
                     getLocalizedField(
@@ -688,7 +705,7 @@ export default function EntdeckenClientPage({
                   return (
                     <article
                       key={spot.id}
-                      className="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+                      className="group overflow-hidden rounded-[14px] border border-[#e8edf2] bg-white shadow-[0_8px_24px_rgba(15,35,62,.035)] transition duration-300 hover:-translate-y-1 hover:border-[#d9e4e9] hover:shadow-[0_16px_36px_rgba(15,35,62,.09)]"
                     >
                       <div className="relative">
                         <Link
@@ -757,7 +774,7 @@ export default function EntdeckenClientPage({
                           )}
                           className="text-decoration-none"
                         >
-                          <h3 className="mb-2 text-xl font-extrabold text-slate-900 transition group-hover:text-teal-600">
+                          <h3 className="mb-2 text-xl font-extrabold text-[#10233f] transition group-hover:text-[#079ca5]">
                             {localizedTitle}
                           </h3>
                         </Link>
@@ -791,7 +808,7 @@ export default function EntdeckenClientPage({
                 })}
               </div>
             ) : (
-              <div className="rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center">
+              <div className="rounded-[14px] border border-dashed border-slate-300 bg-white px-6 py-16 text-center">
                 <Search
                   size={36}
                   className="mx-auto mb-4 text-slate-300"
@@ -814,7 +831,7 @@ export default function EntdeckenClientPage({
           </section>
 
           <aside className="space-y-6 lg:sticky lg:top-5">
-            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="rounded-[14px] border border-[#e8edf2] bg-white p-5 shadow-[0_8px_24px_rgba(15,35,62,.035)]">
               <h3 className="mb-4 text-lg font-extrabold text-slate-900">
                 {t(language, "mapAndDiscover")}
               </h3>
@@ -871,33 +888,6 @@ export default function EntdeckenClientPage({
               </Link>
             </div>
 
-            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-              <h3 className="mb-4 text-lg font-extrabold text-slate-900">
-                {t(language, "topCategories")}
-              </h3>
-
-              <div className="flex flex-col gap-2">
-                {categories.slice(0, 6).map((item) => (
-                  <button
-                    key={item.name}
-                    type="button"
-                    onClick={() =>
-                      setCategory(item.name)
-                    }
-                    className="flex items-center justify-between rounded-xl border-0 bg-slate-50 px-4 py-3 text-left text-sm font-bold text-slate-700 transition hover:bg-teal-50 hover:text-teal-700"
-                  >
-                    <span className="flex items-center gap-2.5">
-                      <DynamicIcon
-                        name={item.icon}
-                        size={17}
-                      />
-                      {item.displayName}
-                    </span>
-                    <span>→</span>
-                  </button>
-                ))}
-              </div>
-            </div>
           </aside>
         </div>
       </div>

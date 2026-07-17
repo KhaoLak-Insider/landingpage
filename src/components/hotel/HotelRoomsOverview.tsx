@@ -10,6 +10,7 @@ import {
   Waves,
 } from "lucide-react";
 import type { Language } from "@/src/lib/i18n";
+import { localizePath } from "@/src/lib/i18n-routing";
 
 interface RoomImage {
   url?: string | null;
@@ -208,9 +209,10 @@ export default function HotelRoomsOverview({
 
             const image = getRoomImage(room, language);
 
-            const roomHref = `/spot/${encodeURIComponent(
-              hotelSlug,
-            )}/zimmer/${encodeURIComponent(slug)}?lng=${language}`;
+            const roomHref = localizePath(
+              `/spot/${encodeURIComponent(hotelSlug)}/zimmer/${encodeURIComponent(slug)}`,
+              language,
+            );
 
             return (
               <article

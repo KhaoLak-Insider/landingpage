@@ -4,6 +4,7 @@ import HotelRoomsOverview, {
   type PremiumRoomOverview,
 } from "@/src/components/hotel/HotelRoomsOverview";
 import { supabase } from "@/src/lib/supabase";
+import { absoluteLocalizedUrl, localizePath } from "@/src/lib/i18n-routing";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +19,7 @@ interface Props {
 
 type Language = "de" | "en";
 
-const BASE_URL = "https://khaolak.app";
+const BASE_URL = "https://www.khaolak.app";
 
 function getLanguage(value?: string | string[]): Language {
   const language = Array.isArray(value) ? value[0] : value;
@@ -175,9 +176,8 @@ export async function generateMetadata({
       ? `Discover all room and villa categories at ${hotelTitle}.`
       : `Entdecke alle Zimmer- und Villenkategorien im ${hotelTitle}.`;
 
-  const canonicalUrl = `${BASE_URL}/spot/${encodeURIComponent(
-    slug,
-  )}/zimmer?lng=${language}`;
+  const roomOverviewPath = `/spot/${encodeURIComponent(slug)}/zimmer`;
+  const canonicalUrl = absoluteLocalizedUrl(roomOverviewPath, language, BASE_URL);
 
   return {
     title,
@@ -185,8 +185,8 @@ export async function generateMetadata({
     alternates: {
       canonical: canonicalUrl,
       languages: {
-        de: `${BASE_URL}/spot/${encodeURIComponent(slug)}/zimmer?lng=de`,
-        en: `${BASE_URL}/spot/${encodeURIComponent(slug)}/zimmer?lng=en`,
+        de: absoluteLocalizedUrl(roomOverviewPath, "de", BASE_URL),
+        en: absoluteLocalizedUrl(roomOverviewPath, "en", BASE_URL),
       },
     },
   };
@@ -213,9 +213,10 @@ export default async function RoomsOverviewPage({
       ? result.spot.title_en?.trim() || result.spot.title
       : result.spot.title?.trim() || result.spot.title_en;
 
-  const backHref = `/spot/${encodeURIComponent(
-    slug,
-  )}?lng=${language}#rooms`;
+  const backHref = localizePath(
+    `/spot/${encodeURIComponent(slug)}#rooms`,
+    language,
+  );
 
   return (
     <HotelRoomsOverview

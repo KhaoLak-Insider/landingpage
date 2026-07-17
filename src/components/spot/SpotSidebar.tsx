@@ -89,7 +89,7 @@ export default function SpotSidebar({
         {(userProfile?.role === "admin" ||
           userProfile?.role === "editor") && (
           <Link
-            href={localizedHref(`/editor/edit/${spot.id}`)}
+            href={`/admin/editor/edit/${spot.id}`}
             style={{
               display: "flex",
               alignItems: "center",

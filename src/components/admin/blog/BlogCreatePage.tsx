@@ -28,10 +28,14 @@ export default function BlogEditorPage() {
   const [blogCategories] = useState<string[]>(["Reiseplanung", "Strände", "Ausflüge", "Kulinarik", "Insider-Tipps"]);
   const [formData, setFormData] = useState({
     title: "",
+    title_en: "",
     image_url: "",
     excerpt: "",
+    excerpt_en: "",
     content: "",
+    content_en: "",
     category: "",
+    category_en: "",
     reading_time: 1,
   });
   const [loading, setLoading] = useState(false);
@@ -86,11 +90,15 @@ const category = data.category || formData.category;
 
     const { error } = await supabase.from("blog_posts").insert([{
       title: formData.title,
+      title_en: formData.title_en,
       image_url: formData.image_url,
       slug: slug,
       excerpt: formData.excerpt,
+      excerpt_en: formData.excerpt_en,
       content: formData.content,
+      content_en: formData.content_en,
       category: formData.category,
+      category_en: formData.category_en,
       reading_time: formData.reading_time,
     }]);
 
@@ -102,10 +110,14 @@ const category = data.category || formData.category;
       alert("Blogbeitrag erfolgreich veröffentlicht!");
       setFormData({
         title: "",
+        title_en: "",
         image_url: "",
         excerpt: "",
+        excerpt_en: "",
         content: "",
+        content_en: "",
         category: "",
+        category_en: "",
         reading_time: 1,
       });
       setAiPrompt("");
@@ -212,6 +224,39 @@ const category = data.category || formData.category;
           </div>
         </section>
 
+        <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+          <div className="border-b pb-3">
+            <span className="text-[10px] font-black uppercase tracking-widest text-teal-600">English version</span>
+            <h2 className="mt-1 text-lg font-bold text-slate-800">Englische Inhalte</h2>
+          </div>
+          <input
+            className="w-full p-4 border rounded-xl focus:ring-2 focus:ring-teal-500 outline-none"
+            placeholder="English title"
+            value={formData.title_en}
+            onChange={(e) => setFormData({...formData, title_en: e.target.value})}
+          />
+          <input
+            className="w-full p-3 border rounded-xl text-sm"
+            placeholder="English category"
+            value={formData.category_en}
+            onChange={(e) => setFormData({...formData, category_en: e.target.value})}
+          />
+          <textarea
+            className="w-full p-4 border rounded-xl text-sm"
+            rows={3}
+            placeholder="English excerpt"
+            value={formData.excerpt_en}
+            onChange={(e) => setFormData({...formData, excerpt_en: e.target.value})}
+          />
+          <textarea
+            className="w-full p-4 border rounded-xl text-sm leading-relaxed"
+            rows={14}
+            placeholder="English article content (use ### for headings)"
+            value={formData.content_en}
+            onChange={(e) => setFormData({...formData, content_en: e.target.value})}
+          />
+        </section>
+
         {/* FLOATING ACTION BAR */}
         <div className="fixed bottom-0 left-0 w-full bg-white border-t p-4 shadow-lg z-50">
           <div className="max-w-4xl mx-auto flex justify-end gap-4">
@@ -241,7 +286,7 @@ const category = data.category || formData.category;
             
             {formData.image_url && (
               <div className="w-full h-[250px] rounded-2xl overflow-hidden mb-6">
-                <img src={formData.image_url} className="w-full h-full object-cover" />
+                <img src={formData.image_url} alt={formData.title || "Blog-Vorschau"} className="w-full h-full object-cover" />
               </div>
             )}
             
@@ -254,7 +299,7 @@ const category = data.category || formData.category;
             <p className="text-lg text-slate-500 italic mb-6 border-l-4 pl-4 border-teal-500">{formData.excerpt || "Kurzbeschreibung..."}</p>
             
             <div className="prose text-slate-700 leading-relaxed border-t pt-4">
-              {convertTextToPreviewBlocks(formData.content).map((block: any, i: number) => (
+              {convertTextToPreviewBlocks(formData.content).map((block, i: number) => (
                 block.type === 'heading' 
                   ? <h3 key={i} className="text-2xl font-bold mt-6 mb-3 text-slate-800">{block.content}</h3>
                   : <p key={i} className="mb-4">{block.content}</p>

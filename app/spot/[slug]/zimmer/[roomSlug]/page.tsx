@@ -4,6 +4,7 @@ import RoomDetail, {
   type PremiumRoomDetail,
 } from "@/src/components/hotel/RoomDetail";
 import { supabase } from "@/src/lib/supabase";
+import { absoluteLocalizedUrl, localizePath } from "@/src/lib/i18n-routing";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +20,7 @@ interface Props {
 
 type Language = "de" | "en";
 
-const BASE_URL = "https://khaolak.app";
+const BASE_URL = "https://www.khaolak.app";
 
 function getLanguage(value?: string | string[]): Language {
   const language = Array.isArray(value) ? value[0] : value;
@@ -245,14 +246,8 @@ export async function generateMetadata({
     localizedValue(result.room, language, "short_description") ||
     localizedValue(result.room, language, "description");
 
-  const canonicalUrl = new URL(
-    `/spot/${encodeURIComponent(hotelSlug)}/zimmer/${encodeURIComponent(
-      roomSlug,
-    )}`,
-    BASE_URL,
-  );
-
-  canonicalUrl.searchParams.set("lng", language);
+  const roomPath = `/spot/${encodeURIComponent(hotelSlug)}/zimmer/${encodeURIComponent(roomSlug)}`;
+  const canonicalUrl = absoluteLocalizedUrl(roomPath, language, BASE_URL);
 
   const image = getRoomImage(result.room);
 
@@ -260,21 +255,17 @@ export async function generateMetadata({
     title: `${roomTitle} | ${hotelTitle}`,
     description,
     alternates: {
-      canonical: canonicalUrl.toString(),
+      canonical: canonicalUrl,
       languages: {
-        de: `${BASE_URL}/spot/${encodeURIComponent(
-          hotelSlug,
-        )}/zimmer/${encodeURIComponent(roomSlug)}?lng=de`,
-        en: `${BASE_URL}/spot/${encodeURIComponent(
-          hotelSlug,
-        )}/zimmer/${encodeURIComponent(roomSlug)}?lng=en`,
+        de: absoluteLocalizedUrl(roomPath, "de", BASE_URL),
+        en: absoluteLocalizedUrl(roomPath, "en", BASE_URL),
       },
     },
     openGraph: {
       type: "article",
       title: `${roomTitle} | ${hotelTitle}`,
       description,
-      url: canonicalUrl.toString(),
+      url: canonicalUrl,
       images: image ? [{ url: image, alt: roomTitle }] : undefined,
     },
   };
@@ -302,9 +293,10 @@ export default async function RoomPage({
       ? result.spot.title_en?.trim() || result.spot.title
       : result.spot.title?.trim() || result.spot.title_en;
 
-  const backHref = `/spot/${encodeURIComponent(
-    hotelSlug,
-  )}?lng=${language}#rooms`;
+  const backHref = localizePath(
+    `/spot/${encodeURIComponent(hotelSlug)}#rooms`,
+    language,
+  );
 
   return (
     <RoomDetail

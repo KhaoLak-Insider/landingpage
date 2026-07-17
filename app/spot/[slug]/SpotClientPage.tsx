@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { supabase } from "@/src/lib/supabase";
-import { getLanguage } from "@/src/lib/i18n";
+import { getLanguageFromPathname, localizePath } from "@/src/lib/i18n-routing";
 import { t, getTranslations } from "@/src/lib/translations";
 import TemplateRenderer from "@/src/components/templates/TemplateRenderer";
 import {
@@ -36,17 +36,13 @@ export default function SpotClientPage({
   const [isFavorite, setIsFavorite] = useState(false);
   const [randomSpots, setRandomSpots] = useState<any[]>(initialRandomSpots);
 
-  const searchParams = useSearchParams();
-  const language = getLanguage({
-    lng: searchParams.get("lng") ?? undefined,
-  });
+  const language = getLanguageFromPathname(usePathname());
 
   const translations = getTranslations(language);
   const nearbyRadiusKm = 0.5;
 
   const localizedHref = (path: string) => {
-    const separator = path.includes("?") ? "&" : "?";
-    return `${path}${separator}lng=${language}`;
+    return localizePath(path, language);
   };
 
   // NEUE STATES FÜR DIE UMGEBUNGS-SPOTS (NUR FÜR STRÄNDE)

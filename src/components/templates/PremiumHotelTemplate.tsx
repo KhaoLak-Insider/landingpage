@@ -9,6 +9,7 @@ import HotelFAQ from "@/src/components/hotel/HotelFAQ";
 import HotelGallery from "@/src/components/hotel/HotelGallery";
 import HotelBestTravelTime from "@/src/components/hotel/HotelBestTravelTime";
 import HotelNearby from "@/src/components/hotel/HotelNearby";
+import SpotDescription from "@/src/components/spot/SpotDescription";
 import type { StandardTemplateProps } from "@/src/components/templates/StandardTemplate";
 import type {
   HotelFaqRecord,
@@ -227,6 +228,11 @@ export default function PremiumHotelTemplate(props: StandardTemplateProps) {
           <a className="is-active" href="#overview">
             {props.language === "en" ? "Overview" : "Überblick"}
           </a>
+          {props.descriptionBlocks.length > 0 && (
+            <a href="#details">
+              {props.language === "en" ? "Details" : "Beschreibung"}
+            </a>
+          )}
           <a href="#location">
             {props.language === "en" ? "Location" : "Lage"}
           </a>
@@ -340,6 +346,21 @@ export default function PremiumHotelTemplate(props: StandardTemplateProps) {
 
           </div>
         </section>
+
+        {props.descriptionBlocks.length > 0 && (
+          <section
+            id="details"
+            className="premium-slot premium-slot--wide premium-slot--description"
+          >
+            <SpotDescription
+              title={props.localizedTitle}
+              blocks={props.descriptionBlocks}
+              language={props.language}
+              initiallyVisibleBlocks={2}
+              seoCollapsible
+            />
+          </section>
+        )}
 
         {hotelProfile && (
           <section
@@ -646,6 +667,20 @@ export default function PremiumHotelTemplate(props: StandardTemplateProps) {
           box-shadow: 0 8px 24px rgba(15, 35, 62, 0.035);
         }
 
+        .premium-slot--description {
+          overflow: hidden;
+          padding: 30px 34px 18px;
+          border: 1px solid #e8edf2;
+          border-radius: 14px;
+          background: #ffffff;
+          box-shadow: 0 8px 24px rgba(15, 35, 62, 0.035);
+        }
+
+        .premium-slot--description .spot-description > p,
+        .premium-slot--description .spot-description > h3 {
+          max-width: 920px !important;
+        }
+
         /* Highlights now use their own compact mockup-oriented component. */
         .premium-slot--highlights {
           margin-top: auto;
@@ -775,6 +810,7 @@ export default function PremiumHotelTemplate(props: StandardTemplateProps) {
           scroll-behavior: smooth;
         }
         #overview,
+        #details,
         #rooms,
         #location,
         #faq,
@@ -827,6 +863,9 @@ export default function PremiumHotelTemplate(props: StandardTemplateProps) {
           }
           .premium-slot {
             border-radius: 13px;
+          }
+          .premium-slot--description {
+            padding: 24px 20px 10px;
           }
         }
       `}</style>
