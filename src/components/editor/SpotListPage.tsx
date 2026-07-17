@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/src/lib/supabase";
 import SpotSearch from "@/src/components/editor/SpotSearch";
+import SpotDeleteButton from "@/src/components/editor/SpotDeleteButton";
 
 export default async function SpotListPage() {
   const { data: spots, error } = await supabase
@@ -65,30 +66,36 @@ export default async function SpotListPage() {
       ) : spots && spots.length > 0 ? (
         <section className="mt-5 grid gap-3">
           {spots.map((spot, index) => (
-            <Link
-              href={`/admin/editor/edit/${spot.id}`}
+            <article
               key={spot.id}
-              className="group flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 no-underline shadow-[0_8px_30px_rgba(16,35,63,0.04)] transition duration-200 hover:-translate-y-0.5 hover:border-teal-300 hover:shadow-[0_14px_35px_rgba(16,35,63,0.09)] sm:p-5"
+              className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-[0_8px_30px_rgba(16,35,63,0.04)] transition duration-200 hover:border-teal-300 hover:shadow-[0_14px_35px_rgba(16,35,63,0.09)] sm:gap-4 sm:p-4"
             >
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xs font-extrabold text-slate-500 transition group-hover:bg-teal-50 group-hover:text-teal-700">
-                {String(index + 1).padStart(2, "0")}
-              </span>
+              <Link
+                href={`/admin/editor/edit/${spot.id}`}
+                className="group flex min-w-0 flex-1 items-center gap-3 rounded-xl p-1 no-underline transition hover:bg-teal-50/60 sm:gap-4 sm:p-2"
+              >
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xs font-extrabold text-slate-500 transition group-hover:bg-teal-50 group-hover:text-teal-700">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
 
-              <div className="min-w-0 flex-1">
-                <h2 className="m-0 truncate text-base font-bold text-[#10233f] sm:text-lg">
-                  {spot.title || "Unbenannter Spot"}
-                </h2>
-                <p className="mb-0 mt-1 text-xs text-slate-500">
-                  Spot-Inhalte und Details bearbeiten
-                </p>
-              </div>
+                <div className="min-w-0 flex-1">
+                  <h2 className="m-0 truncate text-base font-bold text-[#10233f] sm:text-lg">
+                    {spot.title || "Unbenannter Spot"}
+                  </h2>
+                  <p className="mb-0 mt-1 text-xs text-slate-500">
+                    Spot-Inhalte und Details bearbeiten
+                  </p>
+                </div>
 
-              <span className="hidden items-center gap-1 text-xs font-bold text-teal-700 sm:flex">
-                Bearbeiten
-                <ChevronRight size={17} className="transition-transform group-hover:translate-x-0.5" />
-              </span>
-              <ChevronRight size={19} className="shrink-0 text-teal-700 sm:hidden" />
-            </Link>
+                <span className="hidden items-center gap-1 text-xs font-bold text-teal-700 lg:flex">
+                  Bearbeiten
+                  <ChevronRight size={17} className="transition-transform group-hover:translate-x-0.5" />
+                </span>
+                <ChevronRight size={19} className="hidden shrink-0 text-teal-700 sm:block lg:hidden" />
+              </Link>
+
+              <SpotDeleteButton spotId={spot.id} spotTitle={spot.title} />
+            </article>
           ))}
         </section>
       ) : (
