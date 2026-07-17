@@ -111,10 +111,29 @@ export default function HotelGallery({
 
       <div className="hotel-gallery-compact__content">
         {mainImage.mediaType === "video" ? (
-          <video className="hotel-gallery-compact__main hotel-gallery-compact__video" src={mainImage.src} controls playsInline preload="metadata" />
+          <video
+            className="hotel-gallery-compact__main hotel-gallery-compact__video"
+            src={mainImage.src}
+            controls
+            playsInline
+            preload="metadata"
+            style={{ display: "block", width: "100%", aspectRatio: "16 / 9", objectFit: "cover" }}
+          />
         ) : (
-          <button type="button" className="hotel-gallery-compact__main" onClick={() => openImage(0)} aria-label={mainImage.alt}>
-            <img src={mainImage.src} alt={mainImage.alt} />
+          <button
+            type="button"
+            className="hotel-gallery-compact__main"
+            onClick={() => openImage(0)}
+            aria-label={mainImage.alt}
+            style={{ display: "block", width: "100%", aspectRatio: "16 / 9", overflow: "hidden" }}
+          >
+            <img
+              src={mainImage.src}
+              alt={mainImage.alt}
+              width={1200}
+              height={800}
+              style={{ display: "block", width: "100%", height: "100%", objectFit: "cover" }}
+            />
           </button>
         )}
 
@@ -126,8 +145,24 @@ export default function HotelGallery({
                 type="button"
                 onClick={() => openImage(index + 1)}
                 aria-label={image.alt}
+                style={{ display: "block", width: "100%", aspectRatio: "4 / 3", overflow: "hidden" }}
               >
-                {image.mediaType === "video" ? <video src={image.src} playsInline preload="metadata" /> : <img src={image.src} alt={image.alt} />}
+                {image.mediaType === "video" ? (
+                  <video
+                    src={image.src}
+                    playsInline
+                    preload="metadata"
+                    style={{ display: "block", width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                ) : (
+                  <img
+                    src={image.src}
+                    alt={image.alt}
+                    width={600}
+                    height={400}
+                    style={{ display: "block", width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                )}
               </button>
             ))}
           </div>
