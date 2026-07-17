@@ -88,6 +88,10 @@ export function uploadRoomImage(
   });
 }
 
+export function uploadHotelVideo(file: File, hotelSlug: string): Promise<string> {
+  return uploadScopedImage(file, { scope: "hotel", hotelSlug, kind: "video" });
+}
+
 async function convertJpegToWebp(file: File): Promise<File> {
   if (!new Set(["image/jpeg", "image/jpg"]).has(file.type)) return file;
 

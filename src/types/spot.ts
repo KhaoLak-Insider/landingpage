@@ -46,6 +46,7 @@ export type PremiumContentStatus =
 export interface PremiumHotelGalleryImage {
   id?: string;
   image_url: string;
+  media_type?: "image" | "video" | null;
   title_de?: string | null;
   title_en?: string | null;
   alt_de?: string | null;
@@ -195,6 +196,7 @@ export interface HotelImageRecord {
   id: string;
   hotel_profile_id: string;
   image_url: string;
+  media_type?: "image" | "video" | null;
   category: string;
   display_name_de?: string | null;
   display_name_en?: string | null;

@@ -5,6 +5,9 @@ export interface GeneratedAltTexts {
   en: string;
   title_de: string;
   title_en: string;
+  category: string;
+  quality_score: number;
+  hero_score: number;
 }
 
 export async function generateImageAltTexts(
@@ -24,6 +27,14 @@ export async function generateImageAltTexts(
   });
   const data = (await response.json()) as Partial<GeneratedAltTexts> & { error?: string };
   if (!response.ok) throw new Error(data.error || "Alt-Texte konnten nicht erstellt werden.");
-  if (!data.de || !data.en || !data.title_de || !data.title_en) throw new Error("Die KI-Antwort ist unvollständig.");
-  return { de: data.de, en: data.en, title_de: data.title_de, title_en: data.title_en };
+  if (!data.de || !data.en || !data.title_de || !data.title_en || !data.category) throw new Error("Die KI-Antwort ist unvollständig.");
+  return {
+    de: data.de,
+    en: data.en,
+    title_de: data.title_de,
+    title_en: data.title_en,
+    category: data.category,
+    quality_score: Number(data.quality_score) || 0,
+    hero_score: Number(data.hero_score) || 0,
+  };
 }

@@ -19,6 +19,7 @@ interface GalleryImage {
   src: string;
   title: string;
   alt: string;
+  mediaType: "image" | "video";
 }
 
 const copy = {
@@ -70,6 +71,7 @@ export default function HotelGallery({
           src: image.image_url,
           title,
           alt,
+          mediaType: image.media_type === "video" ? "video" : "image",
         };
       });
     }
@@ -79,6 +81,7 @@ export default function HotelGallery({
       src,
       title: `${hotelTitle} ${index + 1}`,
       alt: `${hotelTitle} ${index + 1}`,
+      mediaType: "image",
     }));
   }, [fallbackImages, hotelTitle, images, language]);
 
@@ -89,7 +92,12 @@ export default function HotelGallery({
   const smallImages = previewImages.slice(1, 4);
 
   const openImage = (index: number) => {
-    setLightboxIndex(index);
+    const targetIndex = normalizedImages[index]?.mediaType === "video"
+      ? normalizedImages.findIndex((image) => image.mediaType === "image")
+      : index;
+    if (targetIndex < 0) return;
+    const imageIndex = normalizedImages.slice(0, targetIndex).filter((image) => image.mediaType === "image").length;
+    setLightboxIndex(imageIndex);
     setLightboxOpen(true);
   };
 
@@ -98,14 +106,13 @@ export default function HotelGallery({
       <h2>{text.title}</h2>
 
       <div className="hotel-gallery-compact__content">
-        <button
-          type="button"
-          className="hotel-gallery-compact__main"
-          onClick={() => openImage(0)}
-          aria-label={mainImage.alt}
-        >
-          <img src={mainImage.src} alt={mainImage.alt} />
-        </button>
+        {mainImage.mediaType === "video" ? (
+          <video className="hotel-gallery-compact__main hotel-gallery-compact__video" src={mainImage.src} controls playsInline preload="metadata" />
+        ) : (
+          <button type="button" className="hotel-gallery-compact__main" onClick={() => openImage(0)} aria-label={mainImage.alt}>
+            <img src={mainImage.src} alt={mainImage.alt} />
+          </button>
+        )}
 
         {smallImages.length > 0 && (
           <div className="hotel-gallery-compact__row">
@@ -116,7 +123,7 @@ export default function HotelGallery({
                 onClick={() => openImage(index + 1)}
                 aria-label={image.alt}
               >
-                <img src={image.src} alt={image.alt} />
+                {image.mediaType === "video" ? <video src={image.src} playsInline preload="metadata" /> : <img src={image.src} alt={image.alt} />}
               </button>
             ))}
           </div>
@@ -136,7 +143,7 @@ export default function HotelGallery({
         open={lightboxOpen}
         close={() => setLightboxOpen(false)}
         index={lightboxIndex}
-        slides={normalizedImages.map((image) => ({
+        slides={normalizedImages.filter((image) => image.mediaType === "image").map((image) => ({
           src: image.src,
           alt: image.alt,
           title: image.title,
@@ -186,6 +193,9 @@ export default function HotelGallery({
           object-fit: cover;
           transition: transform 240ms ease;
         }
+
+        video { display:block;width:100%;height:100%;object-fit:cover;background:#08192d; }
+        .hotel-gallery-compact__video { cursor:default; }
 
         .hotel-gallery-compact__main:hover img,
         .hotel-gallery-compact__row button:hover img {

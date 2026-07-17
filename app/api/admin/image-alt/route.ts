@@ -18,7 +18,7 @@ async function verifyEditor(request: NextRequest): Promise<boolean> {
   return ["admin", "editor"].includes(String(data?.role || "").toLowerCase());
 }
 
-function parseJson(text: string): { de?: unknown; en?: unknown; title_de?: unknown; title_en?: unknown } | null {
+function parseJson(text: string): { de?: unknown; en?: unknown; title_de?: unknown; title_en?: unknown; category?: unknown; quality_score?: unknown; hero_score?: unknown } | null {
   try {
     return JSON.parse(text.replace(/^```json\s*|\s*```$/g, ""));
   } catch {
@@ -57,14 +57,14 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         contents: [{ role: "user", parts: [
           { inlineData: { mimeType, data: Buffer.from(imageBytes).toString("base64") } },
-          { text: `Erstelle für dieses Bild je Sprache einen kurzen natürlichen Bildtitel (3 bis 8 Wörter) und einen präzisen SEO-Alt-Text ohne Keyword-Stuffing (maximal 125 Zeichen). Kontext: ${context || "Khao Lak Hotel oder Zimmer"}.` },
+          { text: `Analysiere dieses Hotelbild. Erstelle je Sprache einen kurzen natürlichen Bildtitel (3 bis 8 Wörter) und einen präzisen SEO-Alt-Text ohne Keyword-Stuffing (maximal 125 Zeichen). Ordne es einer kurzen Motivkategorie zu, z. B. Außenansicht, Zimmer, Pool, Strand, Restaurant, Wellness, Garten, Aktivität oder Detail. Bewerte technische und visuelle Qualität sowie Eignung als erstes Galeriebild jeweils von 0 bis 100. Kontext: ${context || "Khao Lak Hotel oder Zimmer"}.` },
         ] }],
         generationConfig: {
           responseMimeType: "application/json",
           responseSchema: {
             type: "OBJECT",
-            properties: { de: { type: "STRING" }, en: { type: "STRING" }, title_de: { type: "STRING" }, title_en: { type: "STRING" } },
-            required: ["de", "en", "title_de", "title_en"],
+            properties: { de: { type: "STRING" }, en: { type: "STRING" }, title_de: { type: "STRING" }, title_en: { type: "STRING" }, category: { type: "STRING" }, quality_score: { type: "INTEGER", minimum: 0, maximum: 100 }, hero_score: { type: "INTEGER", minimum: 0, maximum: 100 } },
+            required: ["de", "en", "title_de", "title_en", "category", "quality_score", "hero_score"],
           },
           thinkingConfig: { thinkingBudget: 0 },
           maxOutputTokens: 500,
@@ -83,8 +83,11 @@ export async function POST(request: NextRequest) {
     const en = typeof parsed?.en === "string" ? parsed.en.trim().slice(0, 160) : "";
     const title_de = typeof parsed?.title_de === "string" ? parsed.title_de.trim().slice(0, 100) : "";
     const title_en = typeof parsed?.title_en === "string" ? parsed.title_en.trim().slice(0, 100) : "";
-    if (!de || !en || !title_de || !title_en) return NextResponse.json({ error: "Die KI hat keine gültigen Bildtexte geliefert." }, { status: 502 });
-    return NextResponse.json({ de, en, title_de, title_en });
+    const category = typeof parsed?.category === "string" ? parsed.category.trim().slice(0, 60) : "";
+    const quality_score = Math.max(0, Math.min(100, Number(parsed?.quality_score) || 0));
+    const hero_score = Math.max(0, Math.min(100, Number(parsed?.hero_score) || 0));
+    if (!de || !en || !title_de || !title_en || !category) return NextResponse.json({ error: "Die KI hat keine gültigen Bildtexte geliefert." }, { status: 502 });
+    return NextResponse.json({ de, en, title_de, title_en, category, quality_score, hero_score });
   } catch (error) {
     console.error("Alt-Text-Generierung fehlgeschlagen:", error);
     return NextResponse.json({ error: "Alt-Texte konnten nicht erstellt werden." }, { status: 500 });

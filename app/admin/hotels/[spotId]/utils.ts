@@ -84,6 +84,10 @@ export function normalizeGalleryImages(value: unknown): HotelGalleryImage[] {
             ? item.id
             : createId(),
         image_url: item.image_url,
+        media_type:
+          "media_type" in item && item.media_type === "video"
+            ? "video"
+            : "image",
         title_de:
           "title_de" in item && typeof item.title_de === "string"
             ? item.title_de
@@ -124,7 +128,13 @@ export function normalizeGalleryImages(value: unknown): HotelGalleryImage[] {
       };
     })
     .filter((item): item is HotelGalleryImage => item !== null)
-    .sort((a, b) => a.sort_order - b.sort_order);
+    .sort((a, b) =>
+      a.media_type === "video"
+        ? -1
+        : b.media_type === "video"
+          ? 1
+          : a.sort_order - b.sort_order,
+    );
 }
 
 export function normalizeFaqItems(value: unknown): HotelFaqItem[] {

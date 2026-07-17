@@ -107,6 +107,7 @@ function toLegacyImages(
       id: String(image.id || `premium-gallery-${index + 1}`),
       hotel_profile_id: hotel.id,
       image_url: image.image_url.trim(),
+      media_type: image.media_type === "video" ? "video" : "image",
       category: "gallery",
       title_de: image.title_de ?? null,
       title_en: image.title_en ?? null,

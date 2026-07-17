@@ -347,6 +347,7 @@ export default function AdminHotelEditorPage() {
     try {
       const cleanedGallery = hotel.gallery_images
         .filter((image) => image.image_url.trim())
+        .sort((a, b) => a.media_type === "video" ? -1 : b.media_type === "video" ? 1 : a.sort_order - b.sort_order)
         .map((image, index) => ({
           ...image,
           image_url: image.image_url.trim(),

@@ -16,6 +16,7 @@ const ALLOWED_IMAGE_TYPES = new Set([
   "image/gif",
   "image/avif",
 ]);
+const ALLOWED_VIDEO_TYPES = new Set(["video/mp4", "video/webm", "video/quicktime"]);
 
 function getR2Config() {
   const endpoint = process.env.R2_ENDPOINT?.trim();
@@ -95,6 +96,9 @@ function fileExtension(file: File): string {
     "image/webp": "webp",
     "image/gif": "gif",
     "image/avif": "avif",
+    "video/mp4": "mp4",
+    "video/webm": "webm",
+    "video/quicktime": "mov",
   };
 
   return byType[file.type] || "img";
@@ -145,7 +149,7 @@ export async function POST(request: NextRequest) {
     const validHotel =
       scope === "hotel" &&
       Boolean(hotelSlug.trim()) &&
-      ["hero", "gallery"].includes(imageKind);
+      ["hero", "gallery", "video"].includes(imageKind);
     const validRoom =
       scope === "room" &&
       Boolean(hotelSlug.trim()) &&
@@ -159,14 +163,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+    const isVideo = imageKind === "video";
+    if (!(isVideo ? ALLOWED_VIDEO_TYPES : ALLOWED_IMAGE_TYPES).has(file.type)) {
       return NextResponse.json(
         { error: "Nicht unterstütztes Bildformat." },
         { status: 415 },
       );
     }
 
-    if (file.size <= 0 || file.size > MAX_FILE_SIZE) {
+    const maxFileSize = isVideo ? 250 * 1024 * 1024 : MAX_FILE_SIZE;
+    if (file.size <= 0 || file.size > maxFileSize) {
       return NextResponse.json(
         { error: "Das Bild darf höchstens 15 MB groß sein." },
         { status: 413 },

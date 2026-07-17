@@ -2,6 +2,7 @@ export type ContentStatus = "draft" | "published" | "archived";
 
 export interface HotelGalleryImage {
   id: string;
+  media_type: "image" | "video";
   image_url: string;
   title_de: string;
   title_en: string;
