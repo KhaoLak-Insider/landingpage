@@ -25,7 +25,7 @@ export async function uploadR2Image(
   slug: string,
   kind: "hero" | "gallery",
 ): Promise<string> {
-  const uploadFile = await convertJpegToWebp(file);
+  const uploadFile = await optimizeImageForUpload(file);
   const formData = new FormData();
   formData.append("file", uploadFile);
   formData.append("category", category);
@@ -49,7 +49,7 @@ async function uploadScopedImage(
   file: File,
   fields: Record<string, string>,
 ): Promise<string> {
-  const uploadFile = await convertJpegToWebp(file);
+  const uploadFile = await optimizeImageForUpload(file);
   const formData = new FormData();
   formData.append("file", uploadFile);
   Object.entries(fields).forEach(([key, value]) => formData.append(key, value));
@@ -92,16 +92,27 @@ export function uploadHotelVideo(file: File, hotelSlug: string): Promise<string>
   return uploadScopedImage(file, { scope: "hotel", hotelSlug, kind: "video" });
 }
 
-async function convertJpegToWebp(file: File): Promise<File> {
-  if (!new Set(["image/jpeg", "image/jpg"]).has(file.type)) return file;
+const MAX_IMAGE_EDGE = 2400;
+const WEBP_QUALITY = 0.82;
+
+async function optimizeImageForUpload(file: File): Promise<File> {
+  const convertibleTypes = new Set([
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/webp",
+    "image/avif",
+  ]);
+  if (!convertibleTypes.has(file.type)) return file;
 
   try {
     const bitmap = await createImageBitmap(file, {
       imageOrientation: "from-image",
     });
     const canvas = document.createElement("canvas");
-    canvas.width = bitmap.width;
-    canvas.height = bitmap.height;
+    const scale = Math.min(1, MAX_IMAGE_EDGE / Math.max(bitmap.width, bitmap.height));
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
 
     const context = canvas.getContext("2d");
     if (!context) {
@@ -109,16 +120,19 @@ async function convertJpegToWebp(file: File): Promise<File> {
       return file;
     }
 
-    context.drawImage(bitmap, 0, 0);
+    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
     bitmap.close();
 
     const blob = await new Promise<Blob | null>((resolve) =>
-      canvas.toBlob(resolve, "image/webp", 0.86),
+      canvas.toBlob(resolve, "image/webp", WEBP_QUALITY),
     );
 
     if (!blob || blob.type !== "image/webp") return file;
 
-    const baseName = file.name.replace(/\.(jpe?g)$/i, "") || "image";
+    // Keep an already smaller source file; optimization must never increase storage.
+    if (blob.size >= file.size) return file;
+
+    const baseName = file.name.replace(/\.[^.]+$/i, "") || "image";
     return new File([blob], `${baseName}.webp`, {
       type: "image/webp",
       lastModified: file.lastModified,
