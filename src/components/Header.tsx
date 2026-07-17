@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Menu, X } from "lucide-react";
 import {
   usePathname,
   useRouter,
@@ -30,6 +31,7 @@ interface HeaderProfile {
 export default function Header() {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<HeaderProfile | null>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -148,11 +150,11 @@ export default function Header() {
 
   return (
     <nav
-      className={`relative z-50 flex items-center border-b border-slate-100 bg-white px-8 py-6 text-slate-900 ${
+      className={`relative z-50 flex items-center border-b border-slate-100 bg-white px-4 py-3 text-slate-900 md:px-8 md:py-6 ${
         isAdminPath ? "min-[901px]:ml-[248px]" : ""
       }`}
     >
-      <div className="flex items-center gap-12">
+      <div className="flex min-w-0 items-center gap-12">
         <Link href={localizedHref("/")}>
           <Image
             src="https://pub-e91d905941ab460b95ac5248c28e16f3.r2.dev/assets/logo.png"
@@ -160,7 +162,7 @@ export default function Header() {
             width={180}
             height={60}
             priority
-            className="h-20 w-auto"
+            className="h-14 w-auto md:h-20"
           />
         </Link>
 
@@ -211,7 +213,7 @@ export default function Header() {
 
       <div className="flex-grow" />
 
-      <div className="flex items-center gap-5">
+      <div className="flex items-center gap-2 md:gap-5">
         <select
           value={language}
           onChange={(event) =>
@@ -220,7 +222,7 @@ export default function Header() {
             )
           }
           aria-label={copy.selectLanguage}
-          className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 outline-none transition hover:border-teal-400 focus:border-teal-500"
+          className="max-w-[92px] rounded-full border border-slate-200 bg-white px-2 py-2 text-xs font-bold text-slate-700 outline-none transition hover:border-teal-400 focus:border-teal-500 sm:max-w-none sm:px-4 sm:text-sm"
         >
           <option value="de">🇩🇪 {copy.german}</option>
           <option value="en">🇬🇧 {copy.english}</option>
@@ -229,7 +231,7 @@ export default function Header() {
         {user ? (
           <div className="group relative flex cursor-pointer items-center gap-2">
             <div className="flex items-center gap-2 pr-2">
-              <span className="text-sm font-bold text-slate-900">
+              <span className="hidden text-sm font-bold text-slate-900 lg:inline">
                 {profile?.username || copy.profile}
               </span>
 
@@ -251,7 +253,7 @@ export default function Header() {
               </div>
 
               <svg
-                className="h-4 w-4 text-slate-500 transition-transform group-hover:rotate-180"
+                className="hidden h-4 w-4 text-slate-500 transition-transform group-hover:rotate-180 md:block"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -316,6 +318,67 @@ export default function Header() {
             {copy.login}
           </Link>
         )}
+
+        <button
+          type="button"
+          onClick={() => setIsMobileMenuOpen((current) => !current)}
+          aria-expanded={isMobileMenuOpen}
+          aria-controls="mobile-header-menu"
+          aria-label={isMobileMenuOpen ? "Menü schließen" : "Menü öffnen"}
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-[#10233f] transition hover:border-[#0eb4bb] hover:text-[#079ca5] md:hidden"
+        >
+          {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
+      </div>
+
+      <div
+        id="mobile-header-menu"
+        className={`absolute inset-x-0 top-full border-b border-slate-200 bg-white px-4 shadow-[0_16px_30px_rgba(15,35,62,.1)] md:hidden ${
+          isMobileMenuOpen ? "block" : "hidden"
+        }`}
+      >
+        <div className="flex flex-col py-3 text-sm font-bold text-[#334155]">
+          {[
+            ["/home", "Home"],
+            ["/entdecken", copy.discover],
+            ["/planen", copy.plan],
+            ["/blog", copy.blog],
+            ["/community", copy.community],
+          ].map(([href, label]) => (
+            <Link
+              key={href}
+              href={localizedHref(href)}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="rounded-xl px-4 py-3 transition hover:bg-[#eefafa] hover:text-[#079ca5]"
+            >
+              {label}
+            </Link>
+          ))}
+
+          {user && (
+            <>
+              <div className="my-2 border-t border-slate-100" />
+              <Link href={localizedHref("/profil")} onClick={() => setIsMobileMenuOpen(false)} className="rounded-xl px-4 py-3 hover:bg-slate-50">
+                {copy.profile}
+              </Link>
+              <Link href={localizedHref("/favorites")} onClick={() => setIsMobileMenuOpen(false)} className="rounded-xl px-4 py-3 hover:bg-slate-50">
+                {copy.favorites}
+              </Link>
+              {(profile?.role === "admin" || profile?.role === "editor") && (
+                <Link href="/admin" onClick={() => setIsMobileMenuOpen(false)} className="rounded-xl px-4 py-3 text-[#079ca5] hover:bg-[#eefafa]">
+                  Admin-CMS
+                </Link>
+              )}
+              <button
+                type="button"
+                onClick={() => supabase.auth.signOut()}
+                className="rounded-xl px-4 py-3 text-left text-red-600 hover:bg-red-50"
+              >
+                {copy.logout}
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </nav>
   );
