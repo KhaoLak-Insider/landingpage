@@ -63,6 +63,7 @@ interface UserProfile {
 interface EntdeckenClientPageProps {
   initialSpots: Spot[];
   initialCategories: Category[];
+  initialCategorySlug?: string;
 }
 
 const ALL_CATEGORIES = "__all__";
@@ -95,12 +96,16 @@ function truncateText(value: string, maxLength = 115): string {
 export default function EntdeckenClientPage({
   initialSpots,
   initialCategories,
+  initialCategorySlug,
 }: EntdeckenClientPageProps) {
   const language = getLanguageFromPathname(usePathname());
 
   const [search, setSearch] = useState("");
   const [category, setCategory] =
-    useState<string>(ALL_CATEGORIES);
+    useState<string>(() =>
+      initialCategories.find((item) => item.slug === initialCategorySlug)?.name ||
+      ALL_CATEGORIES
+    );
   const [favorites, setFavorites] = useState<string[]>([]);
   const [userProfile, setUserProfile] =
     useState<UserProfile | null>(null);

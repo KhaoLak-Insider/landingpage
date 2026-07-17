@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 import {
   usePathname,
   useRouter,
@@ -32,6 +32,7 @@ export default function Header() {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<HeaderProfile | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileDiscoverOpen, setIsMobileDiscoverOpen] = useState(false);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -85,6 +86,26 @@ export default function Header() {
   function localizedHref(path: string) {
     return localizePath(path, language);
   }
+
+  const discoverItems = language === "en"
+    ? [
+        ["strand", "Beaches"],
+        ["essen-trinken", "Food & Drink"],
+        ["unterkunft", "Accommodation"],
+        ["ausfluege", "Excursions"],
+        ["markt", "Markets"],
+        ["natur", "Nature"],
+        ["tempel", "Temples"],
+      ]
+    : [
+        ["strand", "Strände"],
+        ["essen-trinken", "Essen & Trinken"],
+        ["unterkunft", "Unterkünfte"],
+        ["ausfluege", "Ausflüge"],
+        ["markt", "Märkte"],
+        ["natur", "Natur"],
+        ["tempel", "Tempel"],
+      ];
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -174,12 +195,38 @@ export default function Header() {
             Home
           </Link>
 
-          <Link
-            href={localizedHref("/entdecken")}
-            className="transition hover:text-teal-500"
-          >
-            {copy.discover}
-          </Link>
+          <div className="group/discover relative flex items-center gap-1">
+            <Link
+              href={localizedHref("/entdecken")}
+              className="transition hover:text-teal-500"
+            >
+              {copy.discover}
+            </Link>
+            <ChevronDown size={14} className="transition group-hover/discover:rotate-180 group-hover/discover:text-teal-500" aria-hidden="true" />
+
+            <div className="invisible absolute left-1/2 top-full w-[470px] -translate-x-1/2 pt-5 opacity-0 transition-all duration-200 group-hover/discover:visible group-hover/discover:opacity-100 group-focus-within/discover:visible group-focus-within/discover:opacity-100">
+              <div className="rounded-2xl border border-slate-100 bg-white p-3 shadow-[0_22px_55px_rgba(15,35,62,.15)]">
+                <Link
+                  href={localizedHref("/entdecken")}
+                  className="flex items-center justify-between rounded-xl bg-[#eefafa] px-4 py-3 text-[#087f85] transition hover:bg-[#dff6f5]"
+                >
+                  <span><strong className="block text-sm">{language === "en" ? "Discover all places" : "Alle Orte entdecken"}</strong><small className="mt-0.5 block font-medium text-[#4d7c80]">{language === "en" ? "Browse every Khao Lak Insider spot" : "Alle Khao-Lak-Spots im Überblick"}</small></span>
+                  <span aria-hidden="true">→</span>
+                </Link>
+                <div className="mt-2 grid grid-cols-2 gap-1">
+                  {discoverItems.map(([slug, label]) => (
+                    <Link
+                      key={slug}
+                      href={localizedHref(`/entdecken?category=${slug}`)}
+                      className="rounded-xl px-4 py-3 text-sm font-bold text-slate-600 transition hover:bg-slate-50 hover:text-[#079ca5]"
+                    >
+                      {label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
 
           <Link
             href={localizedHref("/planen")}
@@ -338,9 +385,50 @@ export default function Header() {
         }`}
       >
         <div className="flex flex-col py-3 text-sm font-bold text-[#334155]">
+          <Link
+            href={localizedHref("/home")}
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="rounded-xl px-4 py-3 transition hover:bg-[#eefafa] hover:text-[#079ca5]"
+          >
+            Home
+          </Link>
+
+          <div>
+            <div className="flex items-center">
+              <Link
+                href={localizedHref("/entdecken")}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="min-w-0 flex-1 rounded-xl px-4 py-3 transition hover:bg-[#eefafa] hover:text-[#079ca5]"
+              >
+                {copy.discover}
+              </Link>
+              <button
+                type="button"
+                onClick={() => setIsMobileDiscoverOpen((current) => !current)}
+                aria-expanded={isMobileDiscoverOpen}
+                aria-label={language === "en" ? "Show discover categories" : "Entdecken-Kategorien anzeigen"}
+                className="mr-1 flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 hover:bg-[#eefafa] hover:text-[#079ca5]"
+              >
+                <ChevronDown size={17} className={`transition ${isMobileDiscoverOpen ? "rotate-180" : ""}`} />
+              </button>
+            </div>
+            {isMobileDiscoverOpen && (
+              <div className="mx-3 mb-2 grid grid-cols-2 gap-1 rounded-xl bg-slate-50 p-2">
+                {discoverItems.map(([slug, label]) => (
+                  <Link
+                    key={slug}
+                    href={localizedHref(`/entdecken?category=${slug}`)}
+                    onClick={() => { setIsMobileMenuOpen(false); setIsMobileDiscoverOpen(false); }}
+                    className="rounded-lg px-3 py-2.5 text-xs font-bold text-slate-600 hover:bg-white hover:text-[#079ca5]"
+                  >
+                    {label}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
           {[
-            ["/home", "Home"],
-            ["/entdecken", copy.discover],
             ["/planen", copy.plan],
             ["/blog", copy.blog],
             ["/community", copy.community],

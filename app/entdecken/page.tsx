@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 interface Props {
   searchParams: Promise<{
     lng?: string | string[];
+    category?: string | string[];
   }>;
 }
 
@@ -254,8 +255,10 @@ export default async function EntdeckenPage({
       />
 
       <EntdeckenClientPage
+        key={Array.isArray(resolvedSearchParams.category) ? resolvedSearchParams.category[0] : resolvedSearchParams.category || "all"}
         initialSpots={spots}
         initialCategories={categories}
+        initialCategorySlug={Array.isArray(resolvedSearchParams.category) ? resolvedSearchParams.category[0] : resolvedSearchParams.category}
       />
     </>
   );
