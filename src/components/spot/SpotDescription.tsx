@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
 import { t } from "@/src/lib/translations";
 import type { Language } from "@/src/lib/i18n";
 
@@ -37,34 +38,14 @@ export default function SpotDescription({
     block: SpotDescriptionBlock,
     key: string | number
   ) => {
-    if (block.type === "heading") {
-      return (
-        <h3
-          key={key}
-          style={{
-            fontSize: 20,
-            fontWeight: 700,
-            marginTop: "24px",
-            marginBottom: "12px",
-          }}
-        >
-          {block.content}
-        </h3>
-      );
-    }
-
     return (
-      <p
-        key={key}
-        style={{
-          color: "#475569",
-          lineHeight: 1.8,
-          fontSize: "15px",
-          marginBottom: "16px",
-        }}
-      >
-        {block.content}
-      </p>
+      <div key={key} className="spot-description__markdown">
+        <ReactMarkdown>
+          {block.type === "heading"
+            ? `### ${block.content || ""}`
+            : block.content || ""}
+        </ReactMarkdown>
+      </div>
     );
   };
 
@@ -130,7 +111,7 @@ export default function SpotDescription({
         </button>
       )}
       <style jsx>{`
-        .spot-description__eyebrow{display:block;margin-bottom:6px;color:#079ca5;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.spot-description :global(p){max-width:760px}.spot-description :global(button){display:inline-flex!important;margin-top:4px!important;padding:9px 12px!important;border:1px solid #cde7e8!important;border-radius:9px!important;background:#eefafa!important;color:#078f96!important;font-size:10px!important;text-decoration:none!important}
+        .spot-description__eyebrow{display:block;margin-bottom:6px;color:#079ca5;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.spot-description :global(.spot-description__markdown p){max-width:760px;margin:0 0 16px;color:#475569;font-size:15px;line-height:1.8}.spot-description :global(.spot-description__markdown h1),.spot-description :global(.spot-description__markdown h2),.spot-description :global(.spot-description__markdown h3),.spot-description :global(.spot-description__markdown h4),.spot-description :global(.spot-description__markdown h5),.spot-description :global(.spot-description__markdown h6){margin:24px 0 12px;color:#10233f;font-size:20px;font-weight:700;line-height:1.35}.spot-description :global(.spot-description__markdown ul),.spot-description :global(.spot-description__markdown ol){max-width:760px;margin:0 0 16px;padding-left:24px;color:#475569;font-size:15px;line-height:1.8}.spot-description :global(.spot-description__markdown ul){list-style:disc}.spot-description :global(.spot-description__markdown ol){list-style:decimal}.spot-description :global(.spot-description__markdown li){margin-bottom:5px;padding-left:3px}.spot-description :global(.spot-description__markdown strong){color:#263b56;font-weight:700}.spot-description :global(.spot-description__markdown em){font-style:italic}.spot-description :global(.spot-description__markdown a){color:#078f96;font-weight:600;text-decoration:underline;text-underline-offset:2px}.spot-description :global(button){display:inline-flex!important;margin-top:4px!important;padding:9px 12px!important;border:1px solid #cde7e8!important;border-radius:9px!important;background:#eefafa!important;color:#078f96!important;font-size:10px!important;text-decoration:none!important}
         .spot-description__more {
           position: relative;
           display: grid;
