@@ -28,7 +28,7 @@ function convertTextToJson(text: string) {
 }
 
 export default function SpotEditorPage() {
-  const [categories, setCategories] = useState<Array<{ id: string; name: string; name_en: string | null }>>([]);
+  const [categories, setCategories] = useState<Array<{ id: string; name: string; name_en: string | null; parent_id: string | null }>>([]);
   const [searchQuery, setSearchQuery] = useState("");
   
   const [formData, setFormData] = useState({
@@ -75,9 +75,18 @@ export default function SpotEditorPage() {
   const generateDescription = async () => {
     setLoading(true);
     try {
+      const selectedCategory = categories.find((item) => item.name === formData.category);
+      const parentCategory = selectedCategory?.parent_id
+        ? categories.find((item) => item.id === selectedCategory.parent_id)
+        : null;
       const res = await fetch("/api/generate-description", {
         method: "POST",
-        body: JSON.stringify({ spotData: formData }),
+        body: JSON.stringify({
+          spotData: {
+            ...formData,
+            category_family: parentCategory?.name || selectedCategory?.name || formData.category,
+          },
+        }),
       });
       const data = await res.json();
       
@@ -148,7 +157,7 @@ export default function SpotEditorPage() {
     async function fetchCategories() {
       const { data } = await supabase
         .from("categories")
-        .select("id, name, name_en")
+        .select("id, name, name_en, parent_id")
         .eq("is_active", true)
         .order("sort_order")
         .order("name");

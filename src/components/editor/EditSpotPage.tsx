@@ -31,7 +31,7 @@ export default function EditSpotPage() {
   const id = params.id as string;
   const router = useRouter();
   const [categories, setCategories] = useState<
-    Array<{ id: string; name: string; name_en: string | null }>
+    Array<{ id: string; name: string; name_en: string | null; parent_id: string | null }>
   >([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -76,9 +76,18 @@ export default function EditSpotPage() {
   const generateDescription = async () => {
     setLoading(true);
     try {
+      const selectedCategory = categories.find((item) => item.name === formData.category);
+      const parentCategory = selectedCategory?.parent_id
+        ? categories.find((item) => item.id === selectedCategory.parent_id)
+        : null;
       const res = await fetch("/api/generate-description", {
         method: "POST",
-        body: JSON.stringify({ spotData: formData }),
+        body: JSON.stringify({
+          spotData: {
+            ...formData,
+            category_family: parentCategory?.name || selectedCategory?.name || formData.category,
+          },
+        }),
       });
       const data = await res.json();
       setFormData(prev => ({
@@ -145,7 +154,7 @@ export default function EditSpotPage() {
     async function fetchData() {
       const { data: catData } = await supabase
         .from("categories")
-        .select("id, name, name_en")
+        .select("id, name, name_en, parent_id")
         .eq("is_active", true)
         .order("sort_order")
         .order("name");
