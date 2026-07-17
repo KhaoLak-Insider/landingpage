@@ -87,11 +87,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const apiKey = process.env.DEEPL_API_KEY?.trim();
+    const apiKey =
+      process.env.DEEPL_API_KEY?.trim() ||
+      process.env.DEEPL_AUTH_KEY?.trim();
 
     if (!apiKey) {
       return NextResponse.json(
-        { error: "DEEPL_API_KEY ist auf dem Server nicht konfiguriert." },
+        {
+          error:
+            "DEEPL_API_KEY oder DEEPL_AUTH_KEY ist auf dem Server nicht konfiguriert.",
+        },
         { status: 500 },
       );
     }
