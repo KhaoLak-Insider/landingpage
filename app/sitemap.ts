@@ -83,6 +83,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "/home", priority: 1.0 },
     { path: "/entdecken", priority: 0.9 },
     { path: "/blog", priority: 0.9 },
+    { path: "/ueber-uns", priority: 0.7 },
   ];
 
   const germanStaticPages = [

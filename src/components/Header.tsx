@@ -47,6 +47,7 @@ export default function Header() {
         experience: "Experience",
         blog: "Blog",
         community: "Community",
+        about: "About us",
         selectLanguage: "Select language",
         german: "German",
         english: "English",
@@ -61,6 +62,7 @@ export default function Header() {
         experience: "Erleben",
         blog: "Blog",
         community: "Community",
+        about: "Über uns",
         selectLanguage: "Sprache auswählen",
         german: "Deutsch",
         english: "Englisch",
@@ -208,6 +210,13 @@ export default function Header() {
           >
             {copy.community}
           </Link>
+
+          <Link
+            href={localizedHref("/ueber-uns")}
+            className="transition hover:text-teal-500"
+          >
+            {copy.about}
+          </Link>
         </div>
       </div>
 
@@ -344,6 +353,7 @@ export default function Header() {
             ["/planen", copy.plan],
             ["/blog", copy.blog],
             ["/community", copy.community],
+            ["/ueber-uns", copy.about],
           ].map(([href, label]) => (
             <Link
               key={href}
