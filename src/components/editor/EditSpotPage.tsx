@@ -40,7 +40,7 @@ export default function EditSpotPage() {
   const [formData, setFormData] = useState({
     title: "", title_en: "", image_url: "", category: "", description: "", description_en: "", long_description: "", long_description_en: "",
     latitude: "", longitude: "", price_level: "", stars: "", opening_hours: "", youtube_url: "",
-    youtube_timestamp: "", tour_link: "", booking_link: "", features: [{ label: "", value: "", icon: "Sparkles" as keyof typeof iconMap }],
+    youtube_timestamp: "", tour_link: "", booking_link: "", features: [{ label: "", label_en: "", value: "", value_en: "", icon: "Sparkles" as keyof typeof iconMap }],
     best_months: [] as number[], galleryUrlsText: "",
     parking_info: { name: "", price: "", details: "", lat: "", lng: "" },
   });
@@ -86,7 +86,11 @@ export default function EditSpotPage() {
         description: data.description || prev.description,
         long_description: data.long_description || prev.long_description,
         stars: data.stars || prev.stars,
-        features: data.features && data.features.length > 0 ? data.features : prev.features
+        features: data.features && data.features.length > 0
+          ? data.features.map((feature: { label?: string; value?: string; icon?: keyof typeof iconMap }) => ({
+              label: feature.label || "", label_en: "", value: feature.value || "", value_en: "", icon: feature.icon || "Sparkles",
+            }))
+          : prev.features
       }));
     } catch { alert("Fehler bei der KI-Generierung"); }
     finally { setLoading(false); }
@@ -99,22 +103,34 @@ export default function EditSpotPage() {
       ["long_description_en", formData.long_description],
     ] as const;
     const availableEntries = entries.filter(([, value]) => value.trim());
+    const featureEntries = formData.features.flatMap((feature, index) => [
+      { index, field: "label_en" as const, value: feature.label },
+      { index, field: "value_en" as const, value: feature.value },
+    ]).filter((entry) => entry.value.trim());
 
-    if (availableEntries.length === 0) {
-      alert("Bitte zuerst einen deutschen Titel oder Beschreibungstext eingeben.");
+    if (availableEntries.length === 0 && featureEntries.length === 0) {
+      alert("Bitte zuerst deutsche Texte oder Insider-Fakten eingeben.");
       return;
     }
 
     setIsTranslating(true);
     try {
       const translations = await translateTexts(
-        availableEntries.map(([, value]) => value),
+        [
+          ...availableEntries.map(([, value]) => value),
+          ...featureEntries.map((entry) => entry.value),
+        ],
         { sourceLang: "DE", targetLang: "EN-GB" },
       );
       setFormData((current) => {
         const next = { ...current };
         availableEntries.forEach(([field], index) => {
           next[field] = translations[index];
+        });
+        next.features = current.features.map((feature) => ({ ...feature }));
+        featureEntries.forEach((entry, index) => {
+          next.features[entry.index][entry.field] =
+            translations[availableEntries.length + index];
         });
         return next;
       });
@@ -165,7 +181,15 @@ export default function EditSpotPage() {
             youtube_timestamp: resolvedData.youtube_timestamp?.toString() || "",
             tour_link: resolvedData.tour_link || "",
             booking_link: resolvedData.booking_link || "",
-            features: resolvedData.details_config?.features || [{ label: "", value: "", icon: "Sparkles" }],
+            features: Array.isArray(resolvedData.details_config?.features)
+              ? resolvedData.details_config.features.map((feature: Record<string, unknown>) => ({
+                  label: typeof feature.label === "string" ? feature.label : "",
+                  label_en: typeof feature.label_en === "string" ? feature.label_en : "",
+                  value: typeof feature.value === "string" ? feature.value : "",
+                  value_en: typeof feature.value_en === "string" ? feature.value_en : "",
+                  icon: (typeof feature.icon === "string" ? feature.icon : "Sparkles") as keyof typeof iconMap,
+                }))
+              : [{ label: "", label_en: "", value: "", value_en: "", icon: "Sparkles" }],
             best_months: resolvedData.best_months || [],
             galleryUrlsText: resolvedData.gallery_urls?.join("\n") || "",
             parking_info: resolvedData.parking_info || { name: "", price: "", details: "", lat: "", lng: "" },
@@ -297,7 +321,7 @@ export default function EditSpotPage() {
           <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-3">
             <h2 className="text-lg font-bold text-slate-800">Beschreibungen</h2>
             <button type="button" onClick={translateToEnglish} disabled={isTranslating} className="inline-flex items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-4 py-2 text-sm font-bold text-teal-700 hover:bg-teal-100 disabled:opacity-60">
-              <Languages size={16} /> {isTranslating ? "DeepL übersetzt …" : "Deutsch → Englisch mit DeepL"}
+              <Languages size={16} /> {isTranslating ? "DeepL übersetzt …" : "Texte & Insider-Fakten DE → EN"}
             </button>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
@@ -334,10 +358,12 @@ export default function EditSpotPage() {
             {formData.features.map((f, i) => {
                const IconComponent = iconMap[f.icon] || iconMap["MapPin"];
                return (
-                 <div key={i} className="flex gap-2 items-center bg-slate-50 p-2 rounded-xl">
-                    <input className="p-2 border rounded-lg w-1/4" placeholder="Label" value={f.label} onChange={(e) => { const n = [...formData.features]; n[i].label = e.target.value; setFormData({...formData, features: n}); }} />
-                    <input className="p-2 border rounded-lg w-1/4" placeholder="Wert" value={f.value} onChange={(e) => { const n = [...formData.features]; n[i].value = e.target.value; setFormData({...formData, features: n}); }} />
-                    <div className="flex items-center gap-2 w-1/2">
+                 <div key={i} className="grid gap-2 items-center bg-slate-50 p-3 rounded-xl md:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_1fr_1.1fr]">
+                    <input className="p-2 border rounded-lg" placeholder="Label Deutsch" value={f.label} onChange={(e) => { const n = [...formData.features]; n[i].label = e.target.value; setFormData({...formData, features: n}); }} />
+                    <input className="p-2 border rounded-lg" placeholder="Wert Deutsch" value={f.value} onChange={(e) => { const n = [...formData.features]; n[i].value = e.target.value; setFormData({...formData, features: n}); }} />
+                    <input className="p-2 border rounded-lg" placeholder="Label Englisch" value={f.label_en} onChange={(e) => { const n = [...formData.features]; n[i].label_en = e.target.value; setFormData({...formData, features: n}); }} />
+                    <input className="p-2 border rounded-lg" placeholder="Wert Englisch" value={f.value_en} onChange={(e) => { const n = [...formData.features]; n[i].value_en = e.target.value; setFormData({...formData, features: n}); }} />
+                    <div className="flex items-center gap-2">
                       <div className="p-2 bg-white border rounded-lg shrink-0"><IconComponent size={20} className="text-teal-600" /></div>
                       <select className="p-2 border rounded-lg w-full bg-white text-sm truncate" value={f.icon} onChange={(e) => { const n = [...formData.features]; n[i].icon = e.target.value as keyof typeof iconMap; setFormData({...formData, features: n}); }}>
                         {iconNames.map(name => <option key={name} value={name}>{name}</option>)}
@@ -346,7 +372,7 @@ export default function EditSpotPage() {
                  </div>
                );
             })}
-            <button type="button" onClick={() => setFormData({...formData, features: [...formData.features, {label: "", value: "", icon: "Sparkles"}]})} className="text-teal-600 text-sm font-bold hover:underline">+ Feature hinzufügen</button>
+            <button type="button" onClick={() => setFormData({...formData, features: [...formData.features, {label: "", label_en: "", value: "", value_en: "", icon: "Sparkles"}]})} className="text-teal-600 text-sm font-bold hover:underline">+ Feature hinzufügen</button>
           </div>
         </section>
 

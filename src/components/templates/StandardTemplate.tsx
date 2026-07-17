@@ -107,7 +107,7 @@ export default function StandardTemplate(props: StandardTemplateProps) {
             {features.length > 0 && (
               <section className="standard-card standard-features">
                 <div className="standard-section-heading">
-                  <span>Insider-Fakten</span>
+                  <span>{language === "en" ? "Insider facts" : "Insider-Fakten"}</span>
                   <h2>{language === "en" ? "Good to know" : "Gut zu wissen"}</h2>
                 </div>
                 <div className="standard-features__grid">
@@ -128,7 +128,7 @@ export default function StandardTemplate(props: StandardTemplateProps) {
               <section className="standard-card standard-months">
                 <div className="standard-section-heading standard-section-heading--icon">
                   <CalendarDays size={20} />
-                  <div><span>Reiseplanung</span><h2>{t(language, "bestTravelTime")}</h2></div>
+                  <div><span>{language === "en" ? "Travel planning" : "Reiseplanung"}</span><h2>{t(language, "bestTravelTime")}</h2></div>
                 </div>
                 <div className="standard-months__grid">
                   {translations.months.map((month, index) => (
@@ -143,7 +143,7 @@ export default function StandardTemplate(props: StandardTemplateProps) {
             <section className="standard-card standard-location">
               <div className="standard-section-heading standard-section-heading--icon">
                 <MapPin size={20} />
-                <div><span>Orientierung</span><h2>{t(language, "location")}</h2></div>
+                <div><span>{language === "en" ? "Orientation" : "Orientierung"}</span><h2>{t(language, "location")}</h2></div>
               </div>
               <div className="standard-location__map">
                 <MapBoxMini lat={spot.latitude} lng={spot.longitude} route={routeGeoJSON} />
