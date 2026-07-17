@@ -44,7 +44,6 @@ export default function Header() {
     ? {
         discover: "Discover",
         plan: "Plan",
-        experience: "Experience",
         blog: "Blog",
         community: "Community",
         about: "About us",
@@ -59,7 +58,6 @@ export default function Header() {
     : {
         discover: "Entdecken",
         plan: "Planen",
-        experience: "Erleben",
         blog: "Blog",
         community: "Community",
         about: "Über uns",
@@ -189,13 +187,6 @@ export default function Header() {
           >
             {copy.plan}
           </Link>
-
-          <a
-            href="#"
-            className="transition hover:text-teal-500"
-          >
-            {copy.experience}
-          </a>
 
           <Link
             href={localizedHref("/blog")}
