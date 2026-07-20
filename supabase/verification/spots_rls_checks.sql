@@ -27,6 +27,18 @@ with checks as (
       and cmd in ('INSERT', 'UPDATE', 'DELETE', 'ALL')
       and (qual = 'true' or with_check = 'true')
   )
+  union all
+
+  select 'delete is admin or editor', exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public'
+      and tablename = 'spots'
+      and policyname = 'spots_admin_delete'
+      and cmd = 'DELETE'
+      and roles = array['authenticated']::name[]
+      and qual = 'public.is_admin_or_editor()'
+  )
 )
 select check_name, case when passed then 'pass' else 'FAIL' end as result
 from checks order by check_name;
