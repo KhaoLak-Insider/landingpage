@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ImagePlus, Languages, Loader2 } from "lucide-react";
+import { Check, Copy, ImagePlus, Languages, Loader2, Sparkles } from "lucide-react";
 import { supabase } from "@/src/lib/supabase";
 import { translateTexts } from "@/src/lib/admin/deepl";
 import { uploadBlogImage } from "@/src/lib/r2-images";
@@ -20,17 +20,23 @@ type PreviewBlock =
   | { type: "paragraph"; content: string };
 
 function normalizeMarkdownText(text: string) {
-  return text
-    .split("\n")
-    .map((line) => {
-      const trimmed = line.trim();
-      const match = trimmed.match(/^(#{1,3})\s*(.*?)\s*(#{1,3})?$/);
-      if (!match) return line;
-      if (!trimmed.startsWith("#")) return line;
+  const lines = text.split("\n");
+  const normalized: string[] = [];
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const rawLine = lines[index];
+    const trimmed = rawLine.trim();
+
+    const match = trimmed.match(/^(#{1,3})\s*(.*?)\s*(#{1,3})?$/);
+    if (match && trimmed.startsWith("#")) {
       const [, hashes, content] = match;
-      return `${hashes} ${content.trim()}`;
-    })
-    .join("\n");
+      normalized.push(`${hashes} ${content.trim()}`);
+    } else {
+      normalized.push(rawLine);
+    }
+  }
+
+  return normalized.join("\n");
 }
 
 // HELPER: Konvertiert Text für die saubere Rendering-Vorschau in strukturierte Blöcke
@@ -93,7 +99,105 @@ export default function BlogEditPage() {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [aiPrompt, setAiPrompt] = useState("");
+  const [imagePrompt, setImagePrompt] = useState("");
+  const [imagePromptCopied, setImagePromptCopied] = useState(false);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
+  const contentInputRef = useRef<HTMLTextAreaElement | null>(null);
+
+  const imageStylePrompt = (title: string, category: string) => {
+    const topic = (title || "Khao Lak Guide").trim();
+    const categoryText = category.trim() || "Reiseguide";
+    return `Erstelle ein hochwertiges YouTube/Blog-Hero-Thumbnail im Stil der bereitgestellten Referenzbilder für einen deutschsprachigen Khao-Lak-Reiseblog.
+
+Motiv:
+- Thema: ${topic}
+- Kontext: ${categoryText}
+- Szene mit tropischer Thailand-Atmosphäre, warmem Sonnenuntergang oder klarer Tagesstimmung, fotorealistisch, dynamisch, sehr hochwertig
+- starke visuelle Hierarchie, große Titel, prägnante Unterzeile, kleine Info-Boxen oder Icon-Module wie in den Referenzen
+
+Stil:
+- kräftige Blautöne, Türkis, Gold, Weiß, Orange
+- kontrastreiche, saubere Typografie mit großer Headline oben
+- gelbe Pinselstrich-Balken für Untertitel wie in den Referenzen
+- moderne Infografik-Optik mit mehreren kleinen Stichpunkten/Icons
+- cinematic, polished, marketable, editorial travel thumbnail
+
+Bildaufbau:
+- 16:9 Querformat
+- große Headline oben
+- mittlere Unterzeile auf gelbem Brush-Stroke
+- links oder unten kompakte Info-Elemente mit Icons
+- rechts oder im Vordergrund ein starkes Hauptmotiv
+- insgesamt freundlich, klar, klickstark und nicht überladen
+
+Text im Bild:
+- Haupttitel in Großbuchstaben, sehr gut lesbar
+- Unterzeile in deutscher Sprache
+- keine Rechtschreibfehler, kein Zufallstext, keine Wasserzeichen
+
+Do not:
+- kein minimalistisches Design
+- keine dunkle, triste Stimmung
+- keine unscharfen Personen
+- keine verzerrten Hände oder Gesichter
+- keine generischen Stockfoto-Anmutungen`;
+  };
+
+  const generateImagePrompt = async () => {
+    const prompt = imageStylePrompt(formData.title, formData.category);
+    setImagePrompt(prompt);
+    setImagePromptCopied(false);
+    try {
+      await navigator.clipboard.writeText(prompt);
+      setImagePromptCopied(true);
+      window.setTimeout(() => setImagePromptCopied(false), 1800);
+    } catch {
+      // Clipboard kann je nach Browser blockiert sein; Prompt bleibt sichtbar.
+    }
+  };
+
+  const generateAndUseBlogImage = async () => {
+    const prompt = imagePrompt || imageStylePrompt(formData.title, formData.category);
+    setImagePrompt(prompt);
+    setIsGeneratingImage(true);
+    try {
+      const session = await supabase.auth.getSession();
+      const token = session.data.session?.access_token;
+      if (!token) {
+        alert("Bitte zuerst anmelden.");
+        return;
+      }
+
+      const response = await fetch("/api/admin/generate-blog-image", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt,
+          blogSlug:
+            formData.title
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, "-")
+              .replace(/^-+|-+$/g, ""),
+          title: formData.title,
+        }),
+      });
+
+      const data = (await response.json()) as { url?: string; error?: string };
+      if (!response.ok || !data.url) {
+        throw new Error(data.error || "Bild konnte nicht generiert werden.");
+      }
+
+      setFormData((current) => ({ ...current, image_url: data.url || "" }));
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Bild konnte nicht generiert werden.");
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
 
   // Authentifizierung, Rollenprüfung (aus der profiles-Tabelle) und Blogbeitrag beim Laden abrufen
   useEffect(() => {
@@ -221,6 +325,24 @@ export default function BlogEditPage() {
     } finally {
       setIsUploadingImage(false);
     }
+  };
+
+  const insertContentSnippet = (snippet: string) => {
+    const textarea = contentInputRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart ?? formData.content.length;
+    const end = textarea.selectionEnd ?? formData.content.length;
+    const nextValue =
+      formData.content.slice(0, start) + snippet + formData.content.slice(end);
+
+    setFormData((current) => ({ ...current, content: nextValue }));
+
+    requestAnimationFrame(() => {
+      const nextCursor = start + snippet.length;
+      textarea.focus();
+      textarea.setSelectionRange(nextCursor, nextCursor);
+    });
   };
 
   const translateToEnglish = async () => {
@@ -404,6 +526,67 @@ export default function BlogEditPage() {
             >
               {saving ? "KI optimiert Text..." : "Text durch KI erweitern / umschreiben"}
             </button>
+          </section>
+
+          <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-2">
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-teal-600">Bildstil</span>
+                <h2 className="mt-1 text-lg font-bold text-slate-800">Referenz-Prompt für einheitliche Hero-Bilder</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => void generateImagePrompt()}
+                className="inline-flex items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-4 py-2 text-sm font-bold text-teal-700 hover:bg-teal-100"
+              >
+                <Sparkles size={16} />
+                Prompt generieren
+              </button>
+            </div>
+            <p className="text-sm leading-7 text-slate-600">
+              Dieser Prompt orientiert sich an deinen Referenzbildern: große Headline, gelbe Brush-Stroke-Unterzeile, tropische Szene und klickstarke Infografik-Optik.
+            </p>
+            <textarea
+              readOnly
+              value={imagePrompt || "Klicke auf „Prompt generieren“, um einen fertigen Bildprompt zu erhalten."}
+              className="min-h-[240px] w-full rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-7 text-slate-700 outline-none"
+            />
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-xs text-slate-400">
+                {imagePromptCopied ? "Prompt in die Zwischenablage kopiert." : "Der Prompt ist sofort wiederverwendbar für alle Blogbilder."}
+              </span>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!imagePrompt) {
+                      await generateImagePrompt();
+                      return;
+                    }
+                    try {
+                      await navigator.clipboard.writeText(imagePrompt);
+                      setImagePromptCopied(true);
+                      window.setTimeout(() => setImagePromptCopied(false), 1800);
+                    } catch {
+                      setImagePromptCopied(false);
+                    }
+                  }}
+                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50"
+                >
+                  {imagePromptCopied ? <Check size={16} /> : <Copy size={16} />}
+                  {imagePromptCopied ? "Kopiert" : "Prompt kopieren"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void generateAndUseBlogImage()}
+                  disabled={isGeneratingImage}
+                  className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white hover:bg-slate-800 disabled:opacity-60"
+                >
+                  {isGeneratingImage ? <Loader2 size={16} className="animate-spin" /> : <ImagePlus size={16} />}
+                  {isGeneratingImage ? "Bild wird generiert..." : "Bild generieren"}
+                </button>
+              </div>
+            </div>
           </section>
 
           {/* TEXTE */}

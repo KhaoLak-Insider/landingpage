@@ -2,8 +2,7 @@
 import Link from "next/link";
 import Image from "next/image"; 
 import { createClient } from "@supabase/supabase-js";
-import ReactMarkdown from "react-markdown";
-import type { ComponentProps } from "react";
+import type { ReactNode } from "react";
 import BlogImageMagnifier from "@/src/components/BlogImageMagnifier";
 import { headers } from "next/headers";
 import { absoluteLocalizedUrl, localizePath } from "@/src/lib/i18n-routing";
@@ -20,17 +19,131 @@ interface PostPageProps {
 }
 
 function normalizeMarkdownText(text: string) {
-  return text
-    .split("\n")
-    .map((line) => {
-      const trimmed = line.trim();
-      const match = trimmed.match(/^(#{1,3})\s*(.*?)\s*(#{1,3})?$/);
-      if (!match) return line;
-      if (!trimmed.startsWith("#")) return line;
-      const [, hashes, content] = match;
-      return `${hashes} ${content.trim()}`;
-    })
-    .join("\n");
+  const lines = text.split("\n");
+  const normalized: string[] = [];
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const rawLine = lines[index];
+    const trimmed = rawLine.trim();
+
+    const headingMatch = trimmed.match(/^(#{1,3})\s*(.*?)\s*(#{1,3})?$/);
+    if (headingMatch && trimmed.startsWith("#")) {
+      const [, hashes, content] = headingMatch;
+      normalized.push(`${hashes} ${content.trim()}`);
+    } else {
+      normalized.push(rawLine);
+    }
+  }
+
+  return normalized.join("\n");
+}
+
+type RenderBlock =
+  | { type: "heading"; level: 1 | 2 | 3; content: string }
+  | { type: "paragraph"; content: string }
+  | { type: "table"; header: string[]; rows: string[][] }
+  | { type: "list"; items: string[] };
+
+function parseMarkdownContent(text: string): RenderBlock[] {
+  const lines = normalizeMarkdownText(text).split("\n");
+  const blocks: RenderBlock[] = [];
+  let index = 0;
+
+  const isTableLine = (line: string) => line.trim().startsWith("|") && line.trim().endsWith("|");
+  const splitTableRow = (line: string) =>
+    line.trim().slice(1, -1).split("|").map((cell) => cell.trim());
+  const nextNonEmptyIndex = (startIndex: number) => {
+    for (let i = startIndex; i < lines.length; i += 1) {
+      if (lines[i].trim()) return i;
+    }
+    return -1;
+  };
+
+  while (index < lines.length) {
+    const line = lines[index].trim();
+    if (!line) {
+      index += 1;
+      continue;
+    }
+
+    const headingMatch = line.match(/^(#{1,3})\s+(.*)$/);
+    if (headingMatch) {
+      blocks.push({
+        type: "heading",
+        level: headingMatch[1].length as 1 | 2 | 3,
+        content: headingMatch[2].trim(),
+      });
+      index += 1;
+      continue;
+    }
+
+    const nextTableIndex = nextNonEmptyIndex(index + 1);
+    if (isTableLine(line) && nextTableIndex !== -1 && isTableLine(lines[nextTableIndex])) {
+      const header = splitTableRow(lines[index]);
+      index = nextTableIndex + 1;
+      const rows: string[][] = [];
+      while (index < lines.length) {
+        while (index < lines.length && !lines[index].trim()) {
+          index += 1;
+        }
+        if (index >= lines.length || !isTableLine(lines[index])) break;
+        rows.push(splitTableRow(lines[index]));
+        index += 1;
+      }
+      blocks.push({ type: "table", header, rows });
+      continue;
+    }
+
+    if (line.startsWith("- ") || line.startsWith("* ")) {
+      const items: string[] = [];
+      while (index < lines.length) {
+        const current = lines[index].trim();
+        if (!(current.startsWith("- ") || current.startsWith("* "))) break;
+        items.push(current.replace(/^[-*]\s+/, ""));
+        index += 1;
+      }
+      blocks.push({ type: "list", items });
+      continue;
+    }
+
+    const paragraphs: string[] = [line];
+    index += 1;
+    while (index < lines.length) {
+      const current = lines[index].trim();
+      if (!current || current.startsWith("#") || current.startsWith("- ") || current.startsWith("* ") || isTableLine(current)) break;
+      paragraphs.push(current);
+      index += 1;
+    }
+    blocks.push({ type: "paragraph", content: paragraphs.join(" ") });
+  }
+
+  return blocks;
+}
+
+function renderInlineText(text: string): ReactNode[] {
+  const nodes: ReactNode[] = [];
+  const parts = text.split(/(\[[^\]]+\]\([^)]+\))/g);
+  parts.forEach((part, index) => {
+    const match = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+    if (match) {
+      nodes.push(
+        <Link key={index} href={match[2]} className="font-bold text-[#079ca5] underline transition-colors hover:text-[#067f86]">
+          {match[1]}
+        </Link>,
+      );
+      return;
+    }
+    const boldParts = part.split(/(\*\*[^*]+\*\*)/g);
+    boldParts.forEach((boldPart, boldIndex) => {
+      const boldMatch = boldPart.match(/^\*\*([^*]+)\*\*$/);
+      if (boldMatch) {
+        nodes.push(<strong key={`${index}-${boldIndex}`}>{boldMatch[1]}</strong>);
+      } else if (boldPart) {
+        nodes.push(<span key={`${index}-${boldIndex}`}>{boldPart}</span>);
+      }
+    });
+  });
+  return nodes;
 }
 
 // 1. DYNAMISCHE METADATEN FÜR GOOGLE
@@ -154,62 +267,6 @@ export default async function BlogPostDetailPage({ params }: PostPageProps) {
     }
   };
 
-  const markdownComponents = {
-    h1: ({ ...props }) => (
-      <h1 className="mb-5 mt-10 text-3xl font-black tracking-[-0.035em] text-[#10233f] md:text-4xl" {...props} />
-    ),
-    h2: ({ ...props }) => (
-      <h2 className="mb-4 mt-10 text-2xl font-bold tracking-[-0.025em] text-[#10233f] md:text-3xl" {...props} />
-    ),
-    h3: ({ ...props }) => (
-      <h3 className="text-2xl font-bold text-[#10233f] mt-8 mb-4 tracking-tight" {...props} />
-    ),
-    h4: ({ ...props }) => (
-      <h4 className="text-xl font-bold text-[#10233f] mt-6 mb-3 tracking-tight" {...props} />
-    ),
-    p: ({ ...props }) => (
-      <p className="mb-5 text-base font-normal leading-8 text-[#526176] md:text-[17px]" {...props} />
-    ),
-    li: ({ ...props }) => (
-      <li className="ml-6 list-disc text-[#526176] mb-2 leading-7" {...props} />
-    ),
-    hr: ({ ...props }) => (
-      <hr className="my-10 border-[#e7edf2]" {...props} />
-    ),
-    a: ({ href, children, ...props }: ComponentProps<"a">) => {
-      const url = href || "";
-      const isSailyLink = url.includes("saily") || url.includes("xKbnW9ID");
-      const isYesimLink = url.includes("yesim") || url.includes("CTkfUgOu");
-
-      if (isSailyLink || isYesimLink) {
-        return (
-          <div className="my-6 block">
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-xl bg-[#0eb4bb] px-6 py-3.5 font-bold text-[#10233f] shadow-md shadow-[#0eb4bb]/10 transition-all duration-200 hover:bg-[#55d7d1] active:scale-[0.99] no-underline"
-              {...props}
-            >
-              <span>🚀 {copy.dataPackage} {isYesimLink ? "Yesim" : "Saily"}</span>
-              <span className="text-base">→</span>
-            </a>
-          </div>
-        );
-      }
-
-      return (
-        <a 
-          href={url} 
-          className="font-bold text-[#079ca5] underline transition-colors hover:text-[#067f86]"
-          {...props}
-        >
-          {children}
-        </a>
-      );
-    }
-  };
-
   return (
     <main className="min-h-screen bg-white pb-28 text-[#10233f] antialiased">
       <script
@@ -314,11 +371,66 @@ export default async function BlogPostDetailPage({ params }: PostPageProps) {
             <BlogImageMagnifier src={post.image_url} alt={title} />
           )}
 
-          {/* Der formatierte Haupttext via react-markdown */}
           <div className="focus:outline-none">
-            <ReactMarkdown components={markdownComponents}>
-              {content}
-            </ReactMarkdown>
+            {parseMarkdownContent(content).map((block, index) => {
+              if (block.type === "heading") {
+                const Tag = `h${block.level}` as keyof JSX.IntrinsicElements;
+                const className =
+                  block.level === 1
+                    ? "mb-5 mt-10 text-3xl font-black tracking-[-0.035em] text-[#10233f] md:text-4xl"
+                    : block.level === 2
+                      ? "mb-4 mt-10 text-2xl font-bold tracking-[-0.025em] text-[#10233f] md:text-3xl"
+                      : "text-2xl font-bold text-[#10233f] mt-8 mb-4 tracking-tight";
+                return <Tag key={index} className={className}>{renderInlineText(block.content)}</Tag>;
+              }
+
+              if (block.type === "list") {
+                return (
+                  <ul key={index} className="mb-5 list-disc pl-6 text-[#526176]">
+                    {block.items.map((item, itemIndex) => (
+                      <li key={itemIndex} className="mb-2 leading-7">
+                        {renderInlineText(item)}
+                      </li>
+                    ))}
+                  </ul>
+                );
+              }
+
+              if (block.type === "table") {
+                return (
+                  <div key={index} className="my-8 overflow-x-auto rounded-2xl border border-[#e8edf2] bg-white shadow-[0_8px_24px_rgba(15,35,62,.035)]">
+                    <table className="min-w-full border-collapse text-left text-sm">
+                      <thead className="bg-[#f6f8fb]">
+                        <tr className="border-b border-[#e8edf2]">
+                          {block.header.map((cell, cellIndex) => (
+                            <th key={cellIndex} className="px-4 py-3 text-xs font-bold uppercase tracking-[.08em] text-[#10233f]">
+                              {renderInlineText(cell)}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#e8edf2]">
+                        {block.rows.map((row, rowIndex) => (
+                          <tr key={rowIndex} className="border-b border-[#e8edf2] last:border-b-0">
+                            {row.map((cell, cellIndex) => (
+                              <td key={cellIndex} className="px-4 py-3 align-top text-[#526176]">
+                                {renderInlineText(cell)}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              }
+
+              return (
+                <p key={index} className="mb-5 text-base font-normal leading-8 text-[#526176] md:text-[17px]">
+                  {renderInlineText(block.content)}
+                </p>
+              );
+            })}
           </div>
         </article>
 
