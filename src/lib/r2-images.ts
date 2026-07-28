@@ -92,6 +92,10 @@ export function uploadHotelVideo(file: File, hotelSlug: string): Promise<string>
   return uploadScopedImage(file, { scope: "hotel", hotelSlug, kind: "video" });
 }
 
+export function uploadBlogImage(file: File, blogSlug: string): Promise<string> {
+  return uploadScopedImage(file, { scope: "blog", blogSlug, kind: "cover" });
+}
+
 const MAX_IMAGE_EDGE = 2400;
 const WEBP_QUALITY = 0.82;
 

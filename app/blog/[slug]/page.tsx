@@ -19,6 +19,20 @@ interface PostPageProps {
   params: Promise<{ slug: string }>;
 }
 
+function normalizeMarkdownText(text: string) {
+  return text
+    .split("\n")
+    .map((line) => {
+      const trimmed = line.trim();
+      const match = trimmed.match(/^(#{1,3})\s*(.*?)\s*(#{1,3})?$/);
+      if (!match) return line;
+      if (!trimmed.startsWith("#")) return line;
+      const [, hashes, content] = match;
+      return `${hashes} ${content.trim()}`;
+    })
+    .join("\n");
+}
+
 // 1. DYNAMISCHE METADATEN FÜR GOOGLE
 export async function generateMetadata({ params }: PostPageProps) {
   const { slug } = await params;
@@ -106,7 +120,7 @@ export default async function BlogPostDetailPage({ params }: PostPageProps) {
   };
   const title = localizedValue(post, "title");
   const excerpt = localizedValue(post, "excerpt");
-  const content = localizedValue(post, "content");
+  const content = normalizeMarkdownText(localizedValue(post, "content"));
   const category = localizedValue(post, "category");
   const copy = language === "en"
     ? {
@@ -141,6 +155,9 @@ export default async function BlogPostDetailPage({ params }: PostPageProps) {
   };
 
   const markdownComponents = {
+    h1: ({ ...props }) => (
+      <h1 className="mb-5 mt-10 text-3xl font-black tracking-[-0.035em] text-[#10233f] md:text-4xl" {...props} />
+    ),
     h2: ({ ...props }) => (
       <h2 className="mb-4 mt-10 text-2xl font-bold tracking-[-0.025em] text-[#10233f] md:text-3xl" {...props} />
     ),

@@ -137,6 +137,7 @@ export async function POST(request: NextRequest) {
     const scope = String(formData.get("scope") || "spot");
     const category = String(formData.get("category") || "");
     const slug = String(formData.get("slug") || "");
+    const blogSlug = String(formData.get("blogSlug") || "");
     const hotelSlug = String(formData.get("hotelSlug") || "");
     const roomSlug = String(formData.get("roomSlug") || "");
     const imageKind = String(formData.get("kind") || "gallery");
@@ -150,13 +151,17 @@ export async function POST(request: NextRequest) {
       scope === "hotel" &&
       Boolean(hotelSlug.trim()) &&
       ["hero", "gallery", "video"].includes(imageKind);
+    const validBlog =
+      scope === "blog" &&
+      Boolean(blogSlug.trim()) &&
+      imageKind === "cover";
     const validRoom =
       scope === "room" &&
       Boolean(hotelSlug.trim()) &&
       Boolean(roomSlug.trim()) &&
       ["cover", "gallery"].includes(imageKind);
 
-    if (!(file instanceof File) || (!validSpot && !validHotel && !validRoom)) {
+    if (!(file instanceof File) || (!validSpot && !validHotel && !validBlog && !validRoom)) {
       return NextResponse.json(
         { error: "Datei, Kategorie, Slug und Bildtyp werden benötigt." },
         { status: 400 },
@@ -187,6 +192,9 @@ export async function POST(request: NextRequest) {
     if (scope === "hotel") {
       const hotelPath = pathSegment(hotelSlug, "temp-hotel");
       key = `hotels/${hotelPath}/${imageKind}/${hotelPath}-${imageKind}-${shortId}.${extension}`;
+    } else if (scope === "blog") {
+      const blogPath = pathSegment(blogSlug, "temp-blog");
+      key = `blog/${blogPath}/${blogPath}-${imageKind}-${shortId}.${extension}`;
     } else if (scope === "room") {
       const hotelPath = pathSegment(hotelSlug, "temp-hotel");
       const roomPath = pathSegment(roomSlug, "temp-room");

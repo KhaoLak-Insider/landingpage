@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { ImagePlus, Languages, Loader2 } from "lucide-react";
 import { supabase } from "@/src/lib/supabase";
+import { translateTexts } from "@/src/lib/admin/deepl";
+import { uploadBlogImage } from "@/src/lib/r2-images";
 
 // HELPER: Berechnet die Lesezeit basierend auf ca. 200 Wörtern pro Minute
 function calculateReadingTime(text: string): number {
@@ -12,17 +15,53 @@ function calculateReadingTime(text: string): number {
   return time < 1 ? 1 : time;
 }
 
+type PreviewBlock =
+  | { type: "heading-1" | "heading-2" | "heading-3"; content: string }
+  | { type: "paragraph"; content: string };
+
+function normalizeMarkdownText(text: string) {
+  return text
+    .split("\n")
+    .map((line) => {
+      const trimmed = line.trim();
+      const match = trimmed.match(/^(#{1,3})\s*(.*?)\s*(#{1,3})?$/);
+      if (!match) return line;
+      if (!trimmed.startsWith("#")) return line;
+      const [, hashes, content] = match;
+      return `${hashes} ${content.trim()}`;
+    })
+    .join("\n");
+}
+
 // HELPER: Konvertiert Text für die saubere Rendering-Vorschau in strukturierte Blöcke
 function convertTextToPreviewBlocks(text: string) {
   if (!text) return [];
-  return text.split('\n').map(line => {
-    const trimmedLine = line.trim();
-    if (trimmedLine.startsWith('###')) {
-      return { type: 'heading', content: trimmedLine.replace(/###\s*/, '') };
-    }
-    if (trimmedLine === '') return null;
-    return { type: 'paragraph', content: trimmedLine };
-  }).filter(block => block !== null);
+  return normalizeMarkdownText(text)
+    .split("\n")
+    .map((line) => {
+      const trimmedLine = line.trim();
+      if (trimmedLine.startsWith("###")) {
+        return {
+          type: "heading-3",
+          content: trimmedLine.replace(/^###\s*/, ""),
+        } as PreviewBlock;
+      }
+      if (trimmedLine.startsWith("##")) {
+        return {
+          type: "heading-2",
+          content: trimmedLine.replace(/^##\s*/, ""),
+        } as PreviewBlock;
+      }
+      if (trimmedLine.startsWith("#")) {
+        return {
+          type: "heading-1",
+          content: trimmedLine.replace(/^#\s*/, ""),
+        } as PreviewBlock;
+      }
+      if (trimmedLine === "") return null;
+      return { type: "paragraph", content: trimmedLine } as PreviewBlock;
+    })
+    .filter((block): block is PreviewBlock => block !== null);
 }
 
 export default function BlogEditPage() {
@@ -50,8 +89,11 @@ export default function BlogEditPage() {
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [aiPrompt, setAiPrompt] = useState("");
+  const imageInputRef = useRef<HTMLInputElement | null>(null);
 
   // Authentifizierung, Rollenprüfung (aus der profiles-Tabelle) und Blogbeitrag beim Laden abrufen
   useEffect(() => {
@@ -159,6 +201,63 @@ export default function BlogEditPage() {
     }
   };
 
+  const handleBlogImageUpload = async (file: File) => {
+    const slug = formData.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+
+    if (!slug) {
+      alert("Bitte zuerst einen Titel eingeben, damit das Bild sauber abgelegt werden kann.");
+      return;
+    }
+
+    setIsUploadingImage(true);
+    try {
+      const url = await uploadBlogImage(file, slug);
+      setFormData((current) => ({ ...current, image_url: url }));
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Der Bild-Upload ist fehlgeschlagen.");
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  const translateToEnglish = async () => {
+    const entries = [
+      ["title_en", formData.title],
+      ["excerpt_en", formData.excerpt],
+      ["content_en", formData.content],
+      ["category_en", formData.category],
+    ] as const;
+    const availableEntries = entries.filter(([, value]) => value.trim());
+
+    if (availableEntries.length === 0) {
+      alert("Bitte zuerst deutsche Texte oder eine Kategorie eingeben.");
+      return;
+    }
+
+    setIsTranslating(true);
+    try {
+      const translations = await translateTexts(
+        availableEntries.map(([, value]) => value),
+        { sourceLang: "DE", targetLang: "EN-GB" },
+      );
+
+      setFormData((current) => {
+        const next = { ...current };
+        availableEntries.forEach(([field], index) => {
+          next[field] = translations[index];
+        });
+        return next;
+      });
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Die Übersetzung ist fehlgeschlagen.");
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
   // Änderungen in Supabase speichern (UPDATE)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -221,7 +320,18 @@ export default function BlogEditPage() {
         <form onSubmit={handleSubmit} className="space-y-8 pb-24">
           {/* BASIS INFO */}
           <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
-            <h2 className="text-lg font-bold text-slate-800 border-b pb-2">Artikel-Basis</h2>
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-2">
+              <h2 className="text-lg font-bold text-slate-800">Artikel-Basis</h2>
+              <button
+                type="button"
+                onClick={() => imageInputRef.current?.click()}
+                disabled={isUploadingImage}
+                className="inline-flex items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-4 py-2 text-sm font-bold text-teal-700 hover:bg-teal-100 disabled:opacity-60"
+              >
+                {isUploadingImage ? <Loader2 size={16} className="animate-spin" /> : <ImagePlus size={16} />}
+                {isUploadingImage ? "Bild wird in R2 geladen …" : "Bild in R2 hochladen"}
+              </button>
+            </div>
             <input 
               className="w-full p-4 border rounded-xl focus:ring-2 focus:ring-teal-500 outline-none" 
               placeholder="Titel des Blogbeitrags" 
@@ -235,6 +345,24 @@ export default function BlogEditPage() {
               value={formData.image_url}
               onChange={(e) => setFormData({...formData, image_url: e.target.value})}
             />
+            <div className="flex flex-wrap items-center gap-3">
+              <input
+                ref={imageInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    void handleBlogImageUpload(file);
+                  }
+                  e.currentTarget.value = "";
+                }}
+              />
+              <span className="text-xs text-slate-400">
+                Nach dem Upload wird die URL automatisch ins Feld gesetzt.
+              </span>
+            </div>
 
             <div className="grid grid-cols-2 gap-4 pt-2">
               <div>
@@ -280,7 +408,18 @@ export default function BlogEditPage() {
 
           {/* TEXTE */}
           <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
-            <h2 className="text-lg font-bold text-slate-800 border-b pb-2">Inhalt</h2>
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-2">
+              <h2 className="text-lg font-bold text-slate-800">Inhalt</h2>
+              <button
+                type="button"
+                onClick={translateToEnglish}
+                disabled={isTranslating}
+                className="inline-flex items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-4 py-2 text-sm font-bold text-teal-700 hover:bg-teal-100 disabled:opacity-60"
+              >
+                <Languages size={16} />
+                {isTranslating ? "DeepL übersetzt …" : "DE → EN übersetzen"}
+              </button>
+            </div>
             <div>
               <label className="block text-xs font-bold uppercase text-slate-400 mb-2">Auszug / Kurzbeschreibung (excerpt)</label>
               <textarea 
@@ -384,11 +523,25 @@ export default function BlogEditPage() {
             <p className="text-lg text-slate-500 italic mb-6 border-l-4 pl-4 border-teal-500">{formData.excerpt || "Kurzbeschreibung..."}</p>
             
             <div className="prose text-slate-700 leading-relaxed border-t pt-4">
-              {convertTextToPreviewBlocks(formData.content).map((block, i: number) => (
-                block.type === 'heading' 
-                  ? <h3 key={i} className="text-2xl font-bold mt-6 mb-3 text-slate-800">{block.content}</h3>
-                  : <p key={i} className="mb-4">{block.content}</p>
-              ))}
+              {convertTextToPreviewBlocks(formData.content).map((block, i: number) =>
+                block.type === "heading-1" ? (
+                  <h1 key={i} className="text-3xl font-black mt-8 mb-4 text-slate-900 tracking-tight">
+                    {block.content}
+                  </h1>
+                ) : block.type === "heading-2" ? (
+                  <h2 key={i} className="text-2xl font-bold mt-7 mb-3 text-slate-800">
+                    {block.content}
+                  </h2>
+                ) : block.type === "heading-3" ? (
+                  <h3 key={i} className="text-xl font-bold mt-6 mb-3 text-slate-800">
+                    {block.content}
+                  </h3>
+                ) : (
+                  <p key={i} className="mb-4">
+                    {block.content}
+                  </p>
+                ),
+              )}
             </div>
           </div>
         </div>
