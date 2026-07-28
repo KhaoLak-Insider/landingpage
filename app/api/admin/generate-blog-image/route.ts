@@ -148,14 +148,16 @@ export async function POST(request: NextRequest) {
       cache: "no-store",
     });
 
-    const raw = (await imageResponse.json()) as
-      | { error?: { message?: string }; data?: Array<{ b64_json?: string }> }
-      | Record<string, unknown>;
+    const raw = (await imageResponse.json()) as unknown;
 
     if (!imageResponse.ok) {
+      const apiError =
+        typeof raw === "object" && raw !== null && "error" in raw
+          ? (raw as { error?: { message?: unknown } }).error
+          : undefined;
       const message =
-        "error" in raw && raw.error?.message
-          ? raw.error.message
+        apiError && typeof apiError.message === "string"
+          ? apiError.message
           : "Die OpenAI-Bildgenerierung ist fehlgeschlagen.";
       return NextResponse.json({ error: message }, { status: imageResponse.status });
     }

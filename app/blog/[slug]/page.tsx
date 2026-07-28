@@ -2,7 +2,7 @@
 import Link from "next/link";
 import Image from "next/image"; 
 import { createClient } from "@supabase/supabase-js";
-import type { ReactNode } from "react";
+import type { ElementType, ReactNode } from "react";
 import BlogImageMagnifier from "@/src/components/BlogImageMagnifier";
 import { headers } from "next/headers";
 import { absoluteLocalizedUrl, localizePath } from "@/src/lib/i18n-routing";
@@ -374,7 +374,7 @@ export default async function BlogPostDetailPage({ params }: PostPageProps) {
           <div className="focus:outline-none">
             {parseMarkdownContent(content).map((block, index) => {
               if (block.type === "heading") {
-                const Tag = `h${block.level}` as keyof JSX.IntrinsicElements;
+                const Tag = `h${block.level}` as ElementType;
                 const className =
                   block.level === 1
                     ? "mb-5 mt-10 text-3xl font-black tracking-[-0.035em] text-[#10233f] md:text-4xl"
