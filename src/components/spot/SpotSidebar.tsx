@@ -70,18 +70,19 @@ export default function SpotSidebar({
   return (
     <aside
       style={{
-        width: 320,
+        width: overlapHero ? 300 : "100%",
         position: "sticky",
-        top: "20px",
+        top: overlapHero ? "20px" : "18px",
         marginTop: overlapHero ? "-430px" : 0,
         alignSelf: "start",
+        zIndex: 5,
       }}
     >
       <div
         style={{
           background: "#ffffff",
-          borderRadius: 24,
-          padding: "32px",
+          borderRadius: 22,
+          padding: "24px",
           boxShadow: "0 10px 25px -5px rgba(0,0,0,0.05)",
           border: "1px solid #f1f5f9",
         }}
@@ -96,8 +97,8 @@ export default function SpotSidebar({
               justifyContent: "center",
               gap: "8px",
               width: "100%",
-              marginBottom: 32,
-              padding: "12px",
+              marginBottom: 24,
+              padding: "10px 12px",
               background: "#f1f5f9",
               borderRadius: 14,
               fontWeight: 700,
@@ -110,25 +111,18 @@ export default function SpotSidebar({
           </Link>
         )}
 
-        <div
+          <div
           style={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            marginBottom: 32,
+            marginBottom: 24,
           }}
         >
-          <h3
-            style={{
-              fontSize: "11px",
-              fontWeight: 700,
-              color: "#94a3b8",
-              textTransform: "uppercase",
-              margin: 0,
-            }}
-          >
-            {t(language, "spotInformation")}
-          </h3>
+          <div className="standard-section-heading">
+            <span>{t(language, "spotInformation")}</span>
+            <h2>{language === "en" ? "At a glance" : "Auf einen Blick"}</h2>
+          </div>
 
           <button
             type="button"
@@ -154,327 +148,219 @@ export default function SpotSidebar({
 
         <div
           style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 24,
-            marginBottom: 40,
+            display: "grid",
+            gridTemplateColumns: overlapHero ? "1fr" : "minmax(0,1fr) 280px",
+            gap: 20,
+            marginBottom: 28,
           }}
         >
-          {spot.category && (
-            <InfoItem
-              icon={<Tag size={16} />}
-              label={t(language, "category")}
-              value={localizedCategory}
-            />
-          )}
-
-          {spot.stars && (
-            <div className="group relative flex items-center gap-[12px]">
-              <div
-                style={{
-                  color: "#14b8a6",
-                  background: "#f0fdfa",
-                  padding: "8px",
-                  borderRadius: "8px",
-                }}
-              >
-                <Sparkles size={16} />
-              </div>
-
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "2px",
-                }}
-              >
-                <span
-                  className="flex items-center gap-1"
-                  style={{
-                    fontSize: "10px",
-                    fontWeight: 700,
-                    color: "#94a3b8",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  {t(language, "officialCategory")}
-                  <HelpCircle
-                    size={12}
-                    className="text-slate-400 cursor-help"
-                  />
-                </span>
-
-                <span
-                  style={{
-                    fontSize: "13px",
-                    fontWeight: 600,
-                    color: "#334155",
-                  }}
-                >
-                  {spot.stars} {t(language, "stars")}
-                </span>
-              </div>
-
-              <div className="invisible group-hover:visible absolute bottom-full left-0 mb-2 w-64 p-3 bg-slate-900 text-white text-xs rounded-xl shadow-xl z-50 transition-all opacity-0 group-hover:opacity-100 font-medium leading-relaxed">
-                {t(language, "officialCategoryTooltip")}
-              </div>
-            </div>
-          )}
-
-          <InfoItem
-            icon={<Navigation size={16} />}
-            label={t(language, "drivingDistance")}
-            value={
-              isRouting ? (
-                "..."
-              ) : routeDist ? (
-                `${routeDist} km (${routeTime} ${t(
-                  language,
-                  "minutesShort"
-                )})`
-              ) : (
-                <Link
-                  href={localizedHref("/profile")}
-                  className="text-teal-600 underline font-bold"
-                >
-                  {t(language, "setHotel")}
-                </Link>
-              )
-            }
-          />
-
-          {spot.price_level !== undefined &&
-            spot.price_level !== null &&
-            spot.price_level.toString().trim() !== "" && (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                }}
-              >
-                <div
-                  style={{
-                    color: "#14b8a6",
-                    background: "#f0fdfa",
-                    padding: "8px",
-                    borderRadius: "8px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  {isFoodCategory ? (
-                    <img
-                      src="/icons/bottle.svg"
-                      alt="Chang"
-                      style={{
-                        width: 16,
-                        height: 16,
-                        objectFit: "contain",
-                      }}
-                    />
-                  ) : (
-                    <DollarSign size={16} />
-                  )}
+          <div className="standard-spot-info__grid">
+            {spot.category && (
+              <article>
+                <div className="standard-features__icon">
+                  <Tag size={16} />
                 </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "2px",
-                  }}
-                >
-                  <span
-                    className="flex items-center gap-1 group relative"
-                    style={{
-                      fontSize: "10px",
-                      fontWeight: 700,
-                      color: "#94a3b8",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    {isFoodCategory
-                      ? t(language, "changIndex")
-                      : t(language, "budget")}
-                    <HelpCircle
-                      size={12}
-                      className="text-slate-400 cursor-help ml-0.5"
-                    />
-
-                    <div className="invisible group-hover:visible absolute bottom-full left-0 mb-2 w-64 p-3 bg-slate-900 text-white text-xs rounded-xl shadow-xl z-50 transition-all opacity-0 group-hover:opacity-100 font-medium normal-case tracking-normal leading-relaxed">
-                      {isFoodCategory
-                        ? t(language, "changIndexTooltip")
-                        : t(language, "budgetTooltip")}
-                    </div>
-                  </span>
-
-                  {isFoodCategory ? (
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "4px",
-                        alignItems: "center",
-                        marginTop: "2px",
-                      }}
-                    >
-                      {Array.from({ length: 5 }).map((_, index) => {
-                        const currentLevel =
-                          parseInt(spot.price_level) || 0;
-                        const isFilled = index < currentLevel;
-
-                        return (
-                          <img
-                            key={index}
-                            src="/icons/bottle.svg"
-                            alt={t(language, "bottle")}
-                            style={{
-                              width: 10,
-                              height: 22,
-                              objectFit: "contain",
-                              filter: isFilled
-                                ? "none"
-                                : "grayscale(100%)",
-                              opacity: isFilled ? 1 : 0.25,
-                            }}
-                          />
-                        );
-                      })}
-
-                      <span
-                        style={{
-                          fontSize: "11px",
-                          color: "#64748b",
-                          marginLeft: "4px",
-                          fontWeight: 600,
-                        }}
-                      >
-                        ({spot.price_level}/5)
-                      </span>
-                    </div>
-                  ) : (
-                    <span
-                      style={{
-                        fontSize: "13px",
-                        fontWeight: 600,
-                        color: "#334155",
-                      }}
-                    >
-                      {spot.price_level} / 5
-                    </span>
-                  )}
+                <div>
+                  <span>{t(language, "category")}</span>
+                  <strong>{localizedCategory}</strong>
                 </div>
-              </div>
+              </article>
             )}
 
-          {spot.opening_hours &&
-            spot.opening_hours.trim() !== "" && (
-              <InfoItem
-                icon={<Clock size={16} />}
-                label={t(language, "openingHours")}
-                value={
-                  getLocalizedField(
-                    spot,
-                    "opening_hours",
-                    language
-                  ) || spot.opening_hours
+            <article>
+              <div className="standard-features__icon">
+                <Navigation size={16} />
+              </div>
+              <div>
+                <span>{t(language, "drivingDistance")}</span>
+                <strong>
+                  {isRouting ? (
+                    "..."
+                  ) : routeDist ? (
+                    `${routeDist} km (${routeTime} ${t(language, "minutesShort")})`
+                  ) : (
+                    <Link
+                      href={localizedHref("/profile")}
+                      className="text-teal-600 underline font-bold"
+                    >
+                      {t(language, "setHotel")}
+                    </Link>
+                  )}
+                </strong>
+              </div>
+            </article>
+
+            {spot.price_level !== undefined &&
+              spot.price_level !== null &&
+              spot.price_level.toString().trim() !== "" && (
+                <article>
+                  <div className="standard-features__icon">
+                    {isFoodCategory ? (
+                      <img
+                        src="/icons/bottle.svg"
+                        alt="Chang"
+                        style={{
+                          width: 16,
+                          height: 16,
+                          objectFit: "contain",
+                        }}
+                      />
+                    ) : (
+                      <DollarSign size={16} />
+                    )}
+                  </div>
+                  <div>
+                    <span>
+                      {isFoodCategory
+                        ? t(language, "changIndex")
+                        : t(language, "budget")}
+                    </span>
+                    <strong>
+                      {isFoodCategory ? (
+                        <span
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                            flexWrap: "wrap",
+                          }}
+                        >
+                          <span
+                            style={{
+                              display: "flex",
+                              gap: "4px",
+                              alignItems: "center",
+                            }}
+                          >
+                            {Array.from({ length: 5 }).map((_, index) => {
+                              const currentLevel =
+                                parseInt(spot.price_level) || 0;
+                              const isFilled = index < currentLevel;
+
+                              return (
+                                <img
+                                  key={index}
+                                  src="/icons/bottle.svg"
+                                  alt={t(language, "bottle")}
+                                  style={{
+                                    width: 10,
+                                    height: 22,
+                                    objectFit: "contain",
+                                    filter: isFilled
+                                      ? "none"
+                                      : "grayscale(100%)",
+                                    opacity: isFilled ? 1 : 0.25,
+                                  }}
+                                />
+                              );
+                            })}
+                          </span>
+                          <span style={{ whiteSpace: "nowrap" }}>
+                            ({spot.price_level}/5)
+                          </span>
+                        </span>
+                      ) : (
+                        `${spot.price_level} / 5`
+                      )}
+                    </strong>
+                  </div>
+                </article>
+              )}
+
+            {spot.opening_hours &&
+              spot.opening_hours.trim() !== "" && (
+                <article>
+                  <div className="standard-features__icon">
+                    <Clock size={16} />
+                  </div>
+                  <div>
+                    <span>{t(language, "openingHours")}</span>
+                    <strong>
+                      {getLocalizedField(
+                        spot,
+                        "opening_hours",
+                        language
+                      ) || spot.opening_hours}
+                    </strong>
+                  </div>
+                </article>
+              )}
+
+            {spot.parking_info?.name &&
+              spot.parking_info.name.trim() !== "" && (
+                <article>
+                  <div className="standard-features__icon">
+                    <Car size={16} />
+                  </div>
+                  <div>
+                    <span>{t(language, "parking")}</span>
+                    <strong>
+                      {getLocalizedConfigField(
+                        spot.parking_info,
+                        "name",
+                        language
+                      ) || spot.parking_info.name}
+                    </strong>
+                  </div>
+                </article>
+              )}
+
+            {spot.parking_info?.price &&
+              spot.parking_info.price.trim() !== "" && (
+                <article>
+                  <div className="standard-features__icon">
+                    <DollarSign size={16} />
+                  </div>
+                  <div>
+                    <span>{t(language, "parkingCost")}</span>
+                    <strong>
+                      {getLocalizedConfigField(
+                        spot.parking_info,
+                        "price",
+                        language
+                      ) || spot.parking_info.price}
+                    </strong>
+                  </div>
+                </article>
+              )}
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <PremiumActionButton
+              href={`https://www.google.com/maps/dir/?api=1&${
+                hotelLat && hotelLng
+                  ? `origin=${hotelLat},${hotelLng}&`
+                  : ""
+              }destination=${
+                spot.parking_info?.lat || spot.latitude
+              },${
+                spot.parking_info?.lng || spot.longitude
+              }&travelmode=driving`}
+              icon={<Navigation size={22} />}
+              title={t(language, "startRoute")}
+              subtitle={t(language, "openInGoogleMaps")}
+              variant="navy"
+            />
+
+            {spot.youtube_url && (
+              <PremiumActionButton
+                href={
+                  spot.youtube_url.includes("?")
+                    ? `${spot.youtube_url}&t=${
+                        spot.youtube_timestamp || 0
+                      }`
+                    : `${spot.youtube_url}?t=${
+                        spot.youtube_timestamp || 0
+                      }`
                 }
+                icon={<Play size={22} fill="white" />}
+                title={t(language, "youtubeVideo")}
+                subtitle={t(language, "watchSpotVideo")}
+                variant="red"
               />
             )}
-
-          {spot.best_time && spot.best_time.trim() !== "" && (
-            <InfoItem
-              icon={<Sun size={16} />}
-              label={t(language, "bestVisitTime")}
-              value={
-                getLocalizedField(spot, "best_time", language) ||
-                spot.best_time
-              }
-            />
-          )}
-
-          {spot.parking_info?.name &&
-            spot.parking_info.name.trim() !== "" && (
-              <>
-                <InfoItem
-                  icon={<Car size={16} />}
-                  label={t(language, "parking")}
-                  value={
-                    getLocalizedConfigField(
-                      spot.parking_info,
-                      "name",
-                      language
-                    ) || spot.parking_info.name
-                  }
-                />
-
-                {spot.parking_info.price &&
-                  spot.parking_info.price.trim() !== "" && (
-                    <InfoItem
-                      icon={<DollarSign size={16} />}
-                      label={t(language, "parkingCost")}
-                      value={
-                        getLocalizedConfigField(
-                          spot.parking_info,
-                          "price",
-                          language
-                        ) || spot.parking_info.price
-                      }
-                    />
-                  )}
-
-                {spot.parking_info.details &&
-                  spot.parking_info.details.trim() !== "" && (
-                    <InfoItem
-                      icon={<MapPin size={16} />}
-                      label={t(language, "details")}
-                      value={
-                        getLocalizedConfigField(
-                          spot.parking_info,
-                          "details",
-                          language
-                        ) || spot.parking_info.details
-                      }
-                    />
-                  )}
-              </>
-            )}
+          </div>
         </div>
-
-        <PremiumActionButton
-          href={`https://www.google.com/maps/dir/?api=1&${
-            hotelLat && hotelLng
-              ? `origin=${hotelLat},${hotelLng}&`
-              : ""
-          }destination=${
-            spot.parking_info?.lat || spot.latitude
-          },${
-            spot.parking_info?.lng || spot.longitude
-          }&travelmode=driving`}
-          icon={<Navigation size={22} />}
-          title={t(language, "startRoute")}
-          subtitle={t(language, "openInGoogleMaps")}
-          variant="navy"
-        />
-
-        {spot.youtube_url && (
-          <PremiumActionButton
-            href={
-              spot.youtube_url.includes("?")
-                ? `${spot.youtube_url}&t=${
-                    spot.youtube_timestamp || 0
-                  }`
-                : `${spot.youtube_url}?t=${
-                    spot.youtube_timestamp || 0
-                  }`
-            }
-            icon={<Play size={22} fill="white" />}
-            title={t(language, "youtubeVideo")}
-            subtitle={t(language, "watchSpotVideo")}
-            variant="red"
-          />
-        )}
 
         {spot.tour_link && (
           <PremiumActionButton
@@ -589,6 +475,80 @@ export default function SpotSidebar({
             ))}
           </div>
         )}
+
+        <style jsx>{`
+          .standard-section-heading {
+            margin-bottom: 19px;
+          }
+
+          .standard-section-heading > span,
+          .standard-section-heading div > span {
+            display: block;
+            margin-bottom: 5px;
+            color: #079ca5;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+          }
+
+          .standard-section-heading h2 {
+            margin: 0;
+            color: #10233f;
+            font-size: 21px;
+            line-height: 1.2;
+            letter-spacing: -0.025em;
+          }
+
+          .standard-spot-info__grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+          }
+
+          .standard-spot-info__grid article {
+            display: flex;
+            min-width: 0;
+            align-items: center;
+            gap: 11px;
+            padding: 13px;
+            border: 1px solid #e7edef;
+            border-radius: 13px;
+            background: #fafcfc;
+          }
+
+          .standard-spot-info__grid article span {
+            display: block;
+            overflow: hidden;
+            color: #8793a1;
+            font-size: 8px;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-overflow: ellipsis;
+            text-transform: uppercase;
+            white-space: nowrap;
+          }
+
+          .standard-spot-info__grid article strong {
+            display: block;
+            margin-top: 3px;
+            color: #263a52;
+            font-size: 11px;
+            line-height: 1.35;
+          }
+
+          @media (max-width: 1020px) {
+            .standard-spot-info__grid {
+              grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+          }
+
+          @media (max-width: 720px) {
+            .standard-spot-info__grid {
+              grid-template-columns: 1fr;
+            }
+          }
+        `}</style>
       </div>
     </aside>
   );
@@ -687,6 +647,8 @@ function PremiumActionButton({
     </a>
   );
 }
+
+
 
 function InfoItem({
   icon,
