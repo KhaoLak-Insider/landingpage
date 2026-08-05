@@ -246,7 +246,7 @@ export default function SpotEditorPage() {
 
       alert("Spot erfolgreich angelegt!");
       setFormData({
-        title: "", title_en: "", image_url: "", category: "", description: "", description_en: "", long_description: "", long_description_en: "",
+        title: "", title_en: "", image_url: "", google_photo_reference: "", image_source: "manual", category: "", description: "", description_en: "", long_description: "", long_description_en: "",
         latitude: "", longitude: "", price_level: "", stars: "", opening_hours: "", 
         youtube_url: "", youtube_timestamp: "", tour_link: "", booking_link: "",
         features: [{ label: "", label_en: "", value: "", value_en: "", icon: "Sparkles" }], 

@@ -792,7 +792,7 @@ export default function ReiseplanerPage() {
                         : []
                       ).map((activity, index) => (
                         <button
-                          key={`${day.index}-${index}-${activity.title}`}
+                        key={`${day.tripDayIndex}-${index}-${activity.title}`}
                           type="button"
                           className="planner-activity-card"
                           onClick={() => activity.eventId ? setSelectedEventId(activity.eventId) : undefined}
@@ -866,14 +866,14 @@ export default function ReiseplanerPage() {
 
       {false ? (
         <div className="reiseplaner-modal" role="dialog" aria-modal="true" aria-label={language === "en" ? "Planner settings" : "Planer-Einstellungen"}>
-          <div className="reiseplaner-modal__backdrop" onClick={() => setSettingsOpen(false)} />
+          <div className="reiseplaner-modal__backdrop" onClick={() => setSettingsExpanded(false)} />
           <div className="reiseplaner-modal__panel">
             <div className="reiseplaner-modal__head">
               <div>
                 <span>{language === "en" ? "Planner settings" : "Planer-Einstellungen"}</span>
                 <h3>{language === "en" ? "Trip setup" : "Reise-Setup"}</h3>
               </div>
-              <button type="button" className="reiseplaner-modal__close" onClick={() => setSettingsOpen(false)}>×</button>
+              <button type="button" className="reiseplaner-modal__close" onClick={() => setSettingsExpanded(false)}>×</button>
             </div>
             <div className="reiseplaner-settings">
               <label>
