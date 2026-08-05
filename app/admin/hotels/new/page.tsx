@@ -46,6 +46,7 @@ type FormState = {
   seo_description: string;
   seo_description_en: string;
   image_url: string;
+  google_photo_reference: string;
   gallery_urls: string[];
   latitude: string;
   longitude: string;
@@ -83,6 +84,7 @@ const initialForm: FormState = {
   seo_description: "",
   seo_description_en: "",
   image_url: "",
+  google_photo_reference: "",
   gallery_urls: [],
   latitude: "",
   longitude: "",
@@ -212,7 +214,7 @@ export default function NewPremiumHotelPage() {
 
       const photoReference = place.photos?.[0]?.photo_reference;
       const googlePhoto = photoReference
-        ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1200&photo_reference=${encodeURIComponent(photoReference)}&key=${process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY || ""}`
+        ? `/api/google-place-photo?photo_reference=${encodeURIComponent(photoReference)}&maxwidth=1200`
         : "";
 
       setForm((current) => ({
@@ -220,6 +222,7 @@ export default function NewPremiumHotelPage() {
         title: place.name || current.title,
         slug: current.slug || createSlug(place.name || current.title),
         image_url: place.photo_url || googlePhoto || current.image_url,
+        google_photo_reference: photoReference || current.google_photo_reference,
         latitude:
           place.geometry?.location?.lat != null
             ? String(place.geometry.location.lat)
@@ -479,6 +482,7 @@ export default function NewPremiumHotelPage() {
           seo_description: nullableText(form.seo_description),
           seo_description_en: nullableText(form.seo_description_en),
           image_url: nullableText(form.image_url),
+          google_photo_reference: nullableText(form.google_photo_reference),
           gallery_urls: form.gallery_urls.filter(Boolean),
           latitude: nullableNumber(form.latitude),
           longitude: nullableNumber(form.longitude),

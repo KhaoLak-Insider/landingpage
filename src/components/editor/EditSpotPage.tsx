@@ -38,7 +38,7 @@ export default function EditSpotPage() {
   const [isTranslating, setIsTranslating] = useState(false);
 
   const [formData, setFormData] = useState({
-    title: "", title_en: "", image_url: "", category: "", description: "", description_en: "", long_description: "", long_description_en: "",
+    title: "", title_en: "", image_url: "", google_photo_reference: "", image_source: "", category: "", description: "", description_en: "", long_description: "", long_description_en: "",
     latitude: "", longitude: "", price_level: "", stars: "", opening_hours: "", youtube_url: "",
     youtube_timestamp: "", tour_link: "", booking_link: "", features: [{ label: "", label_en: "", value: "", value_en: "", icon: "Sparkles" as keyof typeof iconMap }],
     best_months: [] as number[], galleryUrlsText: "",
@@ -66,7 +66,9 @@ export default function EditSpotPage() {
           description: p.formatted_address || prev.description,
           opening_hours: p.opening_hours?.weekday_text?.join('\n') || prev.opening_hours,
           price_level: p.price_level?.toString() || prev.price_level,
-          image_url: p.photos ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photo_reference=${p.photos[0].photo_reference}&key=${process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY}` : prev.image_url
+          image_url: p.photos ? `/api/google-place-photo?photo_reference=${encodeURIComponent(p.photos[0].photo_reference)}&maxwidth=800` : prev.image_url,
+          google_photo_reference: p.photos?.[0]?.photo_reference || prev.google_photo_reference,
+          image_source: p.photos?.[0]?.photo_reference ? "google" : prev.image_source
         }));
       }
     } catch (e) { console.error("Google Import Fehler:", e); }
@@ -176,6 +178,8 @@ export default function EditSpotPage() {
             title: resolvedData.title || "",
             title_en: resolvedData.title_en || "",
             image_url: resolvedData.image_url || "",
+            google_photo_reference: resolvedData.google_photo_reference || "",
+            image_source: resolvedData.image_source || "",
             category: resolvedData.category || "",
             description: resolvedData.description || "",
             description_en: resolvedData.description_en || "",
@@ -239,6 +243,8 @@ export default function EditSpotPage() {
       title: formData.title || null,
       title_en: formData.title_en || null,
       image_url: formData.image_url || null,
+      google_photo_reference: formData.google_photo_reference || null,
+      image_source: formData.image_source || (formData.google_photo_reference ? "google" : "manual"),
       slug: slug,
       category: formData.category || null,
       category_en: categoryEn,
@@ -390,7 +396,7 @@ export default function EditSpotPage() {
           slug={formData.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")}
           heroUrl={formData.image_url}
           galleryUrls={formData.galleryUrlsText.split("\n").map((url) => url.trim()).filter(Boolean)}
-          onHeroChange={(url) => setFormData((current) => ({ ...current, image_url: url }))}
+          onHeroChange={(url) => setFormData((current) => ({ ...current, image_url: url, image_source: url ? "manual" : current.image_source }))}
           onGalleryChange={(urls) => setFormData((current) => ({ ...current, galleryUrlsText: urls.join("\n") }))}
         />
 

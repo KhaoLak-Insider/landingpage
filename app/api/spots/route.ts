@@ -7,7 +7,7 @@ export async function GET() {
     // 1. Deine originale Abfrage bleibt exakt so, wie sie war
     const { data: spots, error: spotsError } = await supabase
       .from("spots")
-      .select("id, title, title_en, slug, category, category_en, category_id, description, description_en, image_url, latitude, longitude, price_level, stars")
+      .select("id, title, title_en, slug, category, category_en, category_id, description, description_en, image_url, google_photo_reference, latitude, longitude, price_level, stars")
       .eq("is_published", true);
 
     if (spotsError) throw spotsError;

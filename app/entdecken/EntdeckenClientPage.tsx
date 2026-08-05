@@ -28,6 +28,7 @@ interface Spot {
   description: string | null;
   description_en: string | null;
   image_url: string | null;
+  google_photo_reference?: string | null;
   category: string | null;
   category_en: string | null;
   latitude: number | null;
@@ -81,6 +82,21 @@ function getLocalizedField(
   }
 
   return germanValue?.trim() || englishValue?.trim() || "";
+}
+
+function getSpotImageUrl(spot: Spot): string {
+  const rawImageUrl = spot.image_url?.trim() || "";
+  const reference = spot.google_photo_reference?.trim();
+  if (reference) {
+    return `/api/google-place-photo?photo_reference=${encodeURIComponent(reference)}&maxwidth=900`;
+  }
+  if (/googleapis\.com|googleusercontent\.com|maps\.googleapis\.com/i.test(rawImageUrl)) {
+    const match = rawImageUrl.match(/[?&]photo_reference=([^&]+)/i);
+    if (match?.[1]) {
+      return `/api/google-place-photo?photo_reference=${encodeURIComponent(decodeURIComponent(match[1]))}&maxwidth=900`;
+    }
+  }
+  return rawImageUrl;
 }
 
 function truncateText(value: string, maxLength = 115): string {
@@ -720,10 +736,7 @@ export default function EntdeckenClientPage({
                           className="block"
                         >
                           <img
-                            src={
-                              spot.image_url ||
-                              "/images/og-image.jpg"
-                            }
+                            src={getSpotImageUrl(spot) || "/images/og-image.jpg"}
                             alt={localizedTitle}
                             className="h-56 w-full object-cover transition duration-500 group-hover:scale-105"
                           />

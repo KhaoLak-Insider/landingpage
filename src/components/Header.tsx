@@ -44,8 +44,9 @@ export default function Header() {
   const copy = language === "en"
     ? {
         discover: "Discover",
-        plan: "Plan",
-        blog: "Blog",
+      plan: "Plan",
+      tripPlanner: "Trip planner",
+      blog: "Blog",
         community: "Community",
         about: "About us",
         appInfo: "App Info",
@@ -59,8 +60,9 @@ export default function Header() {
       }
     : {
         discover: "Entdecken",
-        plan: "Planen",
-        blog: "Blog",
+      plan: "Planen",
+      tripPlanner: "Reiseplaner",
+      blog: "Blog",
         community: "Community",
         about: "Über uns",
         appInfo: "App Info",
@@ -242,6 +244,13 @@ export default function Header() {
             className="transition hover:text-teal-500"
           >
             {copy.plan}
+          </Link>
+
+          <Link
+            href={localizedHref("/reiseplaner")}
+            className="transition hover:text-teal-500"
+          >
+            {copy.tripPlanner}
           </Link>
 
           <Link
@@ -447,6 +456,7 @@ export default function Header() {
 
           {[
             ["/planen", copy.plan],
+            ["/reiseplaner", copy.tripPlanner],
             ["/blog", copy.blog],
             ["/community", copy.community],
             ["/ueber-uns", copy.about],

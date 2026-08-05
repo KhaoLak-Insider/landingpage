@@ -136,6 +136,7 @@ export default async function EntdeckenPage({
         description,
         description_en,
         image_url,
+        google_photo_reference,
         category,
         category_en,
         latitude,

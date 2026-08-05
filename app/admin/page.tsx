@@ -9,6 +9,8 @@ import {
   MapPin,
   PencilLine,
   Plus,
+  RefreshCw,
+  Loader2,
 } from "lucide-react";
 import { supabase } from "@/src/lib/supabase";
 
@@ -17,6 +19,9 @@ interface DashboardCounts {
   premiumHotels: number;
   premiumRooms: number;
   drafts: number;
+  googleImages: number;
+  manualImages: number;
+  unknownImages: number;
 }
 
 const initialCounts: DashboardCounts = {
@@ -24,12 +29,17 @@ const initialCounts: DashboardCounts = {
   premiumHotels: 0,
   premiumRooms: 0,
   drafts: 0,
+  googleImages: 0,
+  manualImages: 0,
+  unknownImages: 0,
 };
 
 export default function AdminDashboardPage() {
   const [counts, setCounts] =
     useState<DashboardCounts>(initialCounts);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshingImages, setIsRefreshingImages] = useState(false);
+  const [refreshMessage, setRefreshMessage] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -43,6 +53,9 @@ export default function AdminDashboardPage() {
         roomsResult,
         draftHotelsResult,
         draftRoomsResult,
+        googleImagesResult,
+        manualImagesResult,
+        unknownImagesResult,
       ] = await Promise.all([
         supabase
           .from("spots")
@@ -65,6 +78,21 @@ export default function AdminDashboardPage() {
           .from("premium_rooms")
           .select("id", { count: "exact", head: true })
           .eq("status", "draft"),
+
+        supabase
+          .from("spots")
+          .select("id", { count: "exact", head: true })
+          .eq("image_source", "google"),
+
+        supabase
+          .from("spots")
+          .select("id", { count: "exact", head: true })
+          .eq("image_source", "manual"),
+
+        supabase
+          .from("spots")
+          .select("id", { count: "exact", head: true })
+          .or("image_source.is.null,image_source.eq."),
       ]);
 
       if (!isMounted) return;
@@ -76,6 +104,9 @@ export default function AdminDashboardPage() {
         drafts:
           (draftHotelsResult.count || 0) +
           (draftRoomsResult.count || 0),
+        googleImages: googleImagesResult.count || 0,
+        manualImages: manualImagesResult.count || 0,
+        unknownImages: unknownImagesResult.count || 0,
       });
 
       setIsLoading(false);
@@ -87,6 +118,26 @@ export default function AdminDashboardPage() {
       isMounted = false;
     };
   }, []);
+
+  async function refreshGoogleImages() {
+    setIsRefreshingImages(true);
+    setRefreshMessage(null);
+    try {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      const response = await fetch("/api/admin/refresh-google-spot-images", {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload?.error || "Bilder konnten nicht aktualisiert werden.");
+      setRefreshMessage(`Aktualisiert: ${payload.updated || 0}, übersprungen: ${payload.skipped || 0}`);
+    } catch (error) {
+      setRefreshMessage(error instanceof Error ? error.message : "Unbekannter Fehler.");
+    } finally {
+      setIsRefreshingImages(false);
+    }
+  }
 
   const cards = [
     {
@@ -135,6 +186,51 @@ export default function AdminDashboardPage() {
           Neues Premium-Hotel anlegen
         </Link>
       </header>
+
+      <section className="admin-dashboard__maintenance">
+        <div>
+          <span>Wartung</span>
+          <strong>Google-Bilder aktualisieren</strong>
+          <p>
+            Erneuert nur Spots mit Google-Photo-Referenz. Eigene Uploads bleiben unverändert.
+          </p>
+        </div>
+        <button
+          type="button"
+          className="admin-dashboard__refresh"
+          onClick={refreshGoogleImages}
+          disabled={isRefreshingImages}
+        >
+          {isRefreshingImages ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
+          {isRefreshingImages ? "Aktualisiere..." : "Alle Bilder aktualisieren"}
+        </button>
+      {refreshMessage ? <small className="admin-dashboard__maintenance-message">{refreshMessage}</small> : null}
+      </section>
+
+      <section className="admin-dashboard__source-report">
+        <div className="admin-dashboard__section-heading">
+          <h2>Bildquellen</h2>
+          <p>Aufteilung der Spot-Bilder nach Herkunft.</p>
+        </div>
+
+        <div className="admin-dashboard__source-grid">
+          <article>
+            <span>Google</span>
+            <strong>{isLoading ? "–" : counts.googleImages.toLocaleString("de-DE")}</strong>
+            <small>Wird über den Google-Proxy geladen</small>
+          </article>
+          <article>
+            <span>Manuell</span>
+            <strong>{isLoading ? "–" : counts.manualImages.toLocaleString("de-DE")}</strong>
+            <small>Eigene Uploads bleiben erhalten</small>
+          </article>
+          <article>
+            <span>Unbekannt</span>
+            <strong>{isLoading ? "–" : counts.unknownImages.toLocaleString("de-DE")}</strong>
+            <small>Sollte nach dem Backfill gegen 0 gehen</small>
+          </article>
+        </div>
+      </section>
 
       <section className="admin-dashboard__stats">
         {cards.map((card) => {
@@ -274,6 +370,116 @@ export default function AdminDashboardPage() {
           box-shadow: 0 11px 24px rgba(7, 156, 165, 0.25);
         }
 
+        .admin-dashboard__maintenance {
+          display: grid;
+          gap: 10px;
+          margin-top: 18px;
+          padding: 18px 20px;
+          border: 1px solid #dbe7ea;
+          border-radius: 16px;
+          background: linear-gradient(135deg, #f5fcfc, #ffffff);
+          box-shadow: 0 10px 30px rgba(15, 35, 62, 0.04);
+        }
+
+        .admin-dashboard__maintenance span {
+          display: block;
+          color: #079ca5;
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+        }
+
+        .admin-dashboard__maintenance strong {
+          display: block;
+          margin-top: 4px;
+          color: #10233f;
+          font-size: 16px;
+        }
+
+        .admin-dashboard__maintenance p {
+          margin: 8px 0 0;
+          color: #68778a;
+          font-size: 12px;
+          line-height: 1.6;
+        }
+
+        .admin-dashboard__refresh {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          width: fit-content;
+          min-height: 41px;
+          padding: 0 14px;
+          border: 0;
+          border-radius: 11px;
+          background: #079ca5;
+          color: #fff;
+          font-size: 12px;
+          font-weight: 800;
+          cursor: pointer;
+        }
+
+        .admin-dashboard__refresh:disabled {
+          cursor: wait;
+          opacity: 0.7;
+        }
+
+        .admin-dashboard__maintenance-message {
+          color: #53616e;
+          font-size: 12px;
+        }
+
+        .admin-dashboard__source-report {
+          margin-top: 18px;
+          padding: 20px;
+          border: 1px solid #e5ebef;
+          border-radius: 18px;
+          background: #ffffff;
+          box-shadow: 0 8px 24px rgba(15, 35, 62, 0.035);
+        }
+
+        .admin-dashboard__source-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 12px;
+          margin-top: 16px;
+        }
+
+        .admin-dashboard__source-grid article {
+          padding: 16px;
+          border: 1px solid #e8edf2;
+          border-radius: 14px;
+          background: #fbfcfd;
+        }
+
+        .admin-dashboard__source-grid span {
+          display: block;
+          color: #079ca5;
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+        }
+
+        .admin-dashboard__source-grid strong {
+          display: block;
+          margin-top: 8px;
+          color: #10233f;
+          font-size: 26px;
+          line-height: 1;
+          letter-spacing: -0.035em;
+        }
+
+        .admin-dashboard__source-grid small {
+          display: block;
+          margin-top: 8px;
+          color: #718096;
+          font-size: 11px;
+          line-height: 1.5;
+        }
+
         .admin-dashboard__stats {
           display: grid;
           grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -403,6 +609,10 @@ export default function AdminDashboardPage() {
         @media (max-width: 1050px) {
           .admin-dashboard__stats {
             grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+
+          .admin-dashboard__source-grid {
+            grid-template-columns: 1fr;
           }
         }
 
