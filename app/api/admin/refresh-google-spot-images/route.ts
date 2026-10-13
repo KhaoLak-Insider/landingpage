@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     let backfilled = 0;
 
     async function searchGoogleReference(query: string) {
-      const apiKey = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY || "";
+      const apiKey = process.env.GOOGLE_PLACES_API_KEY || "";
       if (!apiKey || !query.trim()) return null;
       const searchRes = await fetch("https://places.googleapis.com/v1/places:searchText", {
         method: "POST",

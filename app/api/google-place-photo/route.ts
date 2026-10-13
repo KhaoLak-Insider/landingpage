@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const reference = searchParams.get("photo_reference")?.trim();
   const maxWidth = searchParams.get("maxwidth")?.trim() || "1200";
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY;
+  const apiKey = process.env.GOOGLE_PLACES_API_KEY;
 
   if (!reference) {
     return NextResponse.json({ error: "Missing photo_reference" }, { status: 400 });

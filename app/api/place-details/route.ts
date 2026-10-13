@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const placeId = searchParams.get('place_id');
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY || '';
+  const apiKey = process.env.GOOGLE_PLACES_API_KEY || '';
 
   const res = await fetch(`https://places.googleapis.com/v1/places/${placeId}`, {
     headers: {
