@@ -99,31 +99,52 @@ export default function StandardTemplate(props: StandardTemplateProps) {
         />
       )}
 
+      <nav className="standard-spot-tabs" aria-label={language === "en" ? "Spot sections" : "Spot-Bereiche"}>
+        <div className="standard-spot-tabs__inner">
+          <a className="is-active" href="#overview">
+            {language === "en" ? "Overview" : "Spot-Informationen"}
+          </a>
+          {features.length > 0 && (
+            <a href="#facts">{language === "en" ? "Good to know" : "Insider-Fakten"}</a>
+          )}
+          {hasTravelMonths && (
+            <a href="#planning">{language === "en" ? "Best time to visit" : "Reiseplanung"}</a>
+          )}
+          <a href="#location">{language === "en" ? "Location" : "Orientierung"}</a>
+          <a href="#description">{language === "en" ? "Description" : "Beschreibung"}</a>
+          {isBeach && (
+            <a href="#nearby">{language === "en" ? "Nearby" : "In der Nähe"}</a>
+          )}
+        </div>
+      </nav>
+
       <div className="standard-spot__shell">
         <div className="standard-spot__layout">
           <div className="standard-spot__content">
             <SpotGallery gallery={gallery} title={localizedTitle} language={language} />
 
-            <SpotSidebar
-              spot={spot}
-              language={language}
-              localizedTitle={localizedTitle}
-              localizedCategory={localizedCategory}
-              userProfile={userProfile}
-              isFavorite={isFavorite}
-              onToggleFavorite={onToggleFavorite}
-              routeDist={routeDist}
-              routeTime={routeTime}
-              isRouting={isRouting}
-              hotelLat={hotelLat}
-              hotelLng={hotelLng}
-              tours={tours}
-              localizedHref={localizedHref}
-              overlapHero={false}
-            />
+            <div id="overview">
+              <SpotSidebar
+                spot={spot}
+                language={language}
+                localizedTitle={localizedTitle}
+                localizedCategory={localizedCategory}
+                userProfile={userProfile}
+                isFavorite={isFavorite}
+                onToggleFavorite={onToggleFavorite}
+                routeDist={routeDist}
+                routeTime={routeTime}
+                isRouting={isRouting}
+                hotelLat={hotelLat}
+                hotelLng={hotelLng}
+                tours={tours}
+                localizedHref={localizedHref}
+                overlapHero={false}
+              />
+            </div>
 
             {features.length > 0 && (
-              <section className="standard-card standard-features">
+              <section id="facts" className="standard-card standard-features">
                 <div className="standard-section-heading">
                   <span>{language === "en" ? "Insider facts" : "Insider-Fakten"}</span>
                   <h2>{language === "en" ? "Good to know" : "Gut zu wissen"}</h2>
@@ -143,7 +164,7 @@ export default function StandardTemplate(props: StandardTemplateProps) {
             )}
 
             {hasTravelMonths && (
-              <section className="standard-card standard-months">
+              <section id="planning" className="standard-card standard-months">
                 <div className="standard-section-heading standard-section-heading--icon">
                   <CalendarDays size={20} />
                   <div><span>{language === "en" ? "Travel planning" : "Reiseplanung"}</span><h2>{t(language, "bestTravelTime")}</h2></div>
@@ -158,7 +179,7 @@ export default function StandardTemplate(props: StandardTemplateProps) {
               </section>
             )}
 
-            <section className="standard-card standard-location">
+            <section id="location" className="standard-card standard-location">
               <div className="standard-section-heading standard-section-heading--icon">
                 <MapPin size={20} />
                 <div><span>{language === "en" ? "Orientation" : "Orientierung"}</span><h2>{t(language, "location")}</h2></div>
@@ -168,19 +189,21 @@ export default function StandardTemplate(props: StandardTemplateProps) {
               </div>
             </section>
 
-            <div className="standard-card standard-description">
+            <div id="description" className="standard-card standard-description">
               <SpotDescription title={localizedTitle} blocks={descriptionBlocks} language={language} />
             </div>
 
             {isBeach && (
-              <NearbySpots
-                spots={nearbySpots}
-                originLatitude={spot.latitude}
-                originLongitude={spot.longitude}
-                radiusKm={nearbyRadiusKm}
-                language={language}
-                localizedHref={localizedHref}
-              />
+              <div id="nearby">
+                <NearbySpots
+                  spots={nearbySpots}
+                  originLatitude={spot.latitude}
+                  originLongitude={spot.longitude}
+                  radiusKm={nearbyRadiusKm}
+                  language={language}
+                  localizedHref={localizedHref}
+                />
+              </div>
             )}
 
             <MoreDiscoveries
@@ -199,6 +222,83 @@ export default function StandardTemplate(props: StandardTemplateProps) {
 
       <style jsx>{`
         .standard-spot{min-height:100vh;padding-bottom:72px;background:#f4f7f8;color:#10233f;font-family:var(--font-poppins),'Poppins',sans-serif}.standard-spot__shell{max-width:1260px;margin:0 auto;padding:34px 28px 0}.standard-spot__layout{display:grid;grid-template-columns:minmax(0,1fr);align-items:start;gap:26px}.standard-spot__content{display:flex;min-width:0;flex-direction:column;gap:22px}.standard-spot__sidebar{position:sticky;top:18px}.standard-card{padding:24px;border:1px solid #e3eaed;border-radius:18px;background:#fff;box-shadow:0 10px 30px rgba(15,35,62,.045)}.standard-section-heading{margin-bottom:19px}.standard-section-heading>span,.standard-section-heading div>span,.standard-section-heading--eyebrow>span{display:block;margin-bottom:5px;color:#079ca5;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.standard-section-heading h2{margin:0;color:#10233f;font-size:21px;line-height:1.2;letter-spacing:-.025em}.standard-section-heading--icon{display:flex;align-items:center;gap:11px;color:#079ca5}.standard-features__grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.standard-features article{display:flex;min-width:0;align-items:center;gap:11px;padding:13px;border:1px solid #e7edef;border-radius:13px;background:#fafcfc}.standard-features__icon{display:flex;width:38px;height:38px;align-items:center;justify-content:center;flex:0 0 38px;border-radius:11px;background:#e9f8f8;color:#078f96}.standard-features article span{display:block;overflow:hidden;color:#8793a1;font-size:8px;font-weight:800;letter-spacing:.06em;text-overflow:ellipsis;text-transform:uppercase;white-space:nowrap}.standard-features article strong{display:block;margin-top:3px;color:#263a52;font-size:11px}.standard-months__grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px}.standard-months__grid>div{padding:10px 4px;border:1px solid #e6ecef;border-radius:10px;background:#f7f9fa;color:#94a0ae;font-size:9px;font-weight:750;text-align:center}.standard-months__grid>div.is-active{border-color:#079ca5;background:#079ca5;color:#fff;box-shadow:0 6px 15px rgba(7,156,165,.18)}.standard-location__map{overflow:hidden;height:340px;border:1px solid #e3eaed;border-radius:14px;background:#edf2f3}.standard-description{padding:28px}.standard-spot__sidebar :global(aside){margin-top:0!important}.standard-spot__sidebar :global(aside>div){border-radius:18px!important;border-color:#e3eaed!important;box-shadow:0 10px 30px rgba(15,35,62,.055)!important}@media(max-width:1020px){.standard-spot__layout{grid-template-columns:1fr}.standard-spot__sidebar{position:static}.standard-spot__sidebar :global(aside){width:100%!important}}@media(max-width:720px){.standard-spot{padding-bottom:40px}.standard-spot__shell{padding:18px 14px 0}.standard-spot__layout,.standard-spot__content{gap:16px}.standard-card{padding:18px;border-radius:15px}.standard-features__grid{grid-template-columns:1fr 1fr}.standard-months__grid{grid-template-columns:repeat(4,minmax(0,1fr))}.standard-location__map{height:280px}}@media(max-width:460px){.standard-features__grid{grid-template-columns:1fr}.standard-months__grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+      `}</style>
+
+      <style jsx global>{`
+        html {
+          scroll-behavior: smooth;
+        }
+
+        .standard-spot-tabs {
+          position: sticky;
+          top: 0;
+          z-index: 30;
+          border-bottom: 1px solid #e7edf2;
+          background: rgba(255, 255, 255, 0.96);
+          backdrop-filter: blur(18px);
+        }
+
+        .standard-spot-tabs__inner {
+          display: flex;
+          align-items: center;
+          max-width: 1260px;
+          margin: 0 auto;
+          padding: 7px 28px;
+          overflow-x: auto;
+          scrollbar-width: none;
+        }
+
+        .standard-spot-tabs__inner::-webkit-scrollbar {
+          display: none;
+        }
+
+        .standard-spot-tabs a {
+          flex: 0 0 auto;
+          padding: 8px 16px;
+          border-radius: 999px;
+          color: #5c6b7d;
+          font-size: 12.5px;
+          font-weight: 600;
+          text-decoration: none;
+          white-space: nowrap;
+          transition: background 0.16s ease, color 0.16s ease;
+        }
+
+        .standard-spot-tabs a:hover {
+          color: #079ca5;
+        }
+
+        .standard-spot-tabs a.is-active {
+          background: #e8f8f8;
+          color: #079ca5;
+        }
+
+        #overview,
+        #facts,
+        #planning,
+        #location,
+        #description,
+        #nearby {
+          scroll-margin-top: 66px;
+        }
+
+        @media (max-width: 720px) {
+          .standard-spot-tabs__inner {
+            padding: 5px 14px;
+          }
+          .standard-spot-tabs a {
+            padding: 6px 12px;
+            font-size: 11.5px;
+          }
+          #overview,
+          #facts,
+          #planning,
+          #location,
+          #description,
+          #nearby {
+            scroll-margin-top: 54px;
+          }
+        }
       `}</style>
     </main>
   );

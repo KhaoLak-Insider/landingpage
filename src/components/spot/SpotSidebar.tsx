@@ -67,12 +67,44 @@ export default function SpotSidebar({
     normalizedCategory === "strandbars" ||
     normalizedCategory === "strandbar";
 
+  const routeAndVideoButtons = (
+    <>
+      <PremiumActionButton
+        href={`https://www.google.com/maps/dir/?api=1&${
+          hotelLat && hotelLng ? `origin=${hotelLat},${hotelLng}&` : ""
+        }destination=${
+          spot.parking_info?.lat || spot.latitude
+        },${
+          spot.parking_info?.lng || spot.longitude
+        }&travelmode=driving`}
+        icon={<Navigation size={22} />}
+        title={t(language, "startRoute")}
+        subtitle={t(language, "openInGoogleMaps")}
+        variant="navy"
+      />
+
+      {spot.youtube_url && (
+        <PremiumActionButton
+          href={
+            spot.youtube_url.includes("?")
+              ? `${spot.youtube_url}&t=${spot.youtube_timestamp || 0}`
+              : `${spot.youtube_url}?t=${spot.youtube_timestamp || 0}`
+          }
+          icon={<Play size={22} fill="white" />}
+          title={t(language, "youtubeVideo")}
+          subtitle={t(language, "watchSpotVideo")}
+          variant="red"
+        />
+      )}
+    </>
+  );
+
   return (
     <aside
       style={{
         width: overlapHero ? 300 : "100%",
-        position: "sticky",
-        top: overlapHero ? "20px" : "18px",
+        position: overlapHero ? "sticky" : "static",
+        top: overlapHero ? "20px" : undefined,
         marginTop: overlapHero ? "-430px" : 0,
         alignSelf: "start",
         zIndex: 5,
@@ -147,6 +179,7 @@ export default function SpotSidebar({
         </div>
 
         <div
+          className="spot-sidebar__top-grid"
           style={{
             display: "grid",
             gridTemplateColumns: overlapHero ? "1fr" : "minmax(0,1fr) 280px",
@@ -325,40 +358,11 @@ export default function SpotSidebar({
               )}
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <PremiumActionButton
-              href={`https://www.google.com/maps/dir/?api=1&${
-                hotelLat && hotelLng
-                  ? `origin=${hotelLat},${hotelLng}&`
-                  : ""
-              }destination=${
-                spot.parking_info?.lat || spot.latitude
-              },${
-                spot.parking_info?.lng || spot.longitude
-              }&travelmode=driving`}
-              icon={<Navigation size={22} />}
-              title={t(language, "startRoute")}
-              subtitle={t(language, "openInGoogleMaps")}
-              variant="navy"
-            />
-
-            {spot.youtube_url && (
-              <PremiumActionButton
-                href={
-                  spot.youtube_url.includes("?")
-                    ? `${spot.youtube_url}&t=${
-                        spot.youtube_timestamp || 0
-                      }`
-                    : `${spot.youtube_url}?t=${
-                        spot.youtube_timestamp || 0
-                      }`
-                }
-                icon={<Play size={22} fill="white" />}
-                title={t(language, "youtubeVideo")}
-                subtitle={t(language, "watchSpotVideo")}
-                variant="red"
-              />
-            )}
+          <div
+            className="spot-sidebar__actions spot-sidebar__actions--desktop"
+            style={{ flexDirection: "column" }}
+          >
+            {routeAndVideoButtons}
           </div>
         </div>
 
@@ -476,6 +480,13 @@ export default function SpotSidebar({
           </div>
         )}
 
+        <div
+          className="spot-sidebar__actions spot-sidebar__actions--mobile"
+          style={{ flexDirection: "column" }}
+        >
+          {routeAndVideoButtons}
+        </div>
+
         <style jsx>{`
           .standard-section-heading {
             margin-bottom: 19px;
@@ -546,6 +557,23 @@ export default function SpotSidebar({
           @media (max-width: 720px) {
             .standard-spot-info__grid {
               grid-template-columns: 1fr;
+            }
+          }
+
+          .spot-sidebar__actions--mobile {
+            display: none !important;
+          }
+
+          @media (max-width: 720px) {
+            .spot-sidebar__top-grid {
+              grid-template-columns: 1fr !important;
+            }
+            .spot-sidebar__actions--desktop {
+              display: none !important;
+            }
+            .spot-sidebar__actions--mobile {
+              display: flex !important;
+              margin-top: 24px;
             }
           }
         `}</style>

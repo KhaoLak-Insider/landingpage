@@ -460,9 +460,10 @@ export default function PremiumHotelTemplate(props: StandardTemplateProps) {
 
         .premium-hotel-tabs__inner {
           display: flex;
+          align-items: center;
           max-width: 1280px;
           margin: 0 auto;
-          padding: 0 40px;
+          padding: 7px 40px;
           overflow-x: auto;
           scrollbar-width: none;
         }
@@ -474,44 +475,41 @@ export default function PremiumHotelTemplate(props: StandardTemplateProps) {
         .premium-hotel-tabs a {
           position: relative;
           flex: 0 0 auto;
-          padding: 18px 26px 17px;
-          color: #26364d;
-          font-size: 13px;
-          font-weight: 500;
+          padding: 8px 16px;
+          border-radius: 999px;
+          color: #5c6b7d;
+          font-size: 12.5px;
+          font-weight: 600;
           text-decoration: none;
           white-space: nowrap;
+          transition: background 0.16s ease, color 0.16s ease;
         }
 
-        .premium-hotel-tabs a::after {
-          position: absolute;
-          right: 24px;
-          bottom: -1px;
-          left: 24px;
-          height: 2px;
-          border-radius: 999px;
-          background: transparent;
-          content: "";
-        }
-
-        .premium-hotel-tabs a:hover,
-        .premium-hotel-tabs a.is-active {
+        .premium-hotel-tabs a:hover {
           color: #079ca5;
         }
-        .premium-hotel-tabs a.is-active::after {
-          background: #0eb4bb;
+        .premium-hotel-tabs a.is-active {
+          background: #e8f8f8;
+          color: #079ca5;
         }
         .premium-hotel-tabs__favorite {
           display: flex;
           align-items: center;
           justify-content: center;
-          width: 52px;
-          min-width: 52px;
+          width: 38px;
+          height: 38px;
+          min-width: 38px;
           margin-left: auto;
           padding: 0;
           border: 0;
+          border-radius: 999px;
           background: transparent;
           cursor: pointer;
           flex: 0 0 auto;
+        }
+
+        .premium-hotel-tabs__favorite:hover {
+          background: #f1f5f9;
         }
 
         .premium-hotel-tabs__inner.has-editor .premium-hotel-tabs__favorite {
@@ -532,18 +530,10 @@ export default function PremiumHotelTemplate(props: StandardTemplateProps) {
           font-weight: 700;
         }
 
-        .premium-hotel-tabs a.premium-hotel-tabs__edit::after {
-          display: none;
-        }
-
         .premium-hotel-tabs a.premium-hotel-tabs__edit:hover {
           border-color: #8bd0d4;
           background: #edf9f9;
           color: #066d73;
-        }
-
-        .premium-hotel-tabs__favorite::after {
-          display: none;
         }
 
         .premium-hotel-tabs__favorite svg {
@@ -560,8 +550,7 @@ export default function PremiumHotelTemplate(props: StandardTemplateProps) {
 
         .premium-hotel-tabs__favorite:focus-visible {
           outline: 2px solid #0eb4bb;
-          outline-offset: -4px;
-          border-radius: 8px;
+          outline-offset: 2px;
         }
 
 
@@ -861,7 +850,18 @@ export default function PremiumHotelTemplate(props: StandardTemplateProps) {
         #location,
         #faq,
         #nearby {
-          scroll-margin-top: 86px;
+          scroll-margin-top: 66px;
+        }
+
+        @media (max-width: 720px) {
+          #overview,
+          #details,
+          #rooms,
+          #location,
+          #faq,
+          #nearby {
+            scroll-margin-top: 54px;
+          }
         }
 
         @media (max-width: 1080px) {
@@ -877,15 +877,16 @@ export default function PremiumHotelTemplate(props: StandardTemplateProps) {
 
         @media (max-width: 720px) {
           .premium-hotel-tabs__inner {
-            padding: 0 14px;
+            padding: 5px 14px;
           }
           .premium-hotel-tabs a {
-            padding: 15px 14px 14px;
-            font-size: 12px;
+            padding: 6px 12px;
+            font-size: 11.5px;
           }
-          .premium-hotel-tabs a::after {
-            right: 13px;
-            left: 13px;
+          .premium-hotel-tabs__favorite {
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
           }
 
           .premium-hotel-shell {
